@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0C3FD0FB1B023952005723A6 /* simple_kd_tree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0C3FD0F91B023952005723A6 /* simple_kd_tree.cpp */; };
 		0C85BB421AFCF24B000ED8F2 /* KD_tree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0C85BB401AFCF24B000ED8F2 /* KD_tree.cpp */; };
 		0CCAFD871B0209A300D86F0A /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0CCAFD861B0209A300D86F0A /* main.cpp */; };
 /* End PBXBuildFile section */
@@ -24,6 +25,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0C3FD0F91B023952005723A6 /* simple_kd_tree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = simple_kd_tree.cpp; sourceTree = "<group>"; };
+		0C3FD0FA1B023952005723A6 /* simple_kd_tree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = simple_kd_tree.h; sourceTree = "<group>"; };
 		0C85BB321AFA790C000ED8F2 /* kd-tree-08-05 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "kd-tree-08-05"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0C85BB401AFCF24B000ED8F2 /* KD_tree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = KD_tree.cpp; sourceTree = "<group>"; };
 		0C85BB411AFCF24B000ED8F2 /* KD_tree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KD_tree.h; sourceTree = "<group>"; };
@@ -61,6 +64,8 @@
 		0C85BB341AFA790C000ED8F2 /* kd-tree */ = {
 			isa = PBXGroup;
 			children = (
+				0C3FD0F91B023952005723A6 /* simple_kd_tree.cpp */,
+				0C3FD0FA1B023952005723A6 /* simple_kd_tree.h */,
 				0C85BB401AFCF24B000ED8F2 /* KD_tree.cpp */,
 				0C85BB411AFCF24B000ED8F2 /* KD_tree.h */,
 			);
@@ -124,6 +129,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0CCAFD871B0209A300D86F0A /* main.cpp in Sources */,
+				0C3FD0FB1B023952005723A6 /* simple_kd_tree.cpp in Sources */,
 				0C85BB421AFCF24B000ED8F2 /* KD_tree.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

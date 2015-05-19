@@ -68,7 +68,7 @@ void KD_tree<T>::KD_tree_recursive(int left, int right, int k){
     
         //check ob korrekt gerundet wird
         k = k%dim.size();
-        
+    
         printTree();
 
         selectMedian(dim[k], med, left, right+1);

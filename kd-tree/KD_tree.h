@@ -11,16 +11,11 @@
 
 #include <stdio.h>
 using namespace std;
-
 template <typename num_t>
 struct Point{
     num_t  x,y;//,z; //dim = 1, 2, 3
 };
-template <typename num_t>
-struct PointCloud
-{
-    std::vector<Point<num_t>>  pts;
-};
+
 
 template <class T>
 class KD_tree{

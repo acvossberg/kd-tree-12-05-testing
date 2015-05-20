@@ -14,7 +14,7 @@
 using namespace std;
 template <typename num_t>
 struct Point{
-    num_t  x,y;//,z; //dim = 1, 2, 3
+    num_t  x,y,z; //dim = 1, 2, 3
 };
 
 template < class num>

@@ -54,6 +54,7 @@ private:
     
     KDnode<T> *root;
     friend class KD_tree<T>;
+    int number_nodes;
     
     
 };

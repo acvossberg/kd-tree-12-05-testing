@@ -42,13 +42,18 @@ public:
     SimpleKDtree(vector<int> &dimensions);
     void make_SimpleKDtree(vector<Point<T>> cloud, int left, int right, int dim);
     KDnode<T> *newSimpleKDtreeNode(Point<T> data);
+    bool sameTree(vector<Point<T>> Kdtree, int i);
+    
     
 private:
     vector<int> dim;
     void addHelper(KDnode<T> *root, Point<T> val);
     void add(Point<T> val);
+    bool sameTreeHelper(KDnode<T> *n, int i, vector<Point<T>> Kdtree);
+    void make_SimpleKDtreeHelper(vector<Point<T>> cloud, KDnode<T> *root, int left, int right, int k);
     
     KDnode<T> *root;
+    friend class KD_tree<T>;
     
     
 };

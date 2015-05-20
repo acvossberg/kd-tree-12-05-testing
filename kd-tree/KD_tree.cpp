@@ -35,52 +35,64 @@ template < class T>
 KD_tree<T>::KD_tree(vector<Point<T>> &cloud, vector<int> &dimensions){
     data = cloud;
     dim = dimensions;
+    int height = floor(log2(data.size()));
+    int max_number_nodes = pow(2,height+1) -1;
+    Point<T> placeholder;
+    placeholder.x = -1; //TODO: some better marker/placeholder needed!
+    placeholder.y = -1;
+    result.resize(max_number_nodes, placeholder);// muss grösser sein -> DONE
+}
+template <class T>
+vector<Point<T>> KD_tree<T>::get_tree_as_vector(){
+    return result;
 }
 
+template<class T>
+void KD_tree<T>::printTree(){
+    for(int i = 0; i<result.size();i++){
+        cout << "(" << result[i].x << ", " << result[i].y << ")" << endl;
+    
+    }
+}
 template <class T>
-void KD_tree<T>::selectMedian(int dim, int median, int left, int right)// dim = 1, 2 oder 3
+void KD_tree<T>::selectMedian(int dim, int median, int left, int right, int pos)// dim = 1, 2 oder 3
 {
     cout << "left " << left << " right " << right << " med " << median << endl;
 
     //nth_element sorts data left - right.
     cout << median << "-th element with dim = " << dim << endl;
-    
     nth_element(data.begin()+left, data.begin() + median, data.begin()+right, sorter(dim));
     cout << "median " <<  data[median].x << " " << data[median].y << endl;
-
+    result[pos-1] = data[median];
     //sorts element s.t. all smaller than median on the left and larger on right
+}
 
-}
-template<class T>
-void KD_tree<T>::printTree(){
-    for(int i = 0; i<data.size(); i++){
-        cout << "( " << data[i].x << ", " << data[i].y << ") \t";
-        
-    }
-    cout << endl;
-}
 template <class T>
-void KD_tree<T>::KD_tree_recursive(int left, int right, int k){
+void KD_tree<T>::KD_tree_recursive(int left, int right, int k, int pos){
     int med = left + (right+1 - left)/2; //left + (right - left)/2;
 
     //return statement:
-    if(left <right){
+    if(left <= right){
     
         //check ob korrekt gerundet wird
         k = k%dim.size();
     
         printTree();
 
-        selectMedian(dim[k], med, left, right+1);
+        selectMedian(dim[k], med, left, right+1, pos);
         k++;
     
-
+        if(right - left == 2){
+            cout << "jetzt müsste xx push_back" << endl;
+        }
         //left:
-        KD_tree_recursive(left, med-1, k);
+        pos *= 2;
+        KD_tree_recursive(left, med-1, k, pos);
+        pos+=1;
         //right:
-        KD_tree_recursive(med+1, right, k);
+        KD_tree_recursive(med+1, right, k, pos);
     
     }
+    
 }
-
 

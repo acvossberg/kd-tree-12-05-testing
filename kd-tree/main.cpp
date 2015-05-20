@@ -45,12 +45,31 @@ void generateRandomPointCloud(vector<Point<num_t>> &point, const size_t N, const
     std::cout << "done\n";
 }
 
+template <typename num_t>
+bool test(KD_tree<num_t> KDtree, SimpleKDtree<num_t>* Tsimple){
+    cout << "testing" << endl;
+    
+    vector<Point<num_t>> KDVect;
+    KDVect = KDtree.get_tree_as_vector();
+    
+    int i = 1;
+    //Tsimple->sameTree(KDVect, i);
+    if(Tsimple->sameTree(KDVect, i)){
+        cout << "yay! trees are the same" << endl;
+        return true;
+    }
+    else{
+        cout << "o oh - debug some more!" << endl;
+        return false;
+    }
+    return true;
+}
 
 int main()
 {
     //: <int> to generic --> DONE
     //TODO: check, which tree should be built.. cut top or bottom?
-    //TODO: make test compare to other tree
+    //: make test compare to other tree -> DONE
     //TODO: free kd_tree.. ?
     //: schön alles in class machen --> DONE
 
@@ -64,21 +83,15 @@ int main()
     
     vector<int> dim = {1,2};
     KD_tree<num_t> tree(cloud, dim);
-    tree.KD_tree_recursive(0, cloud.size()-1, 0);
-    
-    /*SimpleKDtree<num_t> simple_kd_tree(dim);
-    KDnode<num_t> *root = simple_kd_tree.newSimpleKDtreeNode(cloud[0]);
-    simple_kd_tree.make_SimpleKDtree(cloud, root, 0, cloud.size()-1, 0);*/
-    
-    
+    tree.KD_tree_recursive(0, cloud.size()-1, 0, 1);
     
     
     SimpleKDtree<num_t> *bst = new SimpleKDtree<num_t>(dim);
-    bst->make_SimpleKDtree(cloud, 0, cloud.size()-1, 0);
-
+    bst->make_SimpleKDtree( cloud, 0, cloud.size()-1, 0);
+    cout << " \n \n" << endl;
     
-    //TODO: hier testen ob beide gleich sind
-    
+    //: hier testen ob beide gleich sind ->DONE
+    cout << test(tree, bst) << endl;
     
     return 0;
 }

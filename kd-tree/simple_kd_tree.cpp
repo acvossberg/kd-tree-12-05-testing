@@ -57,8 +57,8 @@ void SimpleKDtree<T>::add(Point<T> val) {
         root = new KDnode<T>(val);
     }
 }
-template <class T>
-void SimpleKDtree<T>::make_SimpleKDtree(vector<Point<T>> cloud, int left, int right, int k){
+template < class T>
+void SimpleKDtree<T>::make_SimpleKDtreeHelper(vector<Point<T>> cloud, KDnode<T> *root, int left, int right, int k){
     int mid = cloud.size()/2;
     
     if(cloud.size() > 1){
@@ -78,17 +78,56 @@ void SimpleKDtree<T>::make_SimpleKDtree(vector<Point<T>> cloud, int left, int ri
             root = new KDnode<T>(cloud[mid]);
         }
         
-        vector<Point<T>> cloud_left(cloud.begin(), cloud.begin() + mid-1);
-        vector<Point<T>> cloud_right(cloud.begin()+mid, cloud.end());
+        vector<Point<T>> cloud_left(cloud.begin(), cloud.begin() + mid);
+        vector<Point<T>> cloud_right(cloud.begin()+mid+1, cloud.end());
         k++;
         root->left = new KDnode<T>;
         root->right = new KDnode<T>;
         //left:
-        make_SimpleKDtree(cloud_left, left, mid-1, k);
+        make_SimpleKDtreeHelper(cloud_left,root->left, left, mid-1, k);
         //right:
-        make_SimpleKDtree(cloud_right, mid+1, right, k);
+        make_SimpleKDtreeHelper(cloud_right,root->right, mid+1, right, k);
     }
     if(cloud.size() == 1) root->values = cloud[0];
+
 }
 
+template <class T>
+void SimpleKDtree<T>::make_SimpleKDtree(vector<Point<T>> cloud, int left, int right, int k){
+    if(root){
+        this->make_SimpleKDtreeHelper(cloud, root, 0, cloud.size()-1, 0);
+    }
+    else{
+        root = new KDnode<T>();
+        this->make_SimpleKDtreeHelper(cloud, root, 0, cloud.size()-1, 0);
 
+    }
+    
+}
+
+template <class T>
+bool SimpleKDtree<T>::sameTreeHelper(KDnode<T> *root, int i, vector<Point<T>> Kdtree){
+    //if (!root) return false;
+    if(i > Kdtree.size()) return true;
+    //cout << root->values.x << " " << root->values.y << endl;
+    
+    if(root->values.x == Kdtree[i-1].x && root->values.y == Kdtree[i-1].y){
+        cout << "pair " << i-1 << " is the same! (" << Kdtree[i-1].x << ", " << Kdtree[i-1].y << ")" << endl;
+        return sameTreeHelper(root->left, 2*i, Kdtree) && sameTreeHelper(root->right, 2*i+1, Kdtree);
+    }
+    else if(root->values.x == 0 && root->values.y == 0 &&  Kdtree[i-1].x == -1 && Kdtree[i-1].y == -1){
+        //end-node
+        return true;
+    }
+    else{
+        cout << "hups! not the same " << endl;
+        return false;
+    }
+    
+    return true;
+
+}
+template <class T>
+bool SimpleKDtree<T>::sameTree(vector<Point<T>> Kdtree, int i){
+    return sameTreeHelper(this->root, i, Kdtree);
+}

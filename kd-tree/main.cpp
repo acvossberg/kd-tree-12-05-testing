@@ -22,13 +22,15 @@ using namespace std;
 template <typename num_t>
 void generateRandomPointCloud(vector<Point<num_t>> &point, const size_t N, const int max_range = 10)
 {
-    cout << "Generating "<< N << " point cloud...";
+    cout << "Generating "<< N << " point cloud...\n";
     point.resize(N);
     for (size_t i=0;i<N;i++)
     {
         point[i].x = max_range * (rand() % 1000) / num_t(1000);
         point[i].y = max_range * (rand() % 1000) / num_t(1000);
         point[i].z = max_range * (rand() % 1000) / num_t(1000);
+        point[i].ID = i;
+        cout << "(" << point[i].x <<", "<< point[i].y << ", " << point[i].z<< ") ID "  << point[i].ID << endl;
     }
     /*point[0].x = 2;
     point[0].y = 3;
@@ -65,14 +67,15 @@ bool test(KD_tree<num_t> KDtree, SimpleKDtree<num_t>* Tsimple){
 int main()
 {
     //: <int> to generic --> DONE
-    //TODO: check, which tree should be built.. cut top or bottom?
+    //: check, which tree should be built.. cut top or bottom? -> TOP!! ->DONE
     //: make test compare to other tree -> DONE
     //TODO: free kd_tree.. ?
     //: schön alles in class machen --> DONE
     //TODO: test for 3D
     //TODO: test for larger - random trees.
     //TODO: test for double/float
-    
+    //TODO: what if exact same value in one dimension?
+    //TODO: solution: cut at smaller ID in original set ---> median ID of median value ( not smallest ID )
     
     //type to use:
     typedef int num_t;
@@ -80,7 +83,7 @@ int main()
     vector<Point<num_t>> cloud;
     
     // Generate points:
-    generateRandomPointCloud(cloud, 10);
+    generateRandomPointCloud(cloud, 1000);
     
     vector<int> dim = {1,2,3};
     KD_tree<num_t> tree(cloud, dim);
@@ -92,7 +95,7 @@ int main()
     cout << " \n \n" << endl;
     
     //: hier testen ob beide gleich sind ->DONE
-    cout << test(tree, bst) << endl;
+    test(tree, bst);
     
     return 0;
 }

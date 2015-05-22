@@ -25,12 +25,31 @@ public:
                 return a.y < b.y;
             case 3:
                 return a.z < b.z;
+            case 4:
+                return a.ID < b.ID;
             default:
-                cout << "error - no correct dimension for comparison" << endl;
+                cout << "error << - no correct dimension for comparison" << endl;
                 return a.x < b.x;
         }
     }
+    
+
 };
+template<class T>
+bool KD_tree<T>::same_value(Point<T> &a, Point<T> &b, int dim){
+    switch (dim){
+        case 1:
+            return a.x == b.x;
+        case 2:
+            return a.y == b.y;
+        case 3:
+            return a.z == b.z;
+        default:
+            cout << "error - no correct dimension for comparison" << endl;
+            return a.x == b.x;
+            
+    }
+}
 template < class T>
 KD_tree<T>::KD_tree(vector<Point<T>> &cloud, vector<int> &dimensions){
     data = cloud;
@@ -51,28 +70,33 @@ template<class T>
 void KD_tree<T>::printTree(){
     cout << "printing tree with number of nodes: " << result.size() << endl;
     for(int i = 0; i<result.size();i++){
-        cout << "(" << result[i].x << ", " << result[i].y << ", " << result[i].z << ")" << endl;
+        cout << "(" << result[i].x << ", " << result[i].y << ", " << result[i].z << ") with ID " << result[i].ID << endl;
     
     }
-    cout << "done" << endl;
+    cout << "done\n" << endl;
 }
 template <class T>
 void KD_tree<T>::selectMedian(int dim, int median, int left, int right, int pos)// dim = 1, 2 oder 3
 {
-    //cout << "left " << left << " right " << right << " med " << median << endl;
 
+    //TODO: nochmal drüber gehen und effizienz anschauen!
+    
+    
     //nth_element sorts data left - right.
-    //sorts element s.t. all smaller than median on the left and larger on right
+    //sorts element s.t. all smaller OR EQUAL than median on the left and all larger on right
     //cout << median << "-th element with dim = " << dim << endl;
+    
+    //: verändert reihenfolge - nicht nachvollziehbar --> ID in Point<T> einbauen!!! -> DONE
     nth_element(data.begin()+left, data.begin() + median, data.begin()+right, sorter(dim));
     //cout << "median " <<  data[median].x << " " << data[median].y << endl;
+
+    
     result[pos-1] = data[median];
 }
 
 template <class T>
 void KD_tree<T>::KD_tree_recursive(int left, int right, int k, int pos){
-    int med = left + (right+1 - left)/2; //left + (right - left)/2;
-
+    med = left + (right+1 - left)/2;//lo + (hi - lo) / 2
     //return statement:
     if(left <= right){
     

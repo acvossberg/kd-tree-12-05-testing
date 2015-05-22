@@ -20,6 +20,7 @@ using namespace std;
 template < class T>
 struct KDnode<T> *SimpleKDtree<T>::newSimpleKDtreeNode(Point<T> data)
 {
+    //FIXME: BAD_ACCESS
     KDnode<T> *node;
     node->values = data ;
     node->left = NULL;
@@ -27,82 +28,72 @@ struct KDnode<T> *SimpleKDtree<T>::newSimpleKDtreeNode(Point<T> data)
     
     return node;
 }
-template<class T>
-bool SimpleKDtree<T>::same_value(Point<T> &a, Point<T> &b, int d){
-    switch (d){
-        case 1:
-            return a.x == b.x;
-        case 2:
-            return a.y == b.y;
-        case 3:
-            return a.z == b.z;
-        default:
-            cout << "error at == - no correct dimension for comparison" << endl;
-            return a.x == b.x;
-            
-    }
-}
+
 template < class T>
 SimpleKDtree<T>::SimpleKDtree(vector<int> &dimensions){
     dim = dimensions;
     
 }
 template < class T>
+void SimpleKDtree<T>::addHelper(KDnode<T> *root, Point<T> val) {
+    if (root->value > val) {
+        if (!root->left) {
+            root->left = new KDnode<T>(val);
+        } else {
+            addHelper(root->left, val);
+        }
+    } else {
+        if (!root->right) {
+            root->right = new KDnode<T>(val);
+        } else {
+            addHelper(root->right, val);
+        }
+    }
+}
+template <class T>
+void SimpleKDtree<T>::add(Point<T> val) {
+    if (root) {
+        this->addHelper(root, val);
+    } else {
+        root = new KDnode<T>(val);
+    }
+}
+template < class T>
 void SimpleKDtree<T>::make_SimpleKDtreeHelper(vector<Point<T>> cloud, KDnode<T> *root, int left, int right, int k){
     int mid = cloud.size()/2;
-    height--;
     number_nodes--;
     if(cloud.size() > 1){
         //check ob korrekt gerundet wird
         k = k%dim.size();
         
         //printTree();
-        //was macht sort genau mit gleichen values?
-        stable_sort(cloud.begin(), cloud.end(), sorter(dim[k]));
+        sort(cloud.begin(), cloud.end(), sorter(dim[k]));
         
-        int first = mid-1;
-        while(same_value(cloud[mid], cloud[first], dim[k])){
-            cout << "same value" << endl;
-            first--;
-        }
-        int last = mid+1;
-        while(same_value(cloud[mid], cloud[last], dim[k])){
-            cout << "same value" << endl;
-            last++;
-        }
-        //int ID_mid = first + (last - first)/2;
-        //cout << "ID " << ID_mid << " mid " << mid << endl;
+        
         //this->values = cloud[mid];
-        
-        
         if(root){
             root->values = cloud[mid];
-            //stimmt sowieso nicht... ID_mid.. denn cloud wird jede iteration gekürzt!!!!
-            cout << "(" << cloud[mid].x << ", " << cloud[mid].y << ", " << cloud[mid].z << ")" << endl;
         }
         else{
-            root = new KDnode<T>(cloud[ID_mid]);
+            root = new KDnode<T>(cloud[mid]);
         }
         
-        vector<Point<T>> cloud_left(cloud.begin(), cloud.begin() + ID_mid);
-        vector<Point<T>> cloud_right(cloud.begin()+ID_mid+1, cloud.end());
+        vector<Point<T>> cloud_left(cloud.begin(), cloud.begin() + mid);
+        vector<Point<T>> cloud_right(cloud.begin()+mid+1, cloud.end());
         k++;
         root->left = new KDnode<T>;
         root->right = new KDnode<T>;
         //left:
-        make_SimpleKDtreeHelper(cloud_left,root->left, left, ID_mid-1, k);
+        make_SimpleKDtreeHelper(cloud_left,root->left, left, mid-1, k);
         //right:
-        height++;
-        make_SimpleKDtreeHelper(cloud_right,root->right, ID_mid+1, right, k);
-        height++;
+        make_SimpleKDtreeHelper(cloud_right,root->right, mid+1, right, k);
     }
     if(cloud.size() == 1){
         root->values = cloud[0];
-        //if(number_nodes <= 3){
-        if(height == 0){
+        if(number_nodes <= 3){
             Point<T> zero_point;
             zero_point.x = zero_point.y = zero_point.z = 0;
-            cout << "put extra children here: " << cloud[0].x << " " << cloud[0].y << endl;
+            cout << "put extra children here: " << cloud[0].x << " " << cloud[0].y<< endl;
             root->left = new KDnode<T>(zero_point);
             root->right = new KDnode<T>(zero_point);
         }
@@ -112,8 +103,7 @@ void SimpleKDtree<T>::make_SimpleKDtreeHelper(vector<Point<T>> cloud, KDnode<T> 
 
 template <class T>
 void SimpleKDtree<T>::make_SimpleKDtree(vector<Point<T>> cloud, int left, int right, int k){
-    height = floor(log2(cloud.size()));
-    number_nodes = pow(2, height + 1) - 1;
+    number_nodes = pow(2,floor(log2(cloud.size())) +1) - 1;
     if(root){
         this->make_SimpleKDtreeHelper(cloud, root, 0, cloud.size()-1, 0);
     }
@@ -144,7 +134,7 @@ bool SimpleKDtree<T>::sameTreeHelper(KDnode<T> *root, int i, vector<Point<T>> Kd
         return true;
     }
     else{
-        cout << "hups! not the same at " << i << " root " << root->values.x << " " << root->values.y << " Kdtree " << Kdtree[i-1].x << " " << Kdtree[i-1].y << endl;
+        cout << "hups! not the same " << endl;
         return false;
     }
     

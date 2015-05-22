@@ -51,12 +51,10 @@ private:
     void add(Point<T> val);
     bool sameTreeHelper(KDnode<T> *n, int i, vector<Point<T>> Kdtree);
     void make_SimpleKDtreeHelper(vector<Point<T>> cloud, KDnode<T> *root, int left, int right, int k);
-    bool same_value(Point<T> &a, Point<T> &b, int dim);
     
     KDnode<T> *root;
     friend class KD_tree<T>;
     int number_nodes;
-    int height;
     
     
 };

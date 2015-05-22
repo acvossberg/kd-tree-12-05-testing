@@ -14,7 +14,7 @@
 using namespace std;
 template <typename num_t>
 struct Point{
-    num_t  x,y,z; //dim = 1, 2, 3
+    num_t  x,y,z,ID; //dim = 1, 2, 3
 };
 
 template < class num>
@@ -29,12 +29,15 @@ public:
     bool testTree( SimpleKDtree<T> *simpleTree);
     vector<Point<T>> get_tree_as_vector();
     
-    
 private:
+    void printData();
     void selectMedian(int dim, int median, int left, int right, int pos);
+    void original_order_median(int median, int dim, int left, int right);
+    T get_value(int dim, Point<T> val );
     vector<Point<T>> data;
     vector<int> dim;
     vector<Point<T>> result;
+
     
 };
 

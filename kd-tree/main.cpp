@@ -22,13 +22,16 @@ using namespace std;
 template <typename num_t>
 void generateRandomPointCloud(vector<Point<num_t>> &point, const size_t N, const int max_range = 10)
 {
-    cout << "Generating "<< N << " point cloud...";
+    cout << "Generating "<< N << " point cloud...\n";
     point.resize(N);
     for (size_t i=0;i<N;i++)
     {
         point[i].x = max_range * (rand() % 1000) / num_t(1000);
         point[i].y = max_range * (rand() % 1000) / num_t(1000);
         point[i].z = max_range * (rand() % 1000) / num_t(1000);
+        point[i].ID = i;
+        cout << point[i].x << ", " << point[i].y << ", " << point[i].z << " ID: " << point[i].ID << endl;
+
     }
     /*point[0].x = 2;
     point[0].y = 3;
@@ -42,7 +45,7 @@ void generateRandomPointCloud(vector<Point<num_t>> &point, const size_t N, const
     point[4].y = 1;
     point[5].x = 7;
     point[5].y = 2;*/
-    std::cout << "done\n";
+    std::cout << "done\n \n";
 }
 
 template <typename num_t>
@@ -80,7 +83,7 @@ int main()
     vector<Point<num_t>> cloud;
     
     // Generate points:
-    generateRandomPointCloud(cloud, 10);
+    generateRandomPointCloud(cloud, 11);
     
     vector<int> dim = {1,2,3};
     KD_tree<num_t> tree(cloud, dim);

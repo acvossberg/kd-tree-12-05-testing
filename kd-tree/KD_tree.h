@@ -14,7 +14,7 @@
 using namespace std;
 template <typename num_t>
 struct Point{
-    num_t  x,y,z; //dim = 1, 2, 3
+    num_t  x,y,z, ID; //dim = 1, 2, 3
 };
 
 template < class num>
@@ -35,6 +35,8 @@ private:
     vector<Point<T>> data;
     vector<int> dim;
     vector<Point<T>> result;
+    bool same_value(Point<T> &a, Point<T> &b, int dim);
+    int med;
     
 };
 

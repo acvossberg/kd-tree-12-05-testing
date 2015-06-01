@@ -25,12 +25,13 @@ public:
     void KD_tree_recursive(int left, int right, int k, int pos);
     bool testTree( SimpleKDtree<T> *simpleTree);
     vector<Point<T>> get_tree_as_vector();
+    T get_value(int d, Point<T> val );
+
     
 private:
     void printData();
     void selectMedian(int d, int median, int left, int right, int pos);
     void original_order_median(int median, int d, int left, int right);
-    T get_value(int d, Point<T> val );
     vector<Point<T>> data;
     const vector<int> dim;
     vector<Point<T>> result;

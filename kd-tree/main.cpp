@@ -38,7 +38,7 @@ void generateRandomPointCloud(vector<Point<num_t>> &point, const size_t N, const
 
 template <typename num_t>
 bool test(KD_tree<num_t> KDtree, SimpleKDtree<num_t>* Tsimple){
-    cout << "testing" << endl;
+    cout << "testing ..." << endl;
     
     vector<Point<num_t>> KDVect;
     KDVect = KDtree.get_tree_as_vector();
@@ -67,12 +67,12 @@ int main()
     
     
     //type to use:
-    typedef float num_t;
+    typedef int num_t;
     
     vector<Point<num_t>> cloud;
     
     // Generate points:
-    generateRandomPointCloud(cloud, 1101);
+    generateRandomPointCloud(cloud, 101);
     
     vector<int> dimensions = {1,2};
     KD_tree<num_t> tree(cloud, dimensions);

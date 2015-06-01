@@ -32,7 +32,7 @@ struct KDnode<T> *SimpleKDtree<T>::newSimpleKDtreeNode(Point<T> data)
 template < class T>
 SimpleKDtree<T>::SimpleKDtree(vector<int> const &dimensions){
     dim = dimensions;
-    zero_point.x = zero_point.y = zero_point.z = 0;
+    zero_point.x = zero_point.y = zero_point.z = -1;
 
 }
 template < class T>
@@ -95,7 +95,7 @@ void SimpleKDtree<T>::make_SimpleKDtreeHelper(vector<Point<T>> cloud, KDnode<T> 
         if(height == 1){
             Point<T> zero_point;
             zero_point.x = zero_point.y = zero_point.z = 0;
-            cout << "put extra children here: " << cloud[0].x << " " << cloud[0].y << endl;
+            //cout << "put extra children here: " << cloud[0].x << " " << cloud[0].y << endl;
             root->left = new KDnode<T>(zero_point);
             root->right = new KDnode<T>(zero_point);
         }
@@ -106,7 +106,13 @@ void SimpleKDtree<T>::make_SimpleKDtreeHelper(vector<Point<T>> cloud, KDnode<T> 
 template <class T>
 void SimpleKDtree<T>::make_SimpleKDtree(vector<Point<T>> cloud, int left, int right, int k){
     height = log2(cloud.size())+1;
-    //number_nodes = pow(2,floor(log2(cloud.size())) +1) - 1;
+    number_nodes = pow(2,floor(log2(cloud.size())) +1) - 1;
+    Point<T> placeholder;
+    placeholder.x = -1; //TODO: some better marker/placeholder needed!
+    placeholder.y = -1;
+    placeholder.z = -1;
+    res_vector.resize(number_nodes,placeholder);
+    
     if(root){
         this->make_SimpleKDtreeHelper(cloud, root, 0, cloud.size()-1, 0);
     }
@@ -117,7 +123,16 @@ void SimpleKDtree<T>::make_SimpleKDtree(vector<Point<T>> cloud, int left, int ri
     }
     
 }
-
+template <class T>
+bool SimpleKDtree<T>::compare_tree_node(KDnode<T> root, Point<T> Kdtree){
+    
+    for(int i = 0; i<dim.size()-1; ++i){
+        int d = dim[i];
+        //cout << "root-val " << get_value(d, root.values) << " KDtree " <<get_value(d, Kdtree) << " in dim= " << d << endl;
+        if(get_value(d, root.values) != get_value(d, Kdtree)){return false;}
+    }
+    return true;
+}
 
 template <class T>
 bool SimpleKDtree<T>::sameTreeHelper(KDnode<T> *root, int i, vector<Point<T>> Kdtree){
@@ -127,10 +142,15 @@ bool SimpleKDtree<T>::sameTreeHelper(KDnode<T> *root, int i, vector<Point<T>> Kd
      //cout<< "could not access the child-node at " << i-1 << " tree: "  << Kdtree[i-1].x << ", " << Kdtree[i-1].y << ", " << Kdtree[i-1].z <<  ")" << endl;
      return false;
      }
-    //TODO: change to also compare .z
-    if(root->values.x == Kdtree[i-1].x && root->values.y == Kdtree[i-1].y){
+    
+    if(compare_tree_node(root->values, Kdtree[i-1])){
         return sameTreeHelper(root->left, 2*i, Kdtree) && sameTreeHelper(root->right, 2*i+1, Kdtree);
     }
+    
+    //TODO: change to also compare .z
+    /*if(root->values.x == Kdtree[i-1].x && root->values.y == Kdtree[i-1].y){
+        return sameTreeHelper(root->left, 2*i, Kdtree) && sameTreeHelper(root->right, 2*i+1, Kdtree);
+    }*/
     else if(root->values.x == 0 && root->values.y == 0  && Kdtree[i-1].x == -1 && Kdtree[i-1].y == -1 ){
         //reached end-node
         return true;
@@ -143,7 +163,27 @@ bool SimpleKDtree<T>::sameTreeHelper(KDnode<T> *root, int i, vector<Point<T>> Kd
     return true;
 
 }
+
+
 template <class T>
 bool SimpleKDtree<T>::sameTree(vector<Point<T>> Kdtree, int i){
     return sameTreeHelper(this->root, i, Kdtree);
+}
+
+template < class T>
+T SimpleKDtree<T>::get_value(int d, Point<T> val ){
+    switch (d){
+        case 1:
+            return val.x;
+        case 2:
+            return val.y;
+        case 3:
+            return val.z;
+        case 4:
+            return val.ID;
+        default:
+            cout << "error no correct comparison-value" <<endl;
+            return val.x;
+            
+    }
 }

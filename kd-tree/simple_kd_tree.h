@@ -11,8 +11,8 @@
 
 #include <stdio.h>¨
 #include <vector>
-#include "KD_tree.h"
-
+//#include "KD_tree.h"
+#include "sorter.h"
 using namespace std;
 
 template <class T>

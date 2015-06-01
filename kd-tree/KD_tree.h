@@ -10,12 +10,14 @@
 #define __kd_tree_08_05__KD_tree__
 
 #include <stdio.h>
+#include "sorter.h"
+
 //#include "simple_kd_tree.h"
 using namespace std;
-template <typename num_t>
+/*template <typename num_t>
 struct Point{
     num_t  x,y,z,ID; //dim = 1, 2, 3
-};
+};*/
 
 template < class num>
 class SimpleKDtree;

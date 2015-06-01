@@ -12,12 +12,14 @@
 #include "KD_tree.h"
 
 using namespace std;
-class sorter {
+/*class sorter {
 private:
     short dim_;
 public:
     sorter(short d) : dim_(d) {}
-    bool operator()(Point<int> const &a, Point<int> const &b) const {
+    
+    template <class num_T>
+    bool operator()(Point<num_T> const &a, Point<num_T> const &b) const {
         switch (dim_){
             case 1:
                 return a.x < b.x;
@@ -32,7 +34,8 @@ public:
                 return a.x < b.x;
         }
     }
-};
+};*/
+
 template < class T>
 KD_tree<T>::KD_tree(vector<Point<T>> &cloud, vector<int> dimensions) : dim(dimensions){
     data = cloud;
@@ -83,7 +86,7 @@ void KD_tree<T>::selectMedian(int d, int median, int left, int right, int pos)//
     //nth_element sorts data left - right.
     //sorts element s.t. all smaller than median on the left and larger on right
     //cout << median << "-th element with dim = " << dim << endl;
-    nth_element(data.begin()+left, data.begin() + median, data.begin()+right, sorter(d));
+    nth_element(data.begin()+left, data.begin() + median, data.begin()+right, sorter<T>(d));
     //cout << "median " <<  data[median].x << " " << data[median].y << endl;
     
     //cout << "after sorted with nth_element: von " << left << " bis " <<  right << " with dim= " << d << endl;
@@ -142,7 +145,7 @@ void KD_tree<T>::original_order_median(int median_position, int d, int left, int
     
     
     //cout << " sorting in range: " << data[leftIt].ID << " " << data[rightIt].ID << endl;
-    sort(data.begin()+leftIt, data.begin()+med_right, sorter(4));
+    sort(data.begin()+leftIt, data.begin()+med_right, sorter<T>(4));
     //printData();
 }
 template < class T>

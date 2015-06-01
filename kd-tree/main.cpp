@@ -79,12 +79,12 @@ int main()
     
     
     //type to use:
-    typedef int num_t;
+    typedef float num_t;
     
     vector<Point<num_t>> cloud;
     
     // Generate points:
-    generateRandomPointCloud(cloud, 111);
+    generateRandomPointCloud(cloud, 11001);
     
     vector<int> dimensions = {1,2};
     KD_tree<num_t> tree(cloud, dimensions);

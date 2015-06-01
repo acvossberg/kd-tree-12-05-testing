@@ -59,7 +59,7 @@ void SimpleKDtree<T>::add(Point<T> val) {
         root = new KDnode<T>(val);
     }
 }
-template < class T>
+template <class T>
 void SimpleKDtree<T>::make_SimpleKDtreeHelper(vector<Point<T>> cloud, KDnode<T> *root, int left, int right, int k){
     int mid = cloud.size()/2;
     number_nodes--;
@@ -68,8 +68,8 @@ void SimpleKDtree<T>::make_SimpleKDtreeHelper(vector<Point<T>> cloud, KDnode<T> 
         //check ob korrekt gerundet wird
         k = k%dim.size();
         //s.d. stable_sort die richtige Reihenfolge hat, jedes mal nach indices sortieren:
-        sort(cloud.begin(), cloud.end(), sorter(ID_val));
-        stable_sort(cloud.begin(), cloud.end(), sorter(dim[k]));
+        sort(cloud.begin(), cloud.end(), sorter<T>(ID_val));
+        stable_sort(cloud.begin(), cloud.end(), sorter<T>(dim[k]));
         
         /*cout<< "CLOUD STABLE SORT: " <<endl;
         for(int i = 0; i< cloud.size(); i++){

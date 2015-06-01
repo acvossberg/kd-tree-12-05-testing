@@ -10,6 +10,7 @@
 		0C3FD0FB1B023952005723A6 /* simple_kd_tree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0C3FD0F91B023952005723A6 /* simple_kd_tree.cpp */; };
 		0C85BB421AFCF24B000ED8F2 /* KD_tree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0C85BB401AFCF24B000ED8F2 /* KD_tree.cpp */; };
 		0CCAFD871B0209A300D86F0A /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0CCAFD861B0209A300D86F0A /* main.cpp */; };
+		0CD00ECD1B1CA0BF003E3864 /* sorter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0CD00ECB1B1CA0BF003E3864 /* sorter.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -31,6 +32,8 @@
 		0C85BB401AFCF24B000ED8F2 /* KD_tree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = KD_tree.cpp; sourceTree = "<group>"; };
 		0C85BB411AFCF24B000ED8F2 /* KD_tree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KD_tree.h; sourceTree = "<group>"; };
 		0CCAFD861B0209A300D86F0A /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = "kd-tree/main.cpp"; sourceTree = "<group>"; };
+		0CD00ECB1B1CA0BF003E3864 /* sorter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sorter.cpp; sourceTree = "<group>"; };
+		0CD00ECC1B1CA0BF003E3864 /* sorter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sorter.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,6 +70,8 @@
 				0C3FD0F91B023952005723A6 /* simple_kd_tree.cpp */,
 				0C3FD0FA1B023952005723A6 /* simple_kd_tree.h */,
 				0C85BB401AFCF24B000ED8F2 /* KD_tree.cpp */,
+				0CD00ECB1B1CA0BF003E3864 /* sorter.cpp */,
+				0CD00ECC1B1CA0BF003E3864 /* sorter.h */,
 				0C85BB411AFCF24B000ED8F2 /* KD_tree.h */,
 			);
 			path = "kd-tree";
@@ -130,6 +135,7 @@
 			files = (
 				0CCAFD871B0209A300D86F0A /* main.cpp in Sources */,
 				0C3FD0FB1B023952005723A6 /* simple_kd_tree.cpp in Sources */,
+				0CD00ECD1B1CA0BF003E3864 /* sorter.cpp in Sources */,
 				0C85BB421AFCF24B000ED8F2 /* KD_tree.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

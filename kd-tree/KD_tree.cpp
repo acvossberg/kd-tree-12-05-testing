@@ -12,34 +12,10 @@
 #include "KD_tree.h"
 
 using namespace std;
-/*class sorter {
-private:
-    short dim_;
-public:
-    sorter(short d) : dim_(d) {}
-    
-    template <class num_T>
-    bool operator()(Point<num_T> const &a, Point<num_T> const &b) const {
-        switch (dim_){
-            case 1:
-                return a.x < b.x;
-            case 2:
-                return a.y < b.y;
-            case 3:
-                return a.z < b.z;
-            case 4:
-                return a.ID < b.ID;
-            default:
-                cout << "error - no correct dimension for comparison" << endl;
-                return a.x < b.x;
-        }
-    }
-};*/
 
 template < class T>
 KD_tree<T>::KD_tree(vector<Point<T>> &cloud, vector<int> dimensions) : dim(dimensions){
     data = cloud;
-    //dim(dimensions);
     int height = floor(log2(data.size()));
     int max_number_nodes = pow(2,height+1) - 1;
     Point<T> placeholder;
@@ -81,21 +57,15 @@ void KD_tree<T>::printTree(){
 template <class T>
 void KD_tree<T>::selectMedian(int d, int median, int left, int right, int pos)// dim = 1, 2 oder 3
 {
-    //cout << "left " << left << " right " << right << " med " << median << endl;
-
     //nth_element sorts data left - right.
     //sorts element s.t. all smaller than median on the left and larger on right
-    //cout << median << "-th element with dim = " << dim << endl;
     nth_element(data.begin()+left, data.begin() + median, data.begin()+right, sorter<T>(d));
-    //cout << "median " <<  data[median].x << " " << data[median].y << endl;
     
     //cout << "after sorted with nth_element: von " << left << " bis " <<  right << " with dim= " << d << endl;
     //printData();
     
     //bring duplicate values of median in original order
     original_order_median(median, d, left, right);
-    
-    
     
     result[pos-1] = data[median];
 }
@@ -109,10 +79,6 @@ void KD_tree<T>::original_order_median(int median_position, int d, int left, int
     int med_right = median_position;
     int leftIt = left;
     int rightIt = right-1;
-    
-    //int left = 0;
-    //int right = data.size()-1;
-    //cout << "verändern data in range: " << left << " bis " << right << " ordnen median-value in mitte an " << median_value << endl;
     
     while(leftIt < med_left){
         //find next element left of median, that is not median
@@ -139,15 +105,9 @@ void KD_tree<T>::original_order_median(int median_position, int d, int left, int
         }
     }
     
-    //printData();
-    //sort this range of median values to get original order
-    //TODO: test, if range is correct!
-    
-    
-    //cout << " sorting in range: " << data[leftIt].ID << " " << data[rightIt].ID << endl;
     sort(data.begin()+leftIt, data.begin()+med_right, sorter<T>(4));
-    //printData();
 }
+
 template < class T>
 void KD_tree<T>::printData(){
     for(int i = 0; i< data.size(); i++){
@@ -159,18 +119,11 @@ template <class T>
 void KD_tree<T>::KD_tree_recursive(int left, int right, int k, int pos){
     int med = left + (right+1 - left)/2; //left + (right - left)/2;
     //if even:
-    int new_med = (right-left+1) / 2 + ((((right-left+1) < 0) ^ ((right-left+1) > 0)) && ((right-left+1)%2));
-    //cout << "anz: " << right - left+1 << " med val " << med << " vs new med " << new_med << "and data: " << data[med].x << data[med].y << data[med].z<< endl;
-    //return statement:
     if(left <= right){
     
         //check ob korrekt gerundet wird
         k = k%dim.size();
         int d = dim[k];
-        
-        //cout << dim[0] << dim[1] << dim[2] << endl;
-        //printTree();
-        //cout << "k is now: " << k << "and dim[k] " << dim[k] << endl;
         selectMedian( d, med, left, right+1, pos);
         k++;
     

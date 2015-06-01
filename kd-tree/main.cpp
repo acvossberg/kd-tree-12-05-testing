@@ -33,18 +33,6 @@ void generateRandomPointCloud(vector<Point<num_t>> &point, const size_t N, const
         cout << point[i].x << ", " << point[i].y << ", " << point[i].z << " ID: " << point[i].ID << endl;
 
     }
-    /*point[0].x = 2;
-    point[0].y = 3;
-    point[1].x = 5;
-    point[1].y = 4;
-    point[2].x = 9;
-    point[2].y = 6;
-    point[3].x = 4;
-    point[3].y = 7;
-    point[4].x = 8;
-    point[4].y = 1;
-    point[5].x = 7;
-    point[5].y = 2;*/
     std::cout << "done\n \n";
 }
 
@@ -84,7 +72,7 @@ int main()
     vector<Point<num_t>> cloud;
     
     // Generate points:
-    generateRandomPointCloud(cloud, 11001);
+    generateRandomPointCloud(cloud, 1101);
     
     vector<int> dimensions = {1,2};
     KD_tree<num_t> tree(cloud, dimensions);
@@ -95,7 +83,7 @@ int main()
     bst->make_SimpleKDtree( cloud, 0, cloud.size()-1, 0);
     cout << " \n \n" << endl;
     
-    //: hier testen ob beide gleich sind ->DONE
+    //: hier testen ob beide gleich sind -> DONE
     cout << test(tree, bst) << endl;
     cloud.clear();
 

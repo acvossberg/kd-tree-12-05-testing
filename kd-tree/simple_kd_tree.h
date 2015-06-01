@@ -11,7 +11,6 @@
 
 #include <stdio.h>¨
 #include <vector>
-//#include "KD_tree.h"
 #include "sorter.h"
 using namespace std;
 
@@ -55,8 +54,6 @@ private:
     void make_SimpleKDtreeHelper(vector<Point<T>> cloud, KDnode<T> *root, int left, int right, int k);
     
     KDnode<T> *root;
-    //friend class KD_tree<T>;
-    int number_nodes;
     int height;
 
     Point<T> zero_point;

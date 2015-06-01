@@ -72,9 +72,9 @@ int main()
     vector<Point<num_t>> cloud;
     
     // Generate points:
-    generateRandomPointCloud(cloud, 101);
+    generateRandomPointCloud(cloud, 1091);
     
-    vector<int> dimensions = {1,2};
+    vector<int> dimensions = {1,2,3};
     KD_tree<num_t> tree(cloud, dimensions);
     tree.KD_tree_recursive(0, cloud.size()-1, 0, 1);
     tree.printTree();

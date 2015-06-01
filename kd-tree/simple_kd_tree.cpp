@@ -128,7 +128,6 @@ bool SimpleKDtree<T>::compare_tree_node(KDnode<T> root, Point<T> Kdtree){
     
     for(int i = 0; i<dim.size()-1; ++i){
         int d = dim[i];
-        //cout << "root-val " << get_value(d, root.values) << " KDtree " <<get_value(d, Kdtree) << " in dim= " << d << endl;
         if(get_value(d, root.values) != get_value(d, Kdtree)){return false;}
     }
     return true;
@@ -139,7 +138,6 @@ bool SimpleKDtree<T>::sameTreeHelper(KDnode<T> *root, int i, vector<Point<T>> Kd
     
     if(i >= Kdtree.size()) return true;
     if (!root){
-     //cout<< "could not access the child-node at " << i-1 << " tree: "  << Kdtree[i-1].x << ", " << Kdtree[i-1].y << ", " << Kdtree[i-1].z <<  ")" << endl;
      return false;
      }
     
@@ -147,10 +145,6 @@ bool SimpleKDtree<T>::sameTreeHelper(KDnode<T> *root, int i, vector<Point<T>> Kd
         return sameTreeHelper(root->left, 2*i, Kdtree) && sameTreeHelper(root->right, 2*i+1, Kdtree);
     }
     
-    //TODO: change to also compare .z
-    /*if(root->values.x == Kdtree[i-1].x && root->values.y == Kdtree[i-1].y){
-        return sameTreeHelper(root->left, 2*i, Kdtree) && sameTreeHelper(root->right, 2*i+1, Kdtree);
-    }*/
     else if(root->values.x == 0 && root->values.y == 0  && Kdtree[i-1].x == -1 && Kdtree[i-1].y == -1 ){
         //reached end-node
         return true;

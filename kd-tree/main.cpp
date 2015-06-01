@@ -61,6 +61,7 @@ bool test(KD_tree<num_t> KDtree, SimpleKDtree<num_t>* Tsimple){
     }
     else{
         cout << "o oh - debug some more!" << endl;
+        
         return false;
     }
 }
@@ -83,19 +84,20 @@ int main()
     vector<Point<num_t>> cloud;
     
     // Generate points:
-    generateRandomPointCloud(cloud, 11);
+    generateRandomPointCloud(cloud, 111);
     
-    vector<int> dim = {1,2,3};
-    KD_tree<num_t> tree(cloud, dim);
+    vector<int> dimensions = {1,2};
+    KD_tree<num_t> tree(cloud, dimensions);
     tree.KD_tree_recursive(0, cloud.size()-1, 0, 1);
     tree.printTree();
     
-    SimpleKDtree<num_t> *bst = new SimpleKDtree<num_t>(dim);
+    SimpleKDtree<num_t> *bst = new SimpleKDtree<num_t>(dimensions);
     bst->make_SimpleKDtree( cloud, 0, cloud.size()-1, 0);
     cout << " \n \n" << endl;
     
     //: hier testen ob beide gleich sind ->DONE
     cout << test(tree, bst) << endl;
-    
+    cloud.clear();
+
     return 0;
 }

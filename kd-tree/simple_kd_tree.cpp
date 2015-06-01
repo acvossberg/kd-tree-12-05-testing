@@ -30,9 +30,10 @@ struct KDnode<T> *SimpleKDtree<T>::newSimpleKDtreeNode(Point<T> data)
 }
 
 template < class T>
-SimpleKDtree<T>::SimpleKDtree(vector<int> &dimensions){
+SimpleKDtree<T>::SimpleKDtree(vector<int> const &dimensions){
     dim = dimensions;
-    
+    zero_point.x = zero_point.y = zero_point.z = 0;
+
 }
 template < class T>
 void SimpleKDtree<T>::addHelper(KDnode<T> *root, Point<T> val) {
@@ -62,13 +63,19 @@ template < class T>
 void SimpleKDtree<T>::make_SimpleKDtreeHelper(vector<Point<T>> cloud, KDnode<T> *root, int left, int right, int k){
     int mid = cloud.size()/2;
     number_nodes--;
+    height--;
     if(cloud.size() > 1){
         //check ob korrekt gerundet wird
         k = k%dim.size();
+        //s.d. stable_sort die richtige Reihenfolge hat, jedes mal nach indices sortieren:
+        sort(cloud.begin(), cloud.end(), sorter(ID_val));
+        stable_sort(cloud.begin(), cloud.end(), sorter(dim[k]));
         
-        //printTree();
-        sort(cloud.begin(), cloud.end(), sorter(dim[k]));
-        
+        /*cout<< "CLOUD STABLE SORT: " <<endl;
+        for(int i = 0; i< cloud.size(); i++){
+            cout <<"("<< cloud[i].x << ", " << cloud[i].y << ", " << cloud[i].z << ")" << endl;
+        }
+        cout << "\n \n" << endl;*/
         
         //this->values = cloud[mid];
         if(root){
@@ -81,28 +88,38 @@ void SimpleKDtree<T>::make_SimpleKDtreeHelper(vector<Point<T>> cloud, KDnode<T> 
         vector<Point<T>> cloud_left(cloud.begin(), cloud.begin() + mid);
         vector<Point<T>> cloud_right(cloud.begin()+mid+1, cloud.end());
         k++;
-        root->left = new KDnode<T>;
-        root->right = new KDnode<T>;
+        root->left = new KDnode<T>(zero_point);
+        root->right = new KDnode<T>(zero_point);
         //left:
         make_SimpleKDtreeHelper(cloud_left,root->left, left, mid-1, k);
+        height++;
         //right:
         make_SimpleKDtreeHelper(cloud_right,root->right, mid+1, right, k);
+        height++;
     }
     if(cloud.size() == 1){
         root->values = cloud[0];
-        if(number_nodes <= 3){
+        if(height == 1){
             Point<T> zero_point;
             zero_point.x = zero_point.y = zero_point.z = 0;
-            cout << "put extra children here: " << cloud[0].x << " " << cloud[0].y<< endl;
+            cout << "put extra children here: " << cloud[0].x << " " << cloud[0].y << endl;
+            root->left = new KDnode<T>(zero_point);
+            root->right = new KDnode<T>(zero_point);
+        }
+        if(number_nodes <= 3){
+            
+            cout << "put extra children here: " << cloud[0].x << " " << cloud[0].y << endl;
             root->left = new KDnode<T>(zero_point);
             root->right = new KDnode<T>(zero_point);
         }
     }
+    //if(height > 0 && cloud.size() == 0)
 
 }
 
 template <class T>
 void SimpleKDtree<T>::make_SimpleKDtree(vector<Point<T>> cloud, int left, int right, int k){
+    height = log2(cloud.size())+1;
     number_nodes = pow(2,floor(log2(cloud.size())) +1) - 1;
     if(root){
         this->make_SimpleKDtreeHelper(cloud, root, 0, cloud.size()-1, 0);
@@ -115,6 +132,7 @@ void SimpleKDtree<T>::make_SimpleKDtree(vector<Point<T>> cloud, int left, int ri
     
 }
 
+
 template <class T>
 bool SimpleKDtree<T>::sameTreeHelper(KDnode<T> *root, int i, vector<Point<T>> Kdtree){
     
@@ -126,7 +144,7 @@ bool SimpleKDtree<T>::sameTreeHelper(KDnode<T> *root, int i, vector<Point<T>> Kd
      }
     //TODO: change to also compare .z
     if(root->values.x == Kdtree[i-1].x && root->values.y == Kdtree[i-1].y){
-        cout << "pair " << i-1 << " is the same! (" << Kdtree[i-1].x << ", " << Kdtree[i-1].y << ")" << endl;
+        //cout << "pair " << i-1 << " is the same! (" << Kdtree[i-1].x << ", " << Kdtree[i-1].y << ")" << endl;
         return sameTreeHelper(root->left, 2*i, Kdtree) && sameTreeHelper(root->right, 2*i+1, Kdtree);
     }
     else if(root->values.x == 0 && root->values.y == 0 && Kdtree[i-1].x == -1 && Kdtree[i-1].y == -1){
@@ -134,6 +152,8 @@ bool SimpleKDtree<T>::sameTreeHelper(KDnode<T> *root, int i, vector<Point<T>> Kd
         return true;
     }
     else{
+        cout << "at " << i-1 << " NOT same! (" << Kdtree[i-1].x << ", " << Kdtree[i-1].y << " " << Kdtree[i-1].z << ")" << endl;
+        cout << "vs " << root->values.x << " " << root->values.y << " " << root->values.z << endl;
         cout << "hups! not the same " << endl;
         return false;
     }

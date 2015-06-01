@@ -39,24 +39,27 @@ class SimpleKDtree{
     
 
 public:
-    SimpleKDtree(vector<int> &dimensions);
-    void make_SimpleKDtree(vector<Point<T>> cloud, int left, int right, int dim);
+    SimpleKDtree(const vector<int> &dimensions);
+    void make_SimpleKDtree(vector<Point<T>> cloud, int left, int right, int d);
     KDnode<T> *newSimpleKDtreeNode(Point<T> data);
     bool sameTree(vector<Point<T>> Kdtree, int i);
     
     
 private:
     vector<int> dim;
+    
+    int ID_val = 4;
     void addHelper(KDnode<T> *root, Point<T> val);
     void add(Point<T> val);
     bool sameTreeHelper(KDnode<T> *n, int i, vector<Point<T>> Kdtree);
     void make_SimpleKDtreeHelper(vector<Point<T>> cloud, KDnode<T> *root, int left, int right, int k);
     
     KDnode<T> *root;
-    friend class KD_tree<T>;
+    //friend class KD_tree<T>;
     int number_nodes;
-    
-    
+    int height;
+
+    Point<T> zero_point;
 };
 
 #endif /* defined(__kd_tree_12_05__simple_kd_tree__) */

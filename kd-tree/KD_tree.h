@@ -23,7 +23,7 @@ class SimpleKDtree;
 template <class T>
 class KD_tree{
 public:
-    KD_tree(vector<Point<T>> &data, vector<int> &dimensions);
+    KD_tree(vector<Point<T>> &data, vector<int> dimensions);
     void printTree();
     void KD_tree_recursive(int left, int right, int k, int pos);
     bool testTree( SimpleKDtree<T> *simpleTree);
@@ -31,11 +31,11 @@ public:
     
 private:
     void printData();
-    void selectMedian(int dim, int median, int left, int right, int pos);
-    void original_order_median(int median, int dim, int left, int right);
-    T get_value(int dim, Point<T> val );
+    void selectMedian(int d, int median, int left, int right, int pos);
+    void original_order_median(int median, int d, int left, int right);
+    T get_value(int d, Point<T> val );
     vector<Point<T>> data;
-    vector<int> dim;
+    const vector<int> dim;
     vector<Point<T>> result;
 
     

@@ -44,11 +44,9 @@ public:
     bool sameTree(vector<Point<T>> Kdtree, int i);
     vector<Point<T>> get_as_vector();
     
+    ~SimpleKDtree();
     
 private:
-    vector<int> dim;
-    
-    int ID_val = 4;
     void addHelper(KDnode<T> *root, Point<T> val);
     void add(Point<T> val);
     bool sameTreeHelper(KDnode<T> *n, int i, vector<Point<T>> Kdtree);
@@ -56,6 +54,10 @@ private:
     bool compare_tree_node(KDnode<T> root, Point<T> Kdtree);
     //T get_value(int d, KDnode<T> *val );
     T get_value(int d, Point<T> val );
+    
+    
+    int ID_val = 4;
+    vector<int> dim;
     KDnode<T> *root;
     int height;
     int number_nodes;

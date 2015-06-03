@@ -550,11 +550,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "kd-tree/main.cpp"
-            timestampString = "454942280.865069"
+            timestampString = "455029983.14689"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "141"
-            endingLineNumber = "141"
+            startingLineNumber = "144"
+            endingLineNumber = "144"
             landmarkName = "main()"
             landmarkType = "7">
          </BreakpointContent>
@@ -571,7 +571,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "41"
             endingLineNumber = "41"
-            landmarkName = "test(vector&lt;Point&lt;num_t&gt;&gt; treevector, SimpleKDtree&lt;num_t&gt;* Tsimple)"
+            landmarkName = "test()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -582,12 +582,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "kd-tree/main.cpp"
-            timestampString = "454934400.109378"
+            timestampString = "454950520.426721"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "47"
-            endingLineNumber = "47"
-            landmarkName = "test(vector&lt;Point&lt;num_t&gt;&gt; treevector, SimpleKDtree&lt;num_t&gt;* Tsimple)"
+            startingLineNumber = "44"
+            endingLineNumber = "44"
+            landmarkName = "test()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -774,12 +774,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "kd-tree/main.cpp"
-            timestampString = "454934400.109378"
+            timestampString = "454950520.426721"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "48"
-            endingLineNumber = "48"
-            landmarkName = "test(vector&lt;Point&lt;num_t&gt;&gt; treevector, SimpleKDtree&lt;num_t&gt;* Tsimple)"
+            startingLineNumber = "45"
+            endingLineNumber = "45"
+            landmarkName = "test()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -790,12 +790,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "kd-tree/main.cpp"
-            timestampString = "454934400.109378"
+            timestampString = "454950520.426721"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "52"
-            endingLineNumber = "52"
-            landmarkName = "test(vector&lt;Point&lt;num_t&gt;&gt; treevector, SimpleKDtree&lt;num_t&gt;* Tsimple)"
+            startingLineNumber = "49"
+            endingLineNumber = "49"
+            landmarkName = "test()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -870,11 +870,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "kd-tree/main.cpp"
-            timestampString = "454938921.342636"
+            timestampString = "454950520.426721"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "118"
-            endingLineNumber = "118"
+            startingLineNumber = "114"
+            endingLineNumber = "114"
             landmarkName = "main()"
             landmarkType = "7">
          </BreakpointContent>
@@ -886,11 +886,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "kd-tree/main.cpp"
-            timestampString = "454940551.945071"
+            timestampString = "455029983.14689"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "124"
-            endingLineNumber = "124"
+            startingLineNumber = "129"
+            endingLineNumber = "129"
             landmarkName = "main()"
             landmarkType = "7">
          </BreakpointContent>
@@ -902,12 +902,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "kd-tree/main.cpp"
-            timestampString = "454938921.342636"
+            timestampString = "454950520.426721"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "80"
-            endingLineNumber = "80"
-            landmarkName = "make_forest(vector&lt;Point&lt;num_t&gt;&gt; &amp;cloud,vector&lt;int&gt; dimensions, int datapoints_per_tree, int nthreads)"
+            startingLineNumber = "76"
+            endingLineNumber = "76"
+            landmarkName = "make_forest()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -918,28 +918,28 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "kd-tree/main.cpp"
-            timestampString = "454938921.342636"
+            timestampString = "454950520.426721"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "87"
+            endingLineNumber = "87"
+            landmarkName = "make_forest()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "kd-tree/main.cpp"
+            timestampString = "454950520.426721"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "91"
             endingLineNumber = "91"
-            landmarkName = "make_forest(vector&lt;Point&lt;num_t&gt;&gt; &amp;cloud,vector&lt;int&gt; dimensions, int datapoints_per_tree, int nthreads)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "kd-tree/main.cpp"
-            timestampString = "454938921.342636"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "95"
-            endingLineNumber = "95"
-            landmarkName = "make_forest(vector&lt;Point&lt;num_t&gt;&gt; &amp;cloud,vector&lt;int&gt; dimensions, int datapoints_per_tree, int nthreads)"
+            landmarkName = "make_forest()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -950,11 +950,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "kd-tree/main.cpp"
-            timestampString = "454941012.322817"
+            timestampString = "455029983.14689"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "135"
-            endingLineNumber = "135"
+            startingLineNumber = "139"
+            endingLineNumber = "139"
             landmarkName = "main()"
             landmarkType = "7">
          </BreakpointContent>
@@ -966,11 +966,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "kd-tree/main.cpp"
-            timestampString = "454941012.322817"
+            timestampString = "455029983.14689"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "134"
-            endingLineNumber = "134"
+            startingLineNumber = "138"
+            endingLineNumber = "138"
             landmarkName = "main()"
             landmarkType = "7">
          </BreakpointContent>
@@ -982,11 +982,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "kd-tree/main.cpp"
-            timestampString = "454940761.721749"
+            timestampString = "454950520.426721"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "117"
-            endingLineNumber = "117"
+            startingLineNumber = "113"
+            endingLineNumber = "113"
             landmarkName = "main()"
             landmarkType = "7">
          </BreakpointContent>
@@ -998,11 +998,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "kd-tree/main.cpp"
-            timestampString = "454941016.065825"
+            timestampString = "455029983.14689"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "133"
-            endingLineNumber = "133"
+            startingLineNumber = "137"
+            endingLineNumber = "137"
             landmarkName = "main()"
             landmarkType = "7">
          </BreakpointContent>
@@ -1030,13 +1030,27 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "kd-tree/main.cpp"
-            timestampString = "454941554.67542"
+            timestampString = "455029983.14689"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "132"
-            endingLineNumber = "132"
+            startingLineNumber = "136"
+            endingLineNumber = "136"
             landmarkName = "main()"
             landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "kd-tree/cudamain.cpp"
+            timestampString = "455027176.71152"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "18"
+            endingLineNumber = "18">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

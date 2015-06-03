@@ -6,8 +6,8 @@
 //  Copyright (c) 2015 Ann-Christine Vossberg. All rights reserved.
 //
 
-#include "simple_kd_tree.h"
-#include "KD_tree.h"
+#include "simple_kd_tree.hpp"
+#include "KD_tree.hpp"
 #include <vector>
 #include <vector>
 #include <iostream>
@@ -112,7 +112,7 @@ void SimpleKDtree<T>::make_SimpleKDtreeHelper(vector<Point<T>> cloud, KDnode<T> 
 
 template <class T>
 void SimpleKDtree<T>::make_SimpleKDtree(vector<Point<T>> cloud, int left, int right, int k){
-    height = log2(cloud.size())+1;
+    height = floor(log2(cloud.size()))+1;
     number_nodes = pow(2,floor(log2(cloud.size())) +1) - 1;
     Point<T> placeholder;
     placeholder.x = -1; //TODO: some better marker/placeholder needed!

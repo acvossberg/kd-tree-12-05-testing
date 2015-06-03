@@ -41,9 +41,6 @@ template <typename num_t>
 bool test(vector<Point<num_t>> treevector, SimpleKDtree<num_t>* Tsimple){
     cout << "testing ..." << endl;
     
-    //vector<Point<num_t>> KDVect;
-    //KDVect = KDtree.get_tree_as_vector();
-    
     if(Tsimple->sameTree(treevector, 1)){
         cout << "yay! trees are the same" << endl;
         return true;
@@ -72,7 +69,6 @@ void make_tree(vector<Point<num_t>> cloud, vector<int> dimensions, vector<vector
     KD_tree<num_t> tree(cloud, dimensions);
     tree.KD_tree_recursive(0, cloud.size()-1, 0, 1);
     trees[Id] = tree.get_tree_as_vector();
-    //print_Pointvector(trees[Id]);
 }
 
 template <typename num_t>
@@ -81,7 +77,7 @@ vector<vector<Point<num_t>>> make_forest(vector<Point<num_t>> &cloud,vector<int>
     vector<std::future<void>> futures;
     
     for(int id = 0; id < nthreads; ++id){
-        //TODO:auch aufsplitten - das kann jeder thread selbst tun
+        //TODO: auch aufsplitten - das kann jeder thread selbst tun
         //TODO: maybe way to use part of vector without copying
         
         vector<Point<num_t>> threadcloud(cloud.begin()+id*datapoints_per_tree, cloud.begin()+(id+1)*datapoints_per_tree);
@@ -118,7 +114,16 @@ int main()
     vector<int> dimensions = {1,2,3};
    
     //get_size_of_tree from cuda_device --> #datapoints per thread.. = datapoints per tree
-    int datapoints_per_tree = 20;
+    //
+    
+    //TODO: datapoints_per_tree must me calculated:
+    //they must be less than max threads per block, because of extra empty nodes.
+    //???: will it be one tree per warp or per block?
+    int warp_size = = max_threads;
+    
+    
+    //formula: 2^(floor(log_2(64)+1))-1 is always max when one less than warp_size
+    int datapoints_per_tree = warp_size-1;
     
     int threads = cloud.size()/datapoints_per_tree;
     vector<vector<Point<num_t>>> trees = make_forest<num_t>(cloud, dimensions, datapoints_per_tree, threads);
@@ -127,7 +132,6 @@ int main()
     for(int i = 0; i< trees.size(); i++){
         print_Pointvector(trees[i]);
     }
-    
     
     for(int i = 0; i < threads; i++){
         SimpleKDtree<num_t> *bst = new SimpleKDtree<num_t>(dimensions);

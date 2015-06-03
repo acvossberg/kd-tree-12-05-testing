@@ -9,7 +9,7 @@
 #include <iostream>
 #include <algorithm>
 #include <cmath>
-#include "KD_tree.h"
+#include "KD_tree.hpp"
 
 using namespace std;
 
@@ -87,9 +87,9 @@ void KD_tree<T>::original_order_median(int median_position, int d, int left, int
         while(get_value(d, data[leftIt]) != median_value){ leftIt++;}
         
         if(leftIt < med_left){
-            cout << "watch out - left-med switched " << leftIt << " " << med_left << endl;
+            //cout << "watch out - left-med switched " << leftIt << " " << med_left << endl;
     
-        swap(data[leftIt], data[med_left]);}
+            swap(data[leftIt], data[med_left]);}
     }
     
     if(med_right == rightIt) med_right++;
@@ -100,7 +100,7 @@ void KD_tree<T>::original_order_median(int median_position, int d, int left, int
         while(get_value(d, data[rightIt]) != median_value){ rightIt--;}
         
         if(med_right < rightIt){
-            cout << "watch out - right-med switched " << rightIt << " " << med_right << endl;
+            //cout << "watch out - right-med switched " << rightIt << " " << med_right << endl;
             swap(data[rightIt], data[med_right]);
         }
     }

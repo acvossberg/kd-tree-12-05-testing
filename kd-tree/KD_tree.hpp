@@ -10,7 +10,8 @@
 #define __kd_tree_08_05__KD_tree__
 
 #include <stdio.h>
-#include "sorter.h"
+#include "sorter.hpp"
+#include <vector>
 
 using namespace std;
 

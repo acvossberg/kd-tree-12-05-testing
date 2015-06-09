@@ -102,8 +102,8 @@ vector<int> inBox(Point<num_t> start, Point<num_t> end, vector<vector<Point<num_
     //achtung! letzter trees ist evtl. kleiner und nicht 32...
     for(int i=0; i<trees.size(); i++){
         for(int j = 0; j< trees[i].size();j++){
-            //do nothing
-            if( ((trees[i][j].x <= start.x && trees[i][j].x >= end.x) || (end.x == 0 && start.x == 0))  && ((trees[i][j].y <= start.y && trees[i][j].y >= end.y) || (end.y == 0 && start.y == 0)) && ((trees[i][j].z <= start.z && trees[i][j].z >= end.z) || (end.z == 0 && start.z == 0))){
+            
+            if( ((trees[i][j].x >= start.x && trees[i][j].x <= end.x) || (end.x == 0 && start.x == 0))  && ((trees[i][j].y >= start.y && trees[i][j].y <= end.y) || (end.y == 0 && start.y == 0)) && ((trees[i][j].z >= start.z && trees[i][j].z <= end.z) || (end.z == 0 && start.z == 0))){
                 result.push_back(trees[i][j].ID);
             }
         
@@ -190,8 +190,8 @@ int main()
     
     //print
     /*for(int i = 0; i< trees.size(); i++){
-     print_Pointvector(trees[i]);
-     }*/
+        print_Pointvector(trees[i]);
+    }*/
     
     bool correctTree=true;
     for(int i = 0; i < threads; i++){
@@ -223,8 +223,8 @@ int main()
     //dimensions in x: 2-4 testweise
     //set all other dimensions to zero, if not used:
     box_start.x = box_start.y = box_start.z = box_end.x = box_end.y = box_end.z = 0;
-    box_start.x = 2;
-    box_end.x = 4;
+    box_start.x = 0;
+    box_end.x = 10;
     
     
     cout << box_start.x << " " << box_start.y << " " << box_start.z << endl;
@@ -232,9 +232,10 @@ int main()
     
     //search forest for points inside box_dimensions
     vector<int> result = inBox(box_start, box_end, trees);
-    for(int i = 0; i< result.size(); i++){
+    cout << "inBox are:\n " << endl;
+    /*for(int i = 0; i< result.size(); i++){
         cout << result[i] << "\n" << endl;
-    }
+    }*/
     
     
     

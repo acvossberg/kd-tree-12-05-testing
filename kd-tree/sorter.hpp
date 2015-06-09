@@ -41,4 +41,6 @@ public:
         }
     }
 };
+
+
 #endif /* defined(__kd_tree_12_05__sorter__) */

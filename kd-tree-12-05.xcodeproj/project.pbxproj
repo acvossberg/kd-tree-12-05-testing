@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		0C3FD0FB1B023952005723A6 /* simple_kd_tree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0C3FD0F91B023952005723A6 /* simple_kd_tree.cpp */; };
-		0C5FBF771B1F160A00EF70D6 /* cudamain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0C5FBF761B1F160A00EF70D6 /* cudamain.cpp */; };
 		0C85BB421AFCF24B000ED8F2 /* KD_tree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0C85BB401AFCF24B000ED8F2 /* KD_tree.cpp */; };
 		0CCAFD871B0209A300D86F0A /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0CCAFD861B0209A300D86F0A /* main.cpp */; };
 /* End PBXBuildFile section */
@@ -27,13 +26,13 @@
 
 /* Begin PBXFileReference section */
 		0C3FD0F91B023952005723A6 /* simple_kd_tree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = simple_kd_tree.cpp; sourceTree = "<group>"; };
-		0C3FD0FA1B023952005723A6 /* simple_kd_tree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = simple_kd_tree.h; sourceTree = "<group>"; };
-		0C5FBF761B1F160A00EF70D6 /* cudamain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = cudamain.cpp; path = "kd-tree/cudamain.cpp"; sourceTree = "<group>"; };
+		0C5FBF781B26C94900EF70D6 /* InsideBox.cu */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = InsideBox.cu; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.opencl; };
+		0C5FBF791B26C94900EF70D6 /* KD_tree.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = KD_tree.hpp; sourceTree = "<group>"; };
+		0C5FBF7A1B26C94900EF70D6 /* simple_kd_tree.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = simple_kd_tree.hpp; sourceTree = "<group>"; };
+		0C5FBF7B1B26C94900EF70D6 /* sorter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = sorter.hpp; sourceTree = "<group>"; };
 		0C85BB321AFA790C000ED8F2 /* kd-tree-08-05 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "kd-tree-08-05"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0C85BB401AFCF24B000ED8F2 /* KD_tree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = KD_tree.cpp; sourceTree = "<group>"; };
-		0C85BB411AFCF24B000ED8F2 /* KD_tree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KD_tree.h; sourceTree = "<group>"; };
-		0CCAFD861B0209A300D86F0A /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = "kd-tree/main.cpp"; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.opencl; };
-		0CD00ECC1B1CA0BF003E3864 /* sorter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sorter.h; sourceTree = "<group>"; };
+		0CCAFD861B0209A300D86F0A /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = "kd-tree/main.cpp"; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -50,7 +49,6 @@
 		0C85BB291AFA790C000ED8F2 = {
 			isa = PBXGroup;
 			children = (
-				0C5FBF761B1F160A00EF70D6 /* cudamain.cpp */,
 				0CCAFD861B0209A300D86F0A /* main.cpp */,
 				0C85BB341AFA790C000ED8F2 /* kd-tree */,
 				0C85BB331AFA790C000ED8F2 /* Products */,
@@ -68,11 +66,12 @@
 		0C85BB341AFA790C000ED8F2 /* kd-tree */ = {
 			isa = PBXGroup;
 			children = (
+				0C5FBF781B26C94900EF70D6 /* InsideBox.cu */,
+				0C5FBF791B26C94900EF70D6 /* KD_tree.hpp */,
+				0C5FBF7A1B26C94900EF70D6 /* simple_kd_tree.hpp */,
+				0C5FBF7B1B26C94900EF70D6 /* sorter.hpp */,
 				0C3FD0F91B023952005723A6 /* simple_kd_tree.cpp */,
-				0C3FD0FA1B023952005723A6 /* simple_kd_tree.h */,
 				0C85BB401AFCF24B000ED8F2 /* KD_tree.cpp */,
-				0CD00ECC1B1CA0BF003E3864 /* sorter.h */,
-				0C85BB411AFCF24B000ED8F2 /* KD_tree.h */,
 			);
 			path = "kd-tree";
 			sourceTree = "<group>";
@@ -134,7 +133,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				0CCAFD871B0209A300D86F0A /* main.cpp in Sources */,
-				0C5FBF771B1F160A00EF70D6 /* cudamain.cpp in Sources */,
 				0C3FD0FB1B023952005723A6 /* simple_kd_tree.cpp in Sources */,
 				0C85BB421AFCF24B000ED8F2 /* KD_tree.cpp in Sources */,
 			);

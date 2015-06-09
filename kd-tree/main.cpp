@@ -8,14 +8,17 @@
 
 #include <stdio.h>
 #include <vector>
-#include "KD_tree.h"
+#include "KD_tree.hpp"
 #include "KD_tree.cpp"
-#include "simple_kd_tree.h"
+#include "simple_kd_tree.hpp"
 #include "simple_kd_tree.cpp"
+#include "cuda_runtime.h"
+#include "cuda.h"
 #include <iostream>
 #include <algorithm>
 #include <cmath>
 #include <future>
+#define MYDEVICE 0
 
 using namespace std;
 
@@ -31,18 +34,18 @@ void generateRandomPointCloud( vector<Point<num_t>> &point, const size_t N, cons
         point[i].y = max_range * (rand() % 1000) / num_t(1000);
         point[i].z = max_range * (rand() % 1000) / num_t(1000);
         point[i].ID = i;
-        cout << point[i].x << ", " << point[i].y << ", " << point[i].z << " ID: " << point[i].ID << endl;
-
+        //cout << point[i].x << ", " << point[i].y << ", " << point[i].z << " ID: " << point[i].ID << endl;
+        
     }
     std::cout << "done\n \n";
 }
 
 template <typename num_t>
 bool test(vector<Point<num_t>> treevector, SimpleKDtree<num_t>* Tsimple){
-    cout << "testing ..." << endl;
+    //cout << "testing ..." << endl;
     
     if(Tsimple->sameTree(treevector, 1)){
-        cout << "yay! trees are the same" << endl;
+        //cout << "yay! trees are the same" << endl;
         return true;
     }
     else{
@@ -61,7 +64,7 @@ void print_Pointvector(vector<Point<num_t>> a){
 
 template <typename num_t>
 void make_reference_tree(vector<Point<num_t>> cloud, vector<int> dimensions, vector<vector<Point<num_t>>> &trees, int Id){
-
+    
 }
 
 template <typename num_t>
@@ -82,6 +85,7 @@ vector<vector<Point<num_t>>> make_forest(vector<Point<num_t>> &cloud,vector<int>
         
         vector<Point<num_t>> threadcloud(cloud.begin()+id*datapoints_per_tree, cloud.begin()+(id+1)*datapoints_per_tree);
         futures.push_back(std::async(launch::async, make_tree<num_t>, threadcloud, dimensions, std::ref(trees), id));
+        
     }
     
     for(auto &e : futures) {
@@ -90,6 +94,53 @@ vector<vector<Point<num_t>>> make_forest(vector<Point<num_t>> &cloud,vector<int>
     
     return trees;
 }
+
+template <typename num_t>
+vector<int> inBox(Point<num_t> start, Point<num_t> end, vector<vector<Point<num_t>>> &trees ){
+    vector<int> result;
+    
+    //achtung! letzter trees ist evtl. kleiner und nicht 32...
+    for(int i=0; i<trees.size(); i++){
+        for(int j = 0; j< trees[i].size();j++){
+            //do nothing
+            if( ((trees[i][j].x <= start.x && trees[i][j].x >= end.x) || (end.x == 0 && start.x == 0))  && ((trees[i][j].y <= start.y && trees[i][j].y >= end.y) || (end.y == 0 && start.y == 0)) && ((trees[i][j].z <= start.z && trees[i][j].z >= end.z) || (end.z == 0 && start.z == 0))){
+                result.push_back(trees[i][j].ID);
+            }
+        
+        }
+    
+    }
+    return result;
+}
+
+void printDevProp(cudaDeviceProp devProp)
+{
+    //http://www.cs.fsu.edu/~xyuan/cda5125/examples/lect24/devicequery.cu
+    printf("Major revision number:         %d\n",  devProp.major);
+    printf("Minor revision number:         %d\n",  devProp.minor);
+    printf("Name:                          %s\n",  devProp.name);
+    printf("Total global memory:           %u\n",  devProp.totalGlobalMem);
+    printf("Total shared memory per block: %u\n",  devProp.sharedMemPerBlock);
+    printf("Total registers per block:     %d\n",  devProp.regsPerBlock);
+    printf("Warp size:                     %d\n",  devProp.warpSize);
+    printf("Maximum memory pitch:          %u\n",  devProp.memPitch);
+    printf("Maximum threads per block:     %d\n",  devProp.maxThreadsPerBlock);
+    for (int i = 0; i < 3; ++i)
+        printf("Maximum dimension %d of block:  %d\n", i, devProp.maxThreadsDim[i]);
+    for (int i = 0; i < 3; ++i)
+        printf("Maximum dimension %d of grid:   %d\n", i, devProp.maxGridSize[i]);
+    printf("Clock rate:                    %d\n",  devProp.clockRate);
+    printf("Total constant memory:         %u\n",  devProp.totalConstMem);
+    printf("Texture alignment:             %u\n",  devProp.textureAlignment);
+    printf("Concurrent copy and execution: %s\n",  (devProp.deviceOverlap ? "Yes" : "No"));
+    printf("Number of multiprocessors:     %d\n",  devProp.multiProcessorCount);
+    printf("Kernel execution timeout:      %s\n",  (devProp.kernelExecTimeoutEnabled ? "Yes" : "No"));
+    
+    return;
+}
+
+
+
 
 int main()
 {
@@ -112,35 +163,84 @@ int main()
     
     //must be defined {1, 2, 3} = {x, y, z}
     vector<int> dimensions = {1,2,3};
-   
+    
     //get_size_of_tree from cuda_device --> #datapoints per thread.. = datapoints per tree
-    //
+    int device;
+    cudaGetDevice(&device);
+    std::cout<< "devices are: " << device << endl;
+    
+    cudaDeviceProp devProp;
+    cudaGetDeviceProperties(&devProp, device);
+    printDevProp(devProp);
+    int max_threads = devProp.warpSize;
+    //TODO: here calculate #nodes need
+    
+    cout << "number of warps " << max_threads << endl;
+    
+    int warp_size = max_threads;
     
     //TODO: datapoints_per_tree must me calculated:
     //they must be less than max threads per block, because of extra empty nodes.
     //???: will it be one tree per warp or per block?
-    int warp_size = = max_threads;
-    
-    
     //formula: 2^(floor(log_2(64)+1))-1 is always max when one less than warp_size
     int datapoints_per_tree = warp_size-1;
     
     int threads = cloud.size()/datapoints_per_tree;
     vector<vector<Point<num_t>>> trees = make_forest<num_t>(cloud, dimensions, datapoints_per_tree, threads);
-
-    //print
-    for(int i = 0; i< trees.size(); i++){
-        print_Pointvector(trees[i]);
-    }
     
+    //print
+    /*for(int i = 0; i< trees.size(); i++){
+     print_Pointvector(trees[i]);
+     }*/
+    
+    bool correctTree=true;
     for(int i = 0; i < threads; i++){
         SimpleKDtree<num_t> *bst = new SimpleKDtree<num_t>(dimensions);
         vector<Point<num_t>> threadcloud (cloud.begin()+i*datapoints_per_tree, cloud.begin()+(i+1)*datapoints_per_tree);
         bst->make_SimpleKDtree(threadcloud, 0, threadcloud.size()-1, 0);
-        cout << test(trees[i], bst) << endl;
+        correctTree = correctTree && test(trees[i], bst);
         delete bst;
     }
+    if(correctTree){cout << "\nAll tree's are correct" << endl; }
+    vector<vector<Point<num_t>>> *trees_pointer;
+    int size_of_forest = sizeof(int)*trees.size()*trees[0].size();
+    
+    
+    //TODO:allocate memory
+    cudaMalloc((void**) &trees_pointer, size_of_forest);
+    
+    
+    //TODO:send trees to gpu
+    cudaMemcpy(trees_pointer, &trees, size_of_forest, cudaMemcpyHostToDevice);
+    //here we have to split the forest? - split on GPU?
+    
+    //TODO:kernel, s.d. jeder einzelne thread checkt, ob in box - box-dimensionen gegeben -
+    //gibt zurück ein array mit punkten, die in box (coordinaten? ID's? .. )
+    //main.cpp -> main.cu und andere compilation von c++11 zeug muss ausgelagert werden
+    
+    Point<num_t> box_start;
+    Point<num_t> box_end;
+    //dimensions in x: 2-4 testweise
+    //set all other dimensions to zero, if not used:
+    box_start.x = box_start.y = box_start.z = box_end.x = box_end.y = box_end.z = 0;
+    box_start.x = 2;
+    box_end.x = 4;
+    
+    
+    cout << box_start.x << " " << box_start.y << " " << box_start.z << endl;
+    cout << box_end.x << " " << box_end.y << " " << box_end.z << endl;
+    
+    //search forest for points inside box_dimensions
+    vector<int> result = inBox(box_start, box_end, trees);
+    for(int i = 0; i< result.size(); i++){
+        cout << result[i] << "\n" << endl;
+    }
+    
+    
+    
+    
+    
     cloud.clear();
-
+    
     return 0;
 }

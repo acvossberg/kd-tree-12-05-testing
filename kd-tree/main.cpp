@@ -18,6 +18,8 @@
 #include <algorithm>
 #include <cmath>
 #include <future>
+#include "test.hpp"
+
 #define MYDEVICE 0
 
 using namespace std;
@@ -159,7 +161,8 @@ int main()
     vector<Point<num_t>> cloud;
     
     // Generate points:
-    generateRandomPointCloud(cloud, 1000);
+    int numberOfHits = 1000;
+    generateRandomPointCloud(cloud, numberOfHits);
     
     //must be defined {1, 2, 3} = {x, y, z}
     vector<int> dimensions = {1,2,3};
@@ -205,11 +208,6 @@ int main()
     if(correctTree){cout << "\nAll tree's are correct" << endl; }
     
     
-    
-    //-------start with CUDA----------------------------
-    vector<vector<Point<num_t>>> *trees_pointer;
-    int size_of_forest = sizeof(int)*trees.size()*trees[0].size();
-    
     //make trees into array (instead vector<vector< >> and copy this array over
     //TODO: should be done while making trees and not converted afterwards
     
@@ -233,15 +231,7 @@ int main()
     for(int i = 0; i < 992; i++){
         cout << treeArray_x[i] << endl;
     }
-    //allocate memory
-    cudaMalloc((void**) &trees_pointer, size_of_forest);
-    
-    
-    //send trees to gpu
-    cudaMemcpy(trees_pointer, &trees, size_of_forest, cudaMemcpyHostToDevice);
-    //here we have to split the forest? - split on GPU?
-    
-    //make box
+    //make box, in which should be searched for hits
     //set all other dimensions to zero, if not used:
     Point<num_t> box_start;
     Point<num_t> box_end;
@@ -252,6 +242,40 @@ int main()
     
     cout << box_start.x << " " << box_start.y << " " << box_start.z << endl;
     cout << box_end.x << " " << box_end.y << " " << box_end.z << endl;
+    
+    
+    
+    
+    
+    
+    //-------start with CUDA----------------------------
+    num_t *d_treeArray_x;
+    num_t *d_treeArray_y;
+    num_t *d_treeArray_z;
+    int *d_treeArray_ID;
+    int size_of_forest = sizeof(num_t)*trees.size()*trees[0].size();
+    
+    
+    //allocate memory
+    cudaMalloc(&d_treeArray_x, size_of_forest);
+    cudaMalloc(&d_treeArray_y, size_of_forest);
+    cudaMalloc(&d_treeArray_z, size_of_forest);
+    cudaMalloc(&d_treeArray_ID, size_of_forest);
+
+    //send trees to gpu
+    cudaMemcpy(d_treeArray_x, treeArray_x, size_of_forest, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_treeArray_y, treeArray_y, size_of_forest, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_treeArray_z, treeArray_z, size_of_forest, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_treeArray_ID, treeArray_ID, size_of_forest, cudaMemcpyHostToDevice);
+    //here we have to split the forest? - split on GPU?
+    
+    
+    //allocate host and device memory for results - ID's of hits/datapoints inside box
+    num_t* h_result;
+    num_t* d_result;
+    size_t resultSize = numberOfHits*sizeof(num_t);
+    h_result = (num_t *) malloc(resultSize);
+    cudaMalloc((void **)&d_result, resultSize);
     
     
     //TODO:kernel, s.d. jeder einzelne thread checkt, ob in box - box-dimensionen gegeben -
@@ -265,8 +289,9 @@ int main()
         cout << result[i] << "\n" << endl;
     }*/
     
+    //-------------------test mit vorhandenem .cu-file--------------------------
     
-    
+    test();
     
     
     cloud.clear();

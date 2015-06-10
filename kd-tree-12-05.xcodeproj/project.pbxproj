@@ -30,6 +30,8 @@
 		0C5FBF791B26C94900EF70D6 /* KD_tree.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = KD_tree.hpp; sourceTree = "<group>"; };
 		0C5FBF7A1B26C94900EF70D6 /* simple_kd_tree.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = simple_kd_tree.hpp; sourceTree = "<group>"; };
 		0C5FBF7B1B26C94900EF70D6 /* sorter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = sorter.hpp; sourceTree = "<group>"; };
+		0C5FBF7C1B283BB500EF70D6 /* test.cu */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test.cu; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.opencl; };
+		0C5FBF7D1B283BB500EF70D6 /* test.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = test.hpp; sourceTree = "<group>"; };
 		0C85BB321AFA790C000ED8F2 /* kd-tree-08-05 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "kd-tree-08-05"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0C85BB401AFCF24B000ED8F2 /* KD_tree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = KD_tree.cpp; sourceTree = "<group>"; };
 		0CCAFD861B0209A300D86F0A /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = "kd-tree/main.cpp"; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
@@ -72,6 +74,8 @@
 				0C5FBF7B1B26C94900EF70D6 /* sorter.hpp */,
 				0C3FD0F91B023952005723A6 /* simple_kd_tree.cpp */,
 				0C85BB401AFCF24B000ED8F2 /* KD_tree.cpp */,
+				0C5FBF7C1B283BB500EF70D6 /* test.cu */,
+				0C5FBF7D1B283BB500EF70D6 /* test.hpp */,
 			);
 			path = "kd-tree";
 			sourceTree = "<group>";

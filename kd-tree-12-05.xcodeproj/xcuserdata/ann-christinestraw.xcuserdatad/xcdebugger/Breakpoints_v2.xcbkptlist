@@ -555,7 +555,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "144"
             endingLineNumber = "144"
-            landmarkName = "inBox(vector&lt;Point&lt;num_t&gt;&gt; start, vector&lt;Point&lt;num_t&gt;&gt; end, vector&lt;vector&lt;Point&lt;num_t&gt;&gt;&gt; trees )"
+            landmarkName = "main()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -811,7 +811,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "139"
             endingLineNumber = "139"
-            landmarkName = "inBox(vector&lt;Point&lt;num_t&gt;&gt; start, vector&lt;Point&lt;num_t&gt;&gt; end, vector&lt;vector&lt;Point&lt;num_t&gt;&gt;&gt; trees )"
+            landmarkName = "main()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

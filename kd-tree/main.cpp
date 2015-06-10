@@ -193,6 +193,7 @@ int main()
         print_Pointvector(trees[i]);
     }*/
     
+    //TODO: hier fehler!!! nicht alle datapoints werden benützt - einige gehen verloren!
     bool correctTree=true;
     for(int i = 0; i < threads; i++){
         SimpleKDtree<num_t> *bst = new SimpleKDtree<num_t>(dimensions);
@@ -202,26 +203,48 @@ int main()
         delete bst;
     }
     if(correctTree){cout << "\nAll tree's are correct" << endl; }
+    
+    
+    
+    //-------start with CUDA----------------------------
     vector<vector<Point<num_t>>> *trees_pointer;
     int size_of_forest = sizeof(int)*trees.size()*trees[0].size();
     
+    //make trees into array (instead vector<vector< >> and copy this array over
+    //TODO: should be done while making trees and not converted afterwards
     
-    //TODO:allocate memory
+    int* treeArray_x = new int[trees.size()*trees[0].size()];
+    int* treeArray_y = new int[trees.size()*trees[0].size()];
+    int* treeArray_z = new int[trees.size()*trees[0].size()];
+    int* treeArray_ID = new int[trees.size()*trees[0].size()];
+    
+    //cout << " number of trees " << trees.size() << endl;
+    for(int i=0; i< trees.size() ; i++){
+        //cout << "size of trees: " << trees[i].size() << endl;
+        for(int j = 0; j < trees[i].size(); j++){
+            treeArray_x[i*trees[i].size()+j] = trees[i][j].x;
+            treeArray_y[i*trees[i].size()+j] = trees[i][j].y;
+            treeArray_z[i*trees[i].size()+j] = trees[i][j].z;
+            treeArray_ID[i*trees[i].size()+j] = trees[i][j].ID;
+        }
+    }
+    
+    //check array: - wieder weg!
+    for(int i = 0; i < 992; i++){
+        cout << treeArray_x[i] << endl;
+    }
+    //allocate memory
     cudaMalloc((void**) &trees_pointer, size_of_forest);
     
     
-    //TODO:send trees to gpu
+    //send trees to gpu
     cudaMemcpy(trees_pointer, &trees, size_of_forest, cudaMemcpyHostToDevice);
     //here we have to split the forest? - split on GPU?
     
-    //TODO:kernel, s.d. jeder einzelne thread checkt, ob in box - box-dimensionen gegeben -
-    //gibt zurück ein array mit punkten, die in box (coordinaten? ID's? .. )
-    //main.cpp -> main.cu und andere compilation von c++11 zeug muss ausgelagert werden
-    
+    //make box
+    //set all other dimensions to zero, if not used:
     Point<num_t> box_start;
     Point<num_t> box_end;
-    //dimensions in x: 2-4 testweise
-    //set all other dimensions to zero, if not used:
     box_start.x = box_start.y = box_start.z = box_end.x = box_end.y = box_end.z = 0;
     box_start.x = 0;
     box_end.x = 10;
@@ -230,10 +253,15 @@ int main()
     cout << box_start.x << " " << box_start.y << " " << box_start.z << endl;
     cout << box_end.x << " " << box_end.y << " " << box_end.z << endl;
     
+    
+    //TODO:kernel, s.d. jeder einzelne thread checkt, ob in box - box-dimensionen gegeben -
+    //gibt zurück ein array mit punkten, die in box (coordinaten? ID's? .. )
+    //main.cpp -> main.cu und andere compilation von c++11 zeug muss ausgelagert werden
     //search forest for points inside box_dimensions
+    
     vector<int> result = inBox(box_start, box_end, trees);
-    cout << "inBox are:\n " << endl;
-    /*for(int i = 0; i< result.size(); i++){
+    /*cout << "inBox are:\n " << endl;
+    for(int i = 0; i< result.size(); i++){
         cout << result[i] << "\n" << endl;
     }*/
     

@@ -24,8 +24,6 @@ void checkCUDAError(const char *msg);
 __global__
 void insideBox( int *treeArray_x, int *treeArray_y, int *treeArray_z, int *treeArray_ID, int *box)
 {
-    //braucht kein d_result.
-    //Kann in treeArray_ID returned werden -1, wenn nicht insideBox
     int warpSize = 32;
     int warpIdx = threadIdx.x / warpSize;
     int i = warpIdx;

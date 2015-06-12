@@ -232,71 +232,13 @@ int main()
     int size_of_forest = sizeof(int)*trees.size()*trees[0].size();
     
     //check array: - wieder weg!
-    for(int i = 0; i < 992; i++){
+    /*for(int i = 0; i < 992; i++){
         cout << treeArray_x[i] << endl;
-    }
+    }*/
     //make box, in which should be searched for hits
     //set all other dimensions to zero, if not used:
-    Point<num_t> box_start;
-    Point<num_t> box_end;
-    box_start.x = box_start.y = box_start.z = box_end.x = box_end.y = box_end.z = 0;
-    box_start.x = 0;
-    box_end.x = 10;
-    
-    
-    cout << box_start.x << " " << box_start.y << " " << box_start.z << endl;
-    cout << box_end.x << " " << box_end.y << " " << box_end.z << endl;
-    //x_start, x_end, y_start, y_end, z_start, z_end
     num_t box[6] = {2, 8, 0, 0, 0, 0};
-    
-    
-    
-    
-    
-    //-------start with CUDA----------------------------
-    /*num_t *d_treeArray_x;
-    num_t *d_treeArray_y;
-    num_t *d_treeArray_z;
-    int *d_treeArray_ID;
-    int size_of_forest = sizeof(num_t)*trees.size()*trees[0].size();
-    
-    
-    //allocate memory
-    cudaMalloc(&d_treeArray_x, size_of_forest);
-    cudaMalloc(&d_treeArray_y, size_of_forest);
-    cudaMalloc(&d_treeArray_z, size_of_forest);
-    cudaMalloc(&d_treeArray_ID, size_of_forest);
-
-    //send trees to gpu
-    cudaMemcpy(d_treeArray_x, treeArray_x, size_of_forest, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_treeArray_y, treeArray_y, size_of_forest, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_treeArray_z, treeArray_z, size_of_forest, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_treeArray_ID, treeArray_ID, size_of_forest, cudaMemcpyHostToDevice);
-    //here we have to split the forest? - split on GPU?
-    
-    
-    //allocate host and device memory for results - ID's of hits/datapoints inside box
-    num_t* h_result;
-    num_t* d_result;
-    size_t resultSize = numberOfHits*sizeof(num_t);
-    h_result = (num_t *) malloc(resultSize);
-    cudaMalloc((void **)&d_result, resultSize);
-    
-    
-    //TODO:kernel, s.d. jeder einzelne thread checkt, ob in box - box-dimensionen gegeben -
-    //gibt zurück ein array mit punkten, die in box (coordinaten? ID's? .. )
-    //main.cpp -> main.cu und andere compilation von c++11 zeug muss ausgelagert werden
-    //search forest for points inside box_dimensions
-    
-    vector<int> result = inBox(box_start, box_end, trees);
-    /*cout << "inBox are:\n " << endl;
-    for(int i = 0; i< result.size(); i++){
-        cout << result[i] << "\n" << endl;
-    }*/
-    
-    //-------------------test mit vorhandenem .cu-file--------------------------
-    
-    //test();-- hat funktioniert
+        
     cudaMain(trees.size(), trees[0].size(), treeArray_x, treeArray_y, treeArray_z, treeArray_ID, box);
     
     cloud.clear();

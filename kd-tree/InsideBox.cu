@@ -7,6 +7,8 @@
 //
 
 #include <stdio.h>
+#include <iostream>
+#include "cuPrintf.cu"
 #include "InsideBox.hpp"
 
 
@@ -31,11 +33,18 @@ void insideBox( int *treeArray_x, int *treeArray_y, int *treeArray_z, int *treeA
     int treeSize = warpSize-1;
     int index = i*treeSize+j;
     
+    //box wird korrekt übergeben
+    //printf("box start %d", box[0]);
+    //printf("box end %d", box[1]);
+    
+    
+    //TODO: ERROR!!!! kommt gar nie in "else".. ODER?
     if( ((treeArray_x[index] >= box[0] && treeArray_x[index] <= box[1]) || (box[0] == 0 && box[1] == 0))  && ((treeArray_y[index] >= box[2] && treeArray_y[index] <= box[3]) || (box[2] == 0 && box[3] == 0)) && ((treeArray_z[index] >= box[4] && treeArray_z[index] <= box[5]) || (box[4] == 0 && box[5] == 0))){
         //inside box
         
     }
-    else{
+        else{
+            printf("not inside box");
         treeArray_ID[index] = -1;
     }
 }
@@ -43,7 +52,8 @@ void insideBox( int *treeArray_x, int *treeArray_y, int *treeArray_z, int *treeA
 void cudaMain(int number_of_trees, int tree_size, int treeArray_x[], int treeArray_y[], int treeArray_z[], int treeArray_ID[], int box[]){
     
     cudaSetDevice(MYDEVICE);
-    
+    std::cout << "number of trees: " << number_of_trees << std::endl;
+    std::cout << "tree size: " << tree_size << std::endl;
     
     //TODO: int ----> num_t
     int size_of_forest = number_of_trees*tree_size*sizeof(int);
@@ -77,7 +87,10 @@ void cudaMain(int number_of_trees, int tree_size, int treeArray_x[], int treeArr
     //main.cpp -> main.cu und andere compilation von c++11 zeug muss ausgelagert werden
     //search forest for points inside box_dimensions
     
-    insideBox<<<1,1>>>(d_treeArray_x, d_treeArray_y, d_treeArray_z, d_treeArray_ID, d_box);
+    insideBox<<<1,1024>>>(d_treeArray_x, d_treeArray_y, d_treeArray_z, d_treeArray_ID, d_box);
+    cudaError_t err = cudaGetLastError();
+    if (err != cudaSuccess)
+        printf("Error: %s\n", cudaGetErrorString(err));
     
     //DO NOT NEED - USE treeArray_ID
     //allocate host and device memory for results - ID's of hits/datapoints inside box
@@ -89,8 +102,12 @@ void cudaMain(int number_of_trees, int tree_size, int treeArray_x[], int treeArr
     */
     cudaMemcpy(treeArray_ID, d_treeArray_ID, size_of_forest, cudaMemcpyDeviceToHost);
     
-    //TODO: print out ID's which were in box:
     
+    std::cout << "Size of forest: " << size_of_forest << std::endl;
+    //TODO: print out ID's which were in box:
+    for(int i = 0; i< number_of_trees*tree_size; i++){
+        std::cout << "ID: " << treeArray_ID[i]<< std::endl;
+    }
     
     
     //free space

@@ -554,9 +554,7 @@
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "144"
-            endingLineNumber = "144"
-            landmarkName = "main()"
-            landmarkType = "7">
+            endingLineNumber = "144">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -811,7 +809,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "139"
             endingLineNumber = "139"
-            landmarkName = "main()"
+            landmarkName = "printDevProp(cudaDeviceProp devProp)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

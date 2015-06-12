@@ -18,7 +18,8 @@
 #include <algorithm>
 #include <cmath>
 #include <future>
-#include "test.hpp"
+//#include "test.hpp"
+#include "InsideBox.hpp"
 
 #define MYDEVICE 0
 
@@ -216,16 +217,19 @@ int main()
     int* treeArray_z = new int[trees.size()*trees[0].size()];
     int* treeArray_ID = new int[trees.size()*trees[0].size()];
     
+    
     //cout << " number of trees " << trees.size() << endl;
     for(int i=0; i< trees.size() ; i++){
-        //cout << "size of trees: " << trees[i].size() << endl;
+        //cout << "size of tree: at " << i << " is " << trees[i].size() << endl;
         for(int j = 0; j < trees[i].size(); j++){
+            //TODO: stimmt das trees[i].size() ? müsste nicht trees[0]? trees[i].size() = #nodes dieses trees i. #nodes müssten für jeden tree gleich sein!!!
             treeArray_x[i*trees[i].size()+j] = trees[i][j].x;
             treeArray_y[i*trees[i].size()+j] = trees[i][j].y;
             treeArray_z[i*trees[i].size()+j] = trees[i][j].z;
             treeArray_ID[i*trees[i].size()+j] = trees[i][j].ID;
         }
     }
+    int size_of_forest = sizeof(int)*trees.size()*trees[0].size();
     
     //check array: - wieder weg!
     for(int i = 0; i < 992; i++){
@@ -242,14 +246,15 @@ int main()
     
     cout << box_start.x << " " << box_start.y << " " << box_start.z << endl;
     cout << box_end.x << " " << box_end.y << " " << box_end.z << endl;
-    
+    //x_start, x_end, y_start, y_end, z_start, z_end
+    num_t box[6] = {2, 8, 0, 0, 0, 0};
     
     
     
     
     
     //-------start with CUDA----------------------------
-    num_t *d_treeArray_x;
+    /*num_t *d_treeArray_x;
     num_t *d_treeArray_y;
     num_t *d_treeArray_z;
     int *d_treeArray_ID;
@@ -291,8 +296,8 @@ int main()
     
     //-------------------test mit vorhandenem .cu-file--------------------------
     
-    test();
-    
+    //test();-- hat funktioniert
+    cudaMain(trees.size(), trees[0].size(), treeArray_x, treeArray_y, treeArray_z, treeArray_ID, box);
     
     cloud.clear();
     

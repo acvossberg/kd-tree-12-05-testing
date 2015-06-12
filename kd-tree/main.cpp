@@ -85,7 +85,11 @@ vector<vector<Point<num_t>>> make_forest(vector<Point<num_t>> &cloud,vector<int>
     for(int id = 0; id < nthreads; ++id){
         //TODO: auch aufsplitten - das kann jeder thread selbst tun
         //TODO: maybe way to use part of vector without copying
-        
+        if(id == nthreads-1){
+            cout << "i " << id << " - jetzt datapoints_per_tree verkleinern - letzter tree" << endl;
+            cout << "remaining points: 1000 - datapoints_pertree*i " << cloud.size() -  datapoints_per_tree*id << endl;
+            datapoints_per_tree = cloud.size() -  datapoints_per_tree*id;
+        }
         vector<Point<num_t>> threadcloud(cloud.begin()+id*datapoints_per_tree, cloud.begin()+(id+1)*datapoints_per_tree);
         futures.push_back(std::async(launch::async, make_tree<num_t>, threadcloud, dimensions, std::ref(trees), id));
         
@@ -154,7 +158,7 @@ int main()
     //: test for 3D -> DONE
     //: test for larger - random trees. -> DONE
     //: test for double/float -> DONE
-    //TODO: free kd_tree.. ?
+    //: free kd_tree.. ?
     
     //type to use:
     typedef int num_t;
@@ -183,24 +187,39 @@ int main()
     
     int warp_size = max_threads;
     
+    
     //TODO: datapoints_per_tree must me calculated:
     //they must be less than max threads per block, because of extra empty nodes.
     //???: will it be one tree per warp or per block?
     //formula: 2^(floor(log_2(64)+1))-1 is always max when one less than warp_size
     int datapoints_per_tree = warp_size-1;
+    cout << "datapoints_per_tree: " << datapoints_per_tree << endl;
     
-    int threads = cloud.size()/datapoints_per_tree;
+    
+    //rounding up: q = (x + y - 1) / y;
+    int threads = (numberOfHits+datapoints_per_tree-1)/datapoints_per_tree;
+    //ERROR! fix!
+    //int threads = numberOfHits/datapoints_per_tree;
+    cout << "threads bzw numberOfHits/datapoints_per_tree " << threads << endl;
     vector<vector<Point<num_t>>> trees = make_forest<num_t>(cloud, dimensions, datapoints_per_tree, threads);
     
+    cout << "Number of trees: " << trees.size()<< endl;
+    
     //print
-    /*for(int i = 0; i< trees.size(); i++){
+    for(int i = 0; i< trees.size(); i++){
         print_Pointvector(trees[i]);
-    }*/
+    }
     
     //TODO: hier fehler!!! nicht alle datapoints werden benützt - einige gehen verloren!
     bool correctTree=true;
+    cout << "threadcloud is made for " << 0 << " till "<< threads-1 << endl;
     for(int i = 0; i < threads; i++){
         SimpleKDtree<num_t> *bst = new SimpleKDtree<num_t>(dimensions);
+        if(i == threads-1){
+            cout << "i " << i << " - jetzt datapoints_per_tree verkleinern - letzter tree" << endl;
+            cout << "remaining points: 1000 - datapoints_pertree*i " << numberOfHits-  datapoints_per_tree*i << endl;
+            datapoints_per_tree = numberOfHits-  datapoints_per_tree*i;
+        }
         vector<Point<num_t>> threadcloud (cloud.begin()+i*datapoints_per_tree, cloud.begin()+(i+1)*datapoints_per_tree);
         bst->make_SimpleKDtree(threadcloud, 0, threadcloud.size()-1, 0);
         correctTree = correctTree && test(trees[i], bst);

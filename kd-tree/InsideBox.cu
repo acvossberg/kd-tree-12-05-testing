@@ -8,7 +8,7 @@
 
 #include <stdio.h>
 #include <iostream>
-#include "cuPrintf.cu"
+//#include "cuPrintf.cu" braucht es?
 #include "InsideBox.hpp"
 
 
@@ -44,7 +44,7 @@ void insideBox( int *treeArray_x, int *treeArray_y, int *treeArray_z, int *treeA
         
     }
         else{
-            printf("not inside box");
+            //printf("not inside box");
         treeArray_ID[index] = -1;
     }
 }

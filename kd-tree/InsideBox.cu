@@ -33,12 +33,7 @@ void insideBox( int *treeArray_x, int *treeArray_y, int *treeArray_z, int *treeA
     int treeSize = warpSize-1;
     int index = i*treeSize+j;
     
-    //box wird korrekt übergeben
-    //printf("box start %d", box[0]);
-    //printf("box end %d", box[1]);
     
-    
-    //TODO: ERROR!!!! kommt gar nie in "else".. ODER?
     if( ((treeArray_x[index] >= box[0] && treeArray_x[index] <= box[1]) || (box[0] == 0 && box[1] == 0))  && ((treeArray_y[index] >= box[2] && treeArray_y[index] <= box[3]) || (box[2] == 0 && box[3] == 0)) && ((treeArray_z[index] >= box[4] && treeArray_z[index] <= box[5]) || (box[4] == 0 && box[5] == 0))){
         //inside box
         
@@ -62,7 +57,6 @@ void cudaMain(int number_of_trees, int tree_size, int treeArray_x[], int treeArr
     int *d_treeArray_z;
     int *d_treeArray_ID;
     int *d_box;
-    //int size_of_forest = sizeof(int)*trees.size()*trees[0].size();
     
     
     //allocate memory
@@ -80,31 +74,20 @@ void cudaMain(int number_of_trees, int tree_size, int treeArray_x[], int treeArr
     cudaMemcpy(d_treeArray_ID, treeArray_ID, size_of_forest, cudaMemcpyHostToDevice);
     //TODO: generic
     cudaMemcpy(d_box, box, 6*sizeof(int), cudaMemcpyHostToDevice);
-    //here we have to split the forest? - split on GPU?
     
-    //TODO:kernel, s.d. jeder einzelne thread checkt, ob in box - box-dimensionen gegeben
-    //gibt zurück ein array mit punkten, die in box (coordinaten? ID's? .. )
-    //main.cpp -> main.cu und andere compilation von c++11 zeug muss ausgelagert werden
-    //search forest for points inside box_dimensions
     
+    //search forest for points inside box_dimensions - returns all treeArray_ID's which are inside box - rest are filled with -1
     insideBox<<<1,1024>>>(d_treeArray_x, d_treeArray_y, d_treeArray_z, d_treeArray_ID, d_box);
+    
     cudaError_t err = cudaGetLastError();
     if (err != cudaSuccess)
         printf("Error: %s\n", cudaGetErrorString(err));
     
-    //DO NOT NEED - USE treeArray_ID
-    //allocate host and device memory for results - ID's of hits/datapoints inside box
-    /*int* h_result;
-    int* d_result;
-    size_t resultSize = numberOfHits*sizeof(int);
-    h_result = (int *) malloc(resultSize);
-    cudaMalloc((void **)&d_result, resultSize);
-    */
     cudaMemcpy(treeArray_ID, d_treeArray_ID, size_of_forest, cudaMemcpyDeviceToHost);
     
     
     std::cout << "Size of forest: " << size_of_forest << std::endl;
-    //TODO: print out ID's which were in box:
+    //print out ID's which are in box:
     for(int i = 0; i< number_of_trees*tree_size; i++){
         std::cout << "ID: " << treeArray_ID[i]<< std::endl;
     }
@@ -116,10 +99,5 @@ void cudaMain(int number_of_trees, int tree_size, int treeArray_x[], int treeArr
     cudaFree(d_treeArray_z);
     cudaFree(d_treeArray_ID);
     cudaFree(d_box);
-    /*free(treeArray_x);
-    free(treeArray_y);
-    free(treeArray_z);
-    free(treeArray_ID);
-    free(box);*/
 
 }

@@ -106,7 +106,6 @@ template <typename num_t>
 vector<int> inBox(Point<num_t> start, Point<num_t> end, vector<vector<Point<num_t>>> &trees ){
     vector<int> result;
     
-    //achtung! letzter trees ist evtl. kleiner und nicht 32...
     for(int i=0; i<trees.size(); i++){
         for(int j = 0; j< trees[i].size();j++){
             
@@ -196,10 +195,8 @@ int main()
     cout << "datapoints_per_tree: " << datapoints_per_tree << endl;
     
     
-    //rounding up: q = (x + y - 1) / y;
+    //round up: q = (x + y - 1) / y;
     int threads = (numberOfHits+datapoints_per_tree-1)/datapoints_per_tree;
-    //ERROR! fix!
-    //int threads = numberOfHits/datapoints_per_tree;
     cout << "threads bzw numberOfHits/datapoints_per_tree " << threads << endl;
     vector<vector<Point<num_t>>> trees = make_forest<num_t>(cloud, dimensions, datapoints_per_tree, threads);
     
@@ -210,7 +207,6 @@ int main()
         print_Pointvector(trees[i]);
     }
     
-    //TODO: hier fehler!!! nicht alle datapoints werden benützt - einige gehen verloren!
     bool correctTree=true;
     cout << "threadcloud is made for " << 0 << " till "<< threads-1 << endl;
     for(int i = 0; i < threads; i++){
@@ -230,7 +226,6 @@ int main()
     
     //make trees into array (instead vector<vector< >> and copy this array over
     //TODO: should be done while making trees and not converted afterwards
-    
     int* treeArray_x = new int[trees.size()*trees[0].size()];
     int* treeArray_y = new int[trees.size()*trees[0].size()];
     int* treeArray_z = new int[trees.size()*trees[0].size()];
@@ -241,7 +236,6 @@ int main()
     for(int i=0; i< trees.size() ; i++){
         //cout << "size of tree: at " << i << " is " << trees[i].size() << endl;
         for(int j = 0; j < trees[i].size(); j++){
-            //TODO: stimmt das trees[i].size() ? müsste nicht trees[0]? trees[i].size() = #nodes dieses trees i. #nodes müssten für jeden tree gleich sein!!!
             treeArray_x[i*trees[i].size()+j] = trees[i][j].x;
             treeArray_y[i*trees[i].size()+j] = trees[i][j].y;
             treeArray_z[i*trees[i].size()+j] = trees[i][j].z;

@@ -77,6 +77,8 @@ void make_tree(vector<Point<num_t>> cloud, vector<int> dimensions, vector<vector
     trees[Id] = tree.get_tree_as_vector();
 }
 
+//TODO: change all the copying around.. maybe use std::move
+//TODO: check speedup by changing number of threads
 template <typename num_t>
 vector<vector<Point<num_t>>> make_forest(vector<Point<num_t>> &cloud,vector<int> dimensions, int datapoints_per_tree, int nthreads){
     vector<vector<Point<num_t>>> trees(nthreads);
@@ -85,6 +87,7 @@ vector<vector<Point<num_t>>> make_forest(vector<Point<num_t>> &cloud,vector<int>
     for(int id = 0; id < nthreads; ++id){
         //TODO: auch aufsplitten - das kann jeder thread selbst tun
         //TODO: maybe way to use part of vector without copying
+        
         if(id == nthreads-1){
             cout << "i " << id << " - jetzt datapoints_per_tree verkleinern - letzter tree" << endl;
             cout << "remaining points: 1000 - datapoints_pertree*i " << cloud.size() -  datapoints_per_tree*id << endl;
@@ -197,7 +200,6 @@ int main()
     
     //round up: q = (x + y - 1) / y;
     int threads = (numberOfHits+datapoints_per_tree-1)/datapoints_per_tree;
-    cout << "threads bzw numberOfHits/datapoints_per_tree " << threads << endl;
     vector<vector<Point<num_t>>> trees = make_forest<num_t>(cloud, dimensions, datapoints_per_tree, threads);
     
     cout << "Number of trees: " << trees.size()<< endl;
@@ -250,7 +252,8 @@ int main()
     }*/
     //make box, in which should be searched for hits
     //set all other dimensions to zero, if not used:
-    num_t box[6] = {2, 8, 0, 0, 0, 0};
+    //TODO: int -> num_t
+    int box[6] = {2, 8, 0, 0, 0, 0};
         
     cudaMain(trees.size(), trees[0].size(), treeArray_x, treeArray_y, treeArray_z, treeArray_ID, box);
     

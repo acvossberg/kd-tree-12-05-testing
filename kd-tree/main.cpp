@@ -250,6 +250,7 @@ int main()
     /*for(int i = 0; i < 992; i++){
         cout << treeArray_x[i] << endl;
     }*/
+    
     //make box, in which should be searched for hits
     //set all other dimensions to zero, if not used:
     

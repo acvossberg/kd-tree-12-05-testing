@@ -205,9 +205,9 @@ int main()
     cout << "Number of trees: " << trees.size()<< endl;
     
     //print
-    for(int i = 0; i< trees.size(); i++){
+    /*for(int i = 0; i< trees.size(); i++){
         print_Pointvector(trees[i]);
-    }
+    }*/
     
     bool correctTree=true;
     cout << "threadcloud is made for " << 0 << " till "<< threads-1 << endl;
@@ -252,7 +252,7 @@ int main()
     }*/
     //make box, in which should be searched for hits
     //set all other dimensions to zero, if not used:
-    //TODO: int -> num_t
+    
     int box[6] = {2, 8, 0, 0, 0, 0};
         
     cudaMain(trees.size(), trees[0].size(), treeArray_x, treeArray_y, treeArray_z, treeArray_ID, box);

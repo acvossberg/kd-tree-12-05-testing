@@ -133,24 +133,24 @@ void Cuda_class<T>::cudaMain(int number_of_trees, int tree_size, T treeArray_x[]
     
     
     //test wether insideBox works
-////    int *d_treeArray_ID_copy;
-//    int test_ID[number_of_trees*tree_size];
-//    //int test_treeArray_ID = std::copy(treeArray_ID);
-//    cudaMalloc(&d_treeArray_ID_copy, size_of_forest);
-//    cudaMemcpy(d_treeArray_ID_copy, treeArray_ID, size_of_forest, cudaMemcpyHostToDevice);
-//    insideBox_test<<<1,1024>>>(d_treeArray_x, d_treeArray_y, d_treeArray_z, d_treeArray_ID_copy, d_box);
-//    cudaMemcpy(test_ID, d_treeArray_ID_copy, size_of_forest, cudaMemcpyDeviceToHost);
-//    //finish test
+    int *d_treeArray_ID_copy;
+    int test_ID[number_of_trees*tree_size];
+    //int test_treeArray_ID = std::copy(treeArray_ID);
+    cudaMalloc(&d_treeArray_ID_copy, size_of_forest);
+    cudaMemcpy(d_treeArray_ID_copy, treeArray_ID, size_of_forest, cudaMemcpyHostToDevice);
+    insideBox_test<<<1,1024>>>(d_treeArray_x, d_treeArray_y, d_treeArray_z, d_treeArray_ID_copy, d_box);
+    cudaMemcpy(test_ID, d_treeArray_ID_copy, size_of_forest, cudaMemcpyDeviceToHost);
+    //finish test
 
     
     cudaMemcpy(treeArray_ID, d_treeArray_ID, size_of_forest, cudaMemcpyDeviceToHost);
-//    
-//    bool correctID=true;
-//    for(int i = 0; i<number_of_trees*tree_size; i++){
-//        correctID = correctID && (treeArray_ID[i] == test_ID[i]);
-//    }
-//    printf("\n All ID's found in box are %d", correctID );
-//    
+    
+    bool correctID=true;
+    for(int i = 0; i<number_of_trees*tree_size; i++){
+        correctID = correctID && (treeArray_ID[i] == test_ID[i]);
+    }
+    printf("\n All ID's found in box are %d", correctID );
+
     
     cudaError_t err = cudaGetLastError();
     if (err != cudaSuccess)

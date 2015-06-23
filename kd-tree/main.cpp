@@ -255,9 +255,9 @@ int main()
     int box[6] = {2, 8, 0, 0, 0, 0};
     
     //Cuda_class<num_t> p;
-    Cuda_class<int> p;
-    p.cudaMain(trees.size(), trees[0].size(), treeArray_x, treeArray_y, treeArray_z, treeArray_ID, box);
-    //cudaMain<int>(trees.size(), trees[0].size(), treeArray_x, treeArray_y, treeArray_z, treeArray_ID, box);
+    //Cuda_class<int> p;
+    //p.cudaMain(trees.size(), trees[0].size(), treeArray_x, treeArray_y, treeArray_z, treeArray_ID, box);
+    cudaMain<int>(trees.size(), trees[0].size(), treeArray_x, treeArray_y, treeArray_z, treeArray_ID, box);
     
     cloud.clear();
     

@@ -93,8 +93,6 @@ void insideBox(T *treeArray_x, T *treeArray_y, T *treeArray_z, int *treeArray_ID
 
 
 
-//TODO: template
-//template <typename T>
 template <typename T>
 void Cuda_class<T>::cudaMain(int number_of_trees, int tree_size, T treeArray_x[], T treeArray_y[], T treeArray_z[], int treeArray_ID[], T box[]){
     
@@ -102,8 +100,7 @@ void Cuda_class<T>::cudaMain(int number_of_trees, int tree_size, T treeArray_x[]
     std::cout << "number of trees: " << number_of_trees << std::endl;
     std::cout << "tree size: " << tree_size << std::endl;
     
-    //TODO: int ----> num_t
-    int size_of_forest = number_of_trees*tree_size*sizeof(int);
+    int size_of_forest = number_of_trees*tree_size*sizeof(T);
     T *d_treeArray_x;
     T *d_treeArray_y;
     T *d_treeArray_z;
@@ -131,7 +128,7 @@ void Cuda_class<T>::cudaMain(int number_of_trees, int tree_size, T treeArray_x[]
     //search forest for points inside box_dimensions - returns all treeArray_ID's which are inside box - rest are filled with -1
     insideBox<T><<<1,32>>>(d_treeArray_x, d_treeArray_y, d_treeArray_z, d_treeArray_ID, d_box, tree_size);
     
-    
+    /*
     //test wether insideBox works
     int *d_treeArray_ID_copy;
     int test_ID[number_of_trees*tree_size];
@@ -141,16 +138,17 @@ void Cuda_class<T>::cudaMain(int number_of_trees, int tree_size, T treeArray_x[]
     insideBox_test<<<1,1024>>>(d_treeArray_x, d_treeArray_y, d_treeArray_z, d_treeArray_ID_copy, d_box);
     cudaMemcpy(test_ID, d_treeArray_ID_copy, size_of_forest, cudaMemcpyDeviceToHost);
     //finish test
-
+     */
     
     cudaMemcpy(treeArray_ID, d_treeArray_ID, size_of_forest, cudaMemcpyDeviceToHost);
     
+    /*
     bool correctID=true;
     for(int i = 0; i<number_of_trees*tree_size; i++){
         correctID = correctID && (treeArray_ID[i] == test_ID[i]);
     }
     printf("\n All ID's found in box are %d", correctID );
-
+    */
     
     cudaError_t err = cudaGetLastError();
     if (err != cudaSuccess)

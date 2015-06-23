@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>B1DD44BD-BE66-4DEA-B6D3-8372CF6F0587</string>
+	<key>IDESourceControlProjectName</key>
+	<string>kd-tree-12-05</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>2214CFD3F8D222B48F960E7F0996075776E29083</key>
+		<string>https://github.com/girlwhocodes/kd-tree-12-05-testing.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>kd-tree-12-05.xcodeproj</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>2214CFD3F8D222B48F960E7F0996075776E29083</key>
+		<string>../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/girlwhocodes/kd-tree-12-05-testing.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>2214CFD3F8D222B48F960E7F0996075776E29083</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>2214CFD3F8D222B48F960E7F0996075776E29083</string>
+			<key>IDESourceControlWCCName</key>
+			<string>kd-tree-12-05-testing</string>
+		</dict>
+	</array>
+</dict>
+</plist>

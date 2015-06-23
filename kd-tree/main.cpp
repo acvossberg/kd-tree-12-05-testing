@@ -19,7 +19,9 @@
 #include <cmath>
 #include <future>
 //#include "test.hpp"
+//#include "cuda_class.hpp"
 #include "InsideBox.hpp"
+//#include "InsideBox.cu"
 
 #define MYDEVICE 0
 
@@ -189,9 +191,6 @@ int main()
     
     int warp_size = max_threads;
     
-    
-    //TODO: datapoints_per_tree must me calculated:
-    //they must be less than max threads per block, because of extra empty nodes.
     //???: will it be one tree per warp or per block?
     //formula: 2^(floor(log_2(64)+1))-1 is always max when one less than warp_size
     int datapoints_per_tree = warp_size-1;
@@ -253,12 +252,17 @@ int main()
     
     //make box, in which should be searched for hits
     //set all other dimensions to zero, if not used:
-    
     int box[6] = {2, 8, 0, 0, 0, 0};
-        
-    cudaMain(trees.size(), trees[0].size(), treeArray_x, treeArray_y, treeArray_z, treeArray_ID, box);
+    
+    //Cuda_class<num_t> p;
+    Cuda_class<int> p;
+    p.cudaMain(trees.size(), trees[0].size(), treeArray_x, treeArray_y, treeArray_z, treeArray_ID, box);
+    //cudaMain<int>(trees.size(), trees[0].size(), treeArray_x, treeArray_y, treeArray_z, treeArray_ID, box);
     
     cloud.clear();
     
     return 0;
 }
+
+
+

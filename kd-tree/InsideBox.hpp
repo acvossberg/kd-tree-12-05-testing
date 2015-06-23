@@ -10,7 +10,20 @@
 #define __kd_tree_12_05__hi__
 
 #include <stdio.h>
+#include <iostream>
+#define MYDEVICE 0
+
 
 #endif /* defined(__kd_tree_12_05__hi__) */
 
-void cudaMain(int number_of_trees, int tree_size, int treeArray_x[], int treeArray_y[], int treeArray_z[], int treeArray_ID[], int box[]);
+template <typename T>
+__global__
+void insideBox(T *treeArray_x, T *treeArray_y, T *treeArray_z, int *treeArray_ID, T *box, int tree_size);
+
+template <class T>
+class Cuda_class{
+public:
+    
+    void cudaMain(int number_of_trees, int tree_size, T treeArray_x[], T treeArray_y[], T treeArray_z[], int treeArray_ID[], T box[]);
+};
+

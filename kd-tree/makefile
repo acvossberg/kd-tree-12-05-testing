@@ -20,6 +20,7 @@ all: build
 build: KD_tree
 
 InsideBox.o: InsideBox.cu
+#InsideBox.o: cuda_class.cu cuda_class.hpp
 	$(NVCC) $(NVCCFLAGS) $(GENCODE_FLAGS) $(INCLUDES) -o $@ $<
 	$(NVCC) -dlink  $(GENCODE_FLAGS)  -o InsideBox_link.o $@
 
@@ -39,3 +40,4 @@ run: build
 
 clean:
 	rm -rf *.o
+

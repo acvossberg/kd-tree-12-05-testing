@@ -172,9 +172,7 @@ int main()
     generateRandomPointCloud(cloud, numberOfHits);
     
     //must be defined {1, 2, 3} = {x, y, z}
-    vector<int> dimensions = {1,2,3}; // these are the dimensions, based on which the tree will be constructed
-    int number_of_dimensions = 3; //these is the number of dimensions, the data has. x,y,z, phi, nu, ...
-    
+    vector<int> dimensions = {1,2,3};
     
     //get_size_of_tree from cuda_device --> #datapoints per thread.. = datapoints per tree
     int device;
@@ -192,7 +190,6 @@ int main()
     
     //???: will it be one tree per warp or per block?
     //formula: 2^(floor(log_2(64)+1))-1 is always max when one less than warp_size
-    //datapoints_per_tree is also = #nodes of tree ????
     int datapoints_per_tree = warp_size-1;
     cout << "datapoints_per_tree: " << datapoints_per_tree << endl;
     
@@ -200,10 +197,7 @@ int main()
     //round up: q = (x + y - 1) / y;
     //make real kd_tree:
     int threads = (numberOfHits+datapoints_per_tree-1)/datapoints_per_tree;
-    
-    //allocate array, which will hold trees
-    num_t trees_array[threads*datapoints_per_tree][number_of_dimensions+1]; //+1, for ID
-    vector<vector<Point<num_t>>> trees = make_forest<num_t>( trees_array, cloud, dimensions, datapoints_per_tree, threads);
+    vector<vector<Point<num_t>>> trees = make_forest<num_t>(cloud, dimensions, datapoints_per_tree, threads);
     
     cout << "Number of trees: " << trees.size()<< endl;
     

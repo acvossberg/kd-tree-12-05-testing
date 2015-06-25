@@ -14,7 +14,7 @@
 using namespace std;
 
 template < class T>
-KD_tree<T>::KD_tree(vector<Point<T>> &cloud, vector<int> dimensions) : dim(dimensions){
+KD_tree<T>::KD_tree(vector<Point<T>> &cloud, vector<int> dimensions, T trees_array, int Id) : dim(dimensions){
     data = cloud;
     int height = floor(log2(data.size()));
     int max_number_nodes = pow(2,height+1) - 1;

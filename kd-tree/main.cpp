@@ -173,6 +173,7 @@ int main()
     
     //must be defined {1, 2, 3} = {x, y, z}
     vector<int> dimensions = {1,2,3};
+    int number_of_dimensions = 3; //these is the number of dimensions, the data has. x,y,z, phi, nu, ...
     
     //get_size_of_tree from cuda_device --> #datapoints per thread.. = datapoints per tree
     int device;
@@ -197,6 +198,12 @@ int main()
     //round up: q = (x + y - 1) / y;
     //make real kd_tree:
     int threads = (numberOfHits+datapoints_per_tree-1)/datapoints_per_tree;
+    
+    //make vector that is easily transformably to array - to avoid copying
+    vector<vector<num_t>> trees_array_transformable;
+    trees_array_transformable.resize(threads*datapoints_per_tree, vector<num_t >(number_of_dimensions+1));
+    
+    
     vector<vector<Point<num_t>>> trees = make_forest<num_t>(cloud, dimensions, datapoints_per_tree, threads);
     
     cout << "Number of trees: " << trees.size()<< endl;

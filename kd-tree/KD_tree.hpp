@@ -27,7 +27,7 @@ public:
     bool testTree( SimpleKDtree<T> *simpleTree);
     vector<Point<T>> get_tree_as_vector();
     T get_value(int d, Point<T> val );
-
+    T* get_tree_as_array();
     
 private:
     void printData();
@@ -36,6 +36,8 @@ private:
     vector<Point<T>> data;
     const vector<int> dim;
     vector<Point<T>> result;
+    T result_array[];
+    int number_nodes;
 
     
 };

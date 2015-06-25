@@ -18,6 +18,9 @@
 void checkCUDAError(const char *msg);
 
 
+//TODO: make more generic
+//TODO: use only one large array for treeArray_x, _y, _z!
+
 //think about: threadIDx.y!! index s.d. threadIDx.y die treeArray_y bearbeitet -
 //for this would have to change treeArray_x & treeArray_y etc --> tree..
 //no nested if's no recursive.. -

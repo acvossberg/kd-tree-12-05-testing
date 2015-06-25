@@ -104,6 +104,7 @@ vector<vector<Point<num_t>>> make_forest(vector<Point<num_t>> &cloud,vector<int>
     return trees;
 }
 
+//dummy inBox to check cuda-methods
 template <typename num_t>
 vector<int> inBox(Point<num_t> &start, Point<num_t> &end, vector<vector<Point<num_t>>> &trees ){
     vector<int> result;
@@ -194,6 +195,7 @@ int main()
     
     
     //round up: q = (x + y - 1) / y;
+    //make real kd_tree:
     int threads = (numberOfHits+datapoints_per_tree-1)/datapoints_per_tree;
     vector<vector<Point<num_t>>> trees = make_forest<num_t>(cloud, dimensions, datapoints_per_tree, threads);
     

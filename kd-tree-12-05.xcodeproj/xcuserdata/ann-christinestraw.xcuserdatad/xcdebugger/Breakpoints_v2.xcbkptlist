@@ -459,7 +459,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "62"
             endingLineNumber = "62"
-            landmarkName = "printTree()"
+            landmarkName = "selectMedian(int d, int median, int left, int right, int pos)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -523,7 +523,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "131"
             endingLineNumber = "131"
-            landmarkName = "printData()"
+            landmarkName = "KD_tree_recursive(int left, int right, int k, int pos)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -554,9 +554,7 @@
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "144"
-            endingLineNumber = "144"
-            landmarkName = "printDevProp(cudaDeviceProp devProp)"
-            landmarkType = "7">
+            endingLineNumber = "144">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -619,7 +617,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "75"
             endingLineNumber = "75"
-            landmarkName = "selectMedian(int d, int median, int left, int right, int pos)"
+            landmarkName = "original_order_median(int median_position, int d, int left, int right)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -699,7 +697,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "83"
             endingLineNumber = "83"
-            landmarkName = "selectMedian(int d, int median, int left, int right, int pos)"
+            landmarkName = "original_order_median(int median_position, int d, int left, int right)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -731,7 +729,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "125"
             endingLineNumber = "125"
-            landmarkName = "original_order_median(int median_position, int d, int left, int right)"
+            landmarkName = "KD_tree_recursive(int left, int right, int k, int pos)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

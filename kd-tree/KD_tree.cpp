@@ -23,21 +23,11 @@ KD_tree<T>::KD_tree(vector<Point<T>> &cloud, vector<int> dimensions) : dim(dimen
     placeholder.y = -1;
     placeholder.z = -1;
     result.resize(max_number_nodes, placeholder);
-    
-    
-    //testing: make array while creating tree.
-    number_nodes = pow(2,floor(log2(cloud.size())) +1) - 1;
-    result_array = new T[number_nodes * dimensions.size()];
 }
 template <class T>
 vector<Point<T>> KD_tree<T>::get_tree_as_vector(){
     return result;
 }
-template < class T>
-T* KD_tree<T>::get_tree_as_array(){
-    return result_array;
-}
-
 template < class T>
 T KD_tree<T>::get_value(int d, Point<T> val ){
     switch (d){
@@ -78,14 +68,6 @@ void KD_tree<T>::selectMedian(int d, int median, int left, int right, int pos)//
     original_order_median(median, d, left, right);
     
     result[pos-1] = data[median];
-    
-    //testing:
-    result_array[0*number_nodes+pos-1] = data[median].ID;
-    result_array[1*number_nodes+pos-1] = data[median].x;
-    result_array[2*number_nodes+pos-1] = data[median].y;
-    result_array[3*number_nodes+pos-1] = data[median].z;
-
-    
 }
 
 template <class T>

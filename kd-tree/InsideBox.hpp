@@ -11,7 +11,6 @@
 
 #include <stdio.h>
 #include <iostream>
-
 #define MYDEVICE 0
 
 

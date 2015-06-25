@@ -148,17 +148,7 @@ void printDevProp(cudaDeviceProp devProp)
     return;
 }
 
-//test two-dim array
-void process_2d_array_template(int **array, size_t rows, size_t cols)
-{
-    for (size_t i = 0; i < rows; ++i)
-    {
-        std::cout << i << ": ";
-        for (size_t j = 0; j < cols; ++j)
-            std::cout << array[i][j] << '\t';
-        std::cout << std::endl;
-    }
-}
+
 
 
 int main()
@@ -183,7 +173,6 @@ int main()
     
     //must be defined {1, 2, 3} = {x, y, z}
     vector<int> dimensions = {1,2,3};
-    int number_of_dimensions = 3; //these is the number of dimensions, the data has. x,y,z, phi, nu, ...
     
     //get_size_of_tree from cuda_device --> #datapoints per thread.. = datapoints per tree
     int device;
@@ -208,13 +197,6 @@ int main()
     //round up: q = (x + y - 1) / y;
     //make real kd_tree:
     int threads = (numberOfHits+datapoints_per_tree-1)/datapoints_per_tree;
-    int a1[10][10];
-    const static int rows = threads*datapoints_per_tree;
-    const static int cols = number_of_dimensions+1;
-    int *trees_array[rows][cols];
-    process_2d_array_template(trees_array, rows, cols);
-    
-    
     vector<vector<Point<num_t>>> trees = make_forest<num_t>(cloud, dimensions, datapoints_per_tree, threads);
     
     cout << "Number of trees: " << trees.size()<< endl;

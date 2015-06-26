@@ -14,8 +14,9 @@
 using namespace std;
 
 template < class T>
-KD_tree<T>::KD_tree(vector<Point<T>> &cloud, vector<int> dimensions, vector<vector<T>> &transformable_trees_) : dim(dimensions){
+KD_tree<T>::KD_tree(vector<Point<T>> &cloud, vector<int> dimensions, vector<vector<T>> &transformable_trees_, int offset_) : dim(dimensions){
     
+    //offset = offset_;
     transformable_trees = transformable_trees_;
     //data is reference??? or copy??
     data = cloud;

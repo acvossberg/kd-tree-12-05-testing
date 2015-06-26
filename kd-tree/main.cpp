@@ -68,13 +68,8 @@ void print_Pointvector(vector<Point<num_t>> a){
 }
 
 template <typename num_t>
-void make_reference_tree(vector<Point<num_t>> cloud, vector<int> dimensions, vector<vector<Point<num_t>>> &trees, int Id){
-    
-}
-
-template <typename num_t>
-void make_tree(vector<Point<num_t>> cloud, vector<int> dimensions, vector<vector<Point<num_t>>> &trees, int Id, vector<vector<num_t>> transformable_trees){
-    KD_tree<num_t> tree(cloud, dimensions, transformable_trees);
+void make_tree(vector<Point<num_t>> cloud, vector<int> dimensions, vector<vector<Point<num_t>>> &trees, int Id, vector<vector<num_t>> transformable_trees, int offset){
+    KD_tree<num_t> tree(cloud, dimensions, transformable_trees, offset);
     tree.KD_tree_recursive(0, cloud.size()-1, 0, 1);
     trees[Id] = tree.get_tree_as_vector();
 }
@@ -96,7 +91,7 @@ vector<vector<Point<num_t>>> make_forest(vector<Point<num_t>> &cloud,vector<int>
             datapoints_per_tree = cloud.size() -  datapoints_per_tree*id;
         }
         vector<Point<num_t>> threadcloud(cloud.begin()+id*datapoints_per_tree, cloud.begin()+(id+1)*datapoints_per_tree);
-        futures.push_back(std::async(launch::async, make_tree<num_t>, threadcloud, dimensions, std::ref(trees), id, std::ref(transformable_trees)));
+        futures.push_back(std::async(launch::async, make_tree<num_t>, threadcloud, dimensions, std::ref(trees), id, std::ref(transformable_trees), id*datapoints_per_tree));
         
     }
     

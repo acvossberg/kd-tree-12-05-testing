@@ -14,7 +14,10 @@
 using namespace std;
 
 template < class T>
-KD_tree<T>::KD_tree(vector<Point<T>> &cloud, vector<int> dimensions) : dim(dimensions){
+KD_tree<T>::KD_tree(vector<Point<T>> &cloud, vector<int> dimensions, vector<vector<T>> &transformable_trees_) : dim(dimensions){
+    
+    transformable_trees = transformable_trees_;
+    //data is reference??? or copy??
     data = cloud;
     int height = floor(log2(data.size()));
     int max_number_nodes = pow(2,height+1) - 1;

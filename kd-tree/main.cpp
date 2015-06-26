@@ -74,7 +74,7 @@ void make_reference_tree(vector<Point<num_t>> cloud, vector<int> dimensions, vec
 
 template <typename num_t>
 void make_tree(vector<Point<num_t>> cloud, vector<int> dimensions, vector<vector<Point<num_t>>> &trees, int Id, vector<vector<num_t>> transformable_trees){
-    KD_tree<num_t> tree(cloud, dimensions);
+    KD_tree<num_t> tree(cloud, dimensions, transformable_trees);
     tree.KD_tree_recursive(0, cloud.size()-1, 0, 1);
     trees[Id] = tree.get_tree_as_vector();
 }

@@ -73,7 +73,7 @@ void make_reference_tree(vector<Point<num_t>> cloud, vector<int> dimensions, vec
 }
 
 template <typename num_t>
-void make_tree(vector<Point<num_t>> cloud, vector<int> dimensions, vector<vector<Point<num_t>>> &trees, int Id){
+void make_tree(vector<Point<num_t>> cloud, vector<int> dimensions, vector<vector<Point<num_t>>> &trees, int Id, vector<vector<num_t>> transformable_trees){
     KD_tree<num_t> tree(cloud, dimensions);
     tree.KD_tree_recursive(0, cloud.size()-1, 0, 1);
     trees[Id] = tree.get_tree_as_vector();
@@ -82,7 +82,7 @@ void make_tree(vector<Point<num_t>> cloud, vector<int> dimensions, vector<vector
 //TODO: change all the copying around.. maybe use std::move
 //TODO: check speedup by changing number of threads
 template <typename num_t>
-vector<vector<Point<num_t>>> make_forest(vector<Point<num_t>> &cloud,vector<int> dimensions, int datapoints_per_tree, int nthreads){
+vector<vector<Point<num_t>>> make_forest(vector<Point<num_t>> &cloud,vector<int> dimensions, int datapoints_per_tree, int nthreads, vector<vector<num_t>> &transformable_trees){
     vector<vector<Point<num_t>>> trees(nthreads);
     vector<std::future<void>> futures;
     
@@ -96,7 +96,7 @@ vector<vector<Point<num_t>>> make_forest(vector<Point<num_t>> &cloud,vector<int>
             datapoints_per_tree = cloud.size() -  datapoints_per_tree*id;
         }
         vector<Point<num_t>> threadcloud(cloud.begin()+id*datapoints_per_tree, cloud.begin()+(id+1)*datapoints_per_tree);
-        futures.push_back(std::async(launch::async, make_tree<num_t>, threadcloud, dimensions, std::ref(trees), id));
+        futures.push_back(std::async(launch::async, make_tree<num_t>, threadcloud, dimensions, std::ref(trees), id, std::ref(transformable_trees)));
         
     }
     
@@ -175,6 +175,7 @@ int main()
     
     //must be defined {1, 2, 3} = {x, y, z}
     vector<int> dimensions = {1,2,3};
+    int number_of_dimensions = 3;
     
     //get_size_of_tree from cuda_device --> #datapoints per thread.. = datapoints per tree
     int device;
@@ -199,7 +200,12 @@ int main()
     
     //round up: q = (x + y - 1) / y;
     int threads = (numberOfHits+datapoints_per_tree-1)/datapoints_per_tree;
-    vector<vector<Point<num_t>>> trees = make_forest<num_t>(cloud, dimensions, datapoints_per_tree, threads);
+    vector<vector<num_t>> trees_array_transformable;
+    trees_array_transformable.resize(threads*datapoints_per_tree, vector<num_t >(number_of_dimensions+1));
+    
+
+    
+    vector<vector<Point<num_t>>> trees = make_forest<num_t>(cloud, dimensions, datapoints_per_tree, threads, trees_array_transformable);
     
     cout << "Number of trees: " << trees.size()<< endl;
     

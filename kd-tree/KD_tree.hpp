@@ -21,7 +21,7 @@ class SimpleKDtree;
 template <class T>
 class KD_tree{
 public:
-    KD_tree(vector<Point<T>> &data, vector<int> dimensions);
+    KD_tree(vector<Point<T>> &data, vector<int> dimensions, int Id, vector<vector<T>> &result);
     void printTree();
     void KD_tree_recursive(int left, int right, int k, int pos);
     bool testTree( SimpleKDtree<T> *simpleTree);
@@ -36,7 +36,8 @@ private:
     vector<Point<T>> data;
     const vector<int> dim;
     vector<Point<T>> result;
-
+    int tree_offset;
+    vector<vector<T>> result_trees;
     
 };
 

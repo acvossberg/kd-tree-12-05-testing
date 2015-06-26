@@ -70,18 +70,19 @@ void print_Pointvector(vector<Point<num_t>> &a){
 
 
 template <typename num_t>
-void make_tree(vector<Point<num_t>> &cloud, vector<int> &dimensions, vector<vector<Point<num_t>>> &trees, int Id){
-    KD_tree<num_t> tree(cloud, dimensions);
+void make_tree(vector<Point<num_t>> &cloud, vector<int> &dimensions, vector<vector<num_t>> &trees_transformable ,vector<vector<Point<num_t>>> &trees, int Id, int offset){
+    //Id = offset for new tree
+    KD_tree<num_t> tree(cloud, dimensions, offset, trees_transformable);
     tree.KD_tree_recursive(0, cloud.size()-1, 0, 1);
     trees[Id] = tree.get_tree_as_vector();
 }
 
 //TODO: check speedup by changing number of threads
 template <typename num_t>
-vector<vector<Point<num_t>>> make_forest(vector<Point<num_t>> &cloud,vector<int> &dimensions, int datapoints_per_tree, int nthreads){
+vector<vector<Point<num_t>>> make_forest(vector<vector<num_t>> &trees_array_transformable, vector<Point<num_t>> &cloud,vector<int> &dimensions, int datapoints_per_tree, int nthreads){
     vector<vector<Point<num_t>>> trees(nthreads);
     vector<std::future<void>> futures;
-    
+
     for(int id = 0; id < nthreads; ++id){
         //TODO: auch aufsplitten - das kann jeder thread selbst tun
         
@@ -93,14 +94,13 @@ vector<vector<Point<num_t>>> make_forest(vector<Point<num_t>> &cloud,vector<int>
         }
         //TODO: maybe way to use part of vector without copying
         vector<Point<num_t>> threadcloud(cloud.begin()+id*datapoints_per_tree, cloud.begin()+(id+1)*datapoints_per_tree);
-        futures.push_back(std::async(launch::async, make_tree<num_t>, std::ref(threadcloud), std::ref(dimensions), std::ref(trees), id));
+        futures.push_back(std::async(launch::async, make_tree<num_t>, std::ref(threadcloud), std::ref(dimensions), std::ref(trees_array_transformable), std::ref(trees), id, id*datapoints_per_tree));
         
     }
     
     for(auto &e : futures) {
         e.get();
     }
-    
     return trees;
 }
 
@@ -182,7 +182,7 @@ int main()
     
     cudaDeviceProp devProp;
     cudaGetDeviceProperties(&devProp, device);
-    printDevProp(devProp);
+    //printDevProp(devProp);
     int max_threads = devProp.warpSize;
     
     cout << "number of warps " << max_threads << endl;
@@ -201,12 +201,30 @@ int main()
     
     //make vector that is easily transformably to array - to avoid copying
     vector<vector<num_t>> trees_array_transformable;
-    trees_array_transformable.resize(threads*datapoints_per_tree, vector<num_t >(number_of_dimensions+1));
+    trees_array_transformable.resize(threads*datapoints_per_tree, vector<num_t > (number_of_dimensions+1));
+    
+    vector<vector<Point<num_t>>> trees = make_forest<num_t>(trees_array_transformable, cloud, dimensions, datapoints_per_tree, threads);
+
+    //testing vector -> array
+    //num_t* a = &trees[0][0].x;
     
     
-    vector<vector<Point<num_t>>> trees = make_forest<num_t>(cloud, dimensions, datapoints_per_tree, threads);
+    /*for(int i =0; i< sizeof(a); i++){
+        cout << a[i] << endl;
     
-    cout << "Number of trees: " << trees.size()<< endl;
+    }*/
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    cout << "Number of trees: " << trees.size() << endl;
     
     //print
     /*for(int i = 0; i< trees.size(); i++){
@@ -235,6 +253,10 @@ int main()
     //make trees into array (instead vector<vector< >> and copy this array over
     //TODO: should be done while making trees and not converted afterwards???
     //maybe easier to handle vectors and afterwards change into arrays
+    
+    
+
+    
     int* treeArray_x = new int[trees.size()*trees[0].size()];
     int* treeArray_y = new int[trees.size()*trees[0].size()];
     int* treeArray_z = new int[trees.size()*trees[0].size()];
@@ -251,6 +273,18 @@ int main()
             treeArray_ID[i*trees[i].size()+j] = trees[i][j].ID;
         }
     }
+    
+    /*
+    int* treeArray_ID_new = &trees_array_transformable[0][0];
+    int* treeArray_x_new = &trees_array_transformable[1][0];
+    int* treeArray_y_new = &trees_array_transformable[2][0];
+    int* treeArray_z_new = &trees_array_transformable[3][0];
+    
+    if(treeArray_ID_new == treeArray_ID){
+        std::cout << "correct new treeArray == treeArray " << std::endl;
+    }
+     */
+    
     int size_of_forest = sizeof(num_t)*trees.size()*trees[0].size();
     
     //check array: - wieder weg!

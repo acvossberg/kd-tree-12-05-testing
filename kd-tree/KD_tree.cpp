@@ -14,7 +14,8 @@
 using namespace std;
 
 template < class T>
-KD_tree<T>::KD_tree(vector<Point<T>> &cloud, vector<int> dimensions) : dim(dimensions){
+KD_tree<T>::KD_tree(vector<Point<T>> &cloud, vector<int> dimensions, int Id, vector<vector<T>> &result_trees_) : dim(dimensions){
+    tree_offset = Id;
     data = cloud;
     int height = floor(log2(data.size()));
     int max_number_nodes = pow(2,height+1) - 1;
@@ -22,6 +23,7 @@ KD_tree<T>::KD_tree(vector<Point<T>> &cloud, vector<int> dimensions) : dim(dimen
     placeholder.x = -1; //TODO: some better marker/placeholder needed!
     placeholder.y = -1;
     placeholder.z = -1;
+    //result_trees = result_trees_;
     result.resize(max_number_nodes, placeholder);
 }
 template <class T>
@@ -66,7 +68,12 @@ void KD_tree<T>::selectMedian(int d, int median, int left, int right, int pos)//
     
     //bring duplicate values of median in original order
     original_order_median(median, d, left, right);
-    
+    /*
+    result_trees[tree_offset+pos-1][0] = data[median].ID;
+    result_trees[tree_offset+pos-1][1] = data[median].x;
+    result_trees[tree_offset+pos-1][2] = data[median].y;
+    result_trees[tree_offset+pos-1][3] = data[median].z;
+    */
     result[pos-1] = data[median];
 }
 

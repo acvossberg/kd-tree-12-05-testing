@@ -18,10 +18,7 @@
 #include <algorithm>
 #include <cmath>
 #include <future>
-//#include "test.hpp"
-//#include "cuda_class.hpp"
 #include "InsideBox.hpp"
-//#include "InsideBox.cu"
 
 #define MYDEVICE 0
 
@@ -68,9 +65,10 @@ void print_Pointvector(vector<Point<num_t>> a){
 }
 
 template <typename num_t>
-void make_tree(vector<Point<num_t>> cloud, vector<int> dimensions, vector<vector<Point<num_t>>> &trees, int Id, vector<vector<num_t>> transformable_trees, int offset){
+void make_tree(vector<Point<num_t>> cloud, vector<int> dimensions, vector<vector<Point<num_t>>> &trees, int Id, vector<vector<num_t>>& transformable_trees, int offset){
     KD_tree<num_t> tree(cloud, dimensions, transformable_trees, offset);
     tree.KD_tree_recursive(0, cloud.size()-1, 0, 1);
+    //std::cout << "My Id is: " << Id << " with offset " << offset << endl;
     trees[Id] = tree.get_tree_as_vector();
 }
 
@@ -86,8 +84,8 @@ vector<vector<Point<num_t>>> make_forest(vector<Point<num_t>> &cloud,vector<int>
         //TODO: maybe way to use part of vector without copying
         
         if(id == nthreads-1){
-            cout << "i " << id << " - jetzt datapoints_per_tree verkleinern - letzter tree" << endl;
-            cout << "remaining points: 1000 - datapoints_pertree*i " << cloud.size() -  datapoints_per_tree*id << endl;
+            //cout << "i " << id << " - jetzt datapoints_per_tree verkleinern - letzter tree" << endl;
+            //cout << "remaining points: 1000 - datapoints_pertree*i " << cloud.size() -  datapoints_per_tree*id << endl;
             datapoints_per_tree = cloud.size() -  datapoints_per_tree*id;
         }
         vector<Point<num_t>> threadcloud(cloud.begin()+id*datapoints_per_tree, cloud.begin()+(id+1)*datapoints_per_tree);
@@ -196,12 +194,13 @@ int main()
     //round up: q = (x + y - 1) / y;
     int threads = (numberOfHits+datapoints_per_tree-1)/datapoints_per_tree;
     vector<vector<num_t>> trees_array_transformable;
-    trees_array_transformable.resize(threads*datapoints_per_tree, vector<num_t >(number_of_dimensions+1));
+    //trees_array_transformable.resize(threads*datapoints_per_tree, vector<num_t >(number_of_dimensions+1));
+    trees_array_transformable.resize(number_of_dimensions+1, vector<num_t >(threads*datapoints_per_tree));
     
+    std::cout << "  trees_array_transformable.size() " << trees_array_transformable.size() << "  trees_array_transformable[0].size() " << trees_array_transformable[0].size() << endl;
 
     
     vector<vector<Point<num_t>>> trees = make_forest<num_t>(cloud, dimensions, datapoints_per_tree, threads, trees_array_transformable);
-    
     cout << "Number of trees: " << trees.size()<< endl;
     
     //print
@@ -214,8 +213,8 @@ int main()
     for(int i = 0; i < threads; i++){
         SimpleKDtree<num_t> *bst = new SimpleKDtree<num_t>(dimensions);
         if(i == threads-1){
-            cout << "i " << i << " - jetzt datapoints_per_tree verkleinern - letzter tree" << endl;
-            cout << "remaining points: 1000 - datapoints_pertree*i " << numberOfHits-  datapoints_per_tree*i << endl;
+            //cout << "i " << i << " - jetzt datapoints_per_tree verkleinern - letzter tree" << endl;
+            //cout << "remaining points: 1000 - datapoints_pertree*i " << numberOfHits-  datapoints_per_tree*i << endl;
             datapoints_per_tree = numberOfHits-  datapoints_per_tree*i;
         }
         vector<Point<num_t>> threadcloud (cloud.begin()+i*datapoints_per_tree, cloud.begin()+(i+1)*datapoints_per_tree);
@@ -244,6 +243,46 @@ int main()
             treeArray_ID[i*trees[i].size()+j] = trees[i][j].ID;
         }
     }
+    
+    
+     int* treeArray_ID_new = &trees_array_transformable[0][0];
+     int* treeArray_x_new = &trees_array_transformable[1][0];
+     int* treeArray_y_new = &trees_array_transformable[2][0];
+     int* treeArray_z_new = &trees_array_transformable[3][0];
+    
+    for(int i = 0; i<20; i++){
+
+        std::cout << "trans-tree[0][i] " << trees_array_transformable[0][i] << " vs trees[0][i].ID " << trees[0][i].ID <<  endl;
+    }
+    
+    cout << "AND NOW FOR ARRAYS: \n" << endl;
+    cout << "size of new "  << sizeof(treeArray_ID_new) << " size of old " << sizeof(treeArray_ID) << endl;
+    
+    for(int i = 0; i<20; i++){
+        
+        std::cout << "treeArray_ID_new[i] " << treeArray_ID_new[i] << " vs treeArray_ID[i] " << treeArray_ID[i] <<  endl;
+    }
+    
+    
+    std::cout << "trees_array_transformable.size() " << trees_array_transformable.size() <<  " trees_array_transformable[0].size() " << trees_array_transformable[0].size() << endl;
+    
+    
+    for(int i=0; i < trees_array_transformable[0].size(); i++){
+    
+        //std::cout << trees_array_transformable[1][i] << endl;
+    
+    }
+    for(int i=0; i<sizeof(treeArray_ID) ; i++){
+        if(treeArray_ID_new[i] == treeArray_ID[i]){
+            std::cout << "correct new treeArray == treeArray " << std::endl;
+        }
+        else{
+            std::cout << "treeArray != treeArray - NO!\n" << std::endl;
+        }
+    }
+    
+     
+    
     int size_of_forest = sizeof(int)*trees.size()*trees[0].size();
     
     //check array: - wieder weg!
@@ -257,7 +296,7 @@ int main()
     
     //Cuda_class<num_t> p;
     Cuda_class<int> p;
-    p.cudaMain(trees.size(), trees[0].size(), treeArray_x, treeArray_y, treeArray_z, treeArray_ID, box);
+    p.cudaMain(trees.size(), trees[0].size(), treeArray_x_new, treeArray_y_new, treeArray_z_new, treeArray_ID_new, box);
     //cudaMain<int>(trees.size(), trees[0].size(), treeArray_x, treeArray_y, treeArray_z, treeArray_ID, box);
     
     cloud.clear();

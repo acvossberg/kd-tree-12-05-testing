@@ -14,12 +14,12 @@
 using namespace std;
 
 template < class T>
-KD_tree<T>::KD_tree(vector<Point<T>> &cloud, vector<int> dimensions, vector<vector<T>> &transformable_trees_, int offset_) : dim(dimensions){
+KD_tree<T>::KD_tree(vector<Point<T>> &cloud, vector<int>& dimensions, vector<vector<T>> &transformable_trees_, int& offset_) : dim(dimensions), offset(offset_), transformable_trees(transformable_trees_), data(cloud){
     
     //offset = offset_;
-    transformable_trees = transformable_trees_;
+    //transformable_trees = transformable_trees_;
     //data is reference??? or copy??
-    data = cloud;
+    //data = cloud;
     int height = floor(log2(data.size()));
     int max_number_nodes = pow(2,height+1) - 1;
     Point<T> placeholder;
@@ -30,8 +30,13 @@ KD_tree<T>::KD_tree(vector<Point<T>> &cloud, vector<int> dimensions, vector<vect
 }
 template <class T>
 vector<Point<T>> KD_tree<T>::get_tree_as_vector(){
+    if(offset == 0){
+        cout << "!!!!!!!!!!!!!!!!tree[0][0] " << transformable_trees[0][0] << endl;
+    
+    }
     return result;
 }
+
 template < class T>
 T KD_tree<T>::get_value(int d, Point<T> val ){
     switch (d){
@@ -72,6 +77,12 @@ void KD_tree<T>::selectMedian(int d, int median, int left, int right, int pos)//
     original_order_median(median, d, left, right);
     
     result[pos-1] = data[median];
+    
+    transformable_trees[0][offset+pos-1] = data[median].ID;
+    transformable_trees[1][offset+pos-1] = data[median].x;
+    transformable_trees[2][offset+pos-1] = data[median].y;
+    transformable_trees[3][offset+pos-1] = data[median].z;
+    
 }
 
 template <class T>

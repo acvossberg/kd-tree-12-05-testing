@@ -67,13 +67,13 @@ template <typename num_t>
 void make_tree(vector<Point<num_t>> cloud, vector<int> dimensions, vector<vector<Point<num_t>>> &trees, int Id, vector<vector<num_t>>& transformable_trees, int offset){
     KD_tree<num_t> tree(cloud, dimensions, transformable_trees, offset);
     tree.KD_tree_recursive(0, cloud.size()-1, 0, 1);
-    trees[Id] = tree.get_tree_as_vector();
+    //trees[Id] = tree.get_tree_as_vector();
 }
 
 //TODO: change all the copying around.. maybe use std::move
 //TODO: check speedup by changing number of threads
 template <typename num_t>
-vector<vector<Point<num_t>>> make_forest(vector<Point<num_t>> &cloud,vector<int> dimensions, int datapoints_per_tree, int nthreads, vector<vector<num_t>> &transformable_trees){
+void make_forest(vector<Point<num_t>> &cloud,vector<int> dimensions, int datapoints_per_tree, int nthreads, vector<vector<num_t>> &transformable_trees){
     vector<vector<Point<num_t>>> trees(nthreads);
     vector<std::future<void>> futures;
     
@@ -93,7 +93,7 @@ vector<vector<Point<num_t>>> make_forest(vector<Point<num_t>> &cloud,vector<int>
         e.get();
     }
     
-    return trees;
+    //return trees;
 }
 
 template <typename num_t>
@@ -195,8 +195,10 @@ int main()
     std::cout << "  trees_array_transformable.size() " << trees_array_transformable.size() << "  trees_array_transformable[0].size() " << trees_array_transformable[0].size() << endl;
 
     
-    vector<vector<Point<num_t>>> trees = make_forest<num_t>(cloud, dimensions, datapoints_per_tree, threads, trees_array_transformable);
-    cout << "Number of trees: " << trees.size()<< endl;
+    
+    make_forest<num_t>(cloud, dimensions, datapoints_per_tree, threads, trees_array_transformable);
+    //vector<vector<Point<num_t>>> trees = make_forest<num_t>(cloud, dimensions, datapoints_per_tree, threads, trees_array_transformable);
+    //cout << "Number of trees: " << trees.size()<< endl;
     
     //print
     /*for(int i = 0; i< trees.size(); i++){
@@ -210,6 +212,7 @@ int main()
     int* treeArray_y_new = &trees_array_transformable[2][0];
     int* treeArray_z_new = &trees_array_transformable[3][0];
     
+    /*
     bool correctTree=true;
     int points_in_tree = datapoints_per_tree;
     cout << "threadcloud is made for " << 0 << " till "<< threads-1 << endl;
@@ -224,6 +227,10 @@ int main()
         delete bst;
     }
     if(correctTree){cout << "\nAll tree's are correct" << endl; }
+    */
+    
+    
+    
     
     
     //make trees into array (instead vector<vector< >> and copy this array over
@@ -247,7 +254,7 @@ int main()
     
      
     
-    int size_of_forest = sizeof(int)*trees.size()*trees[0].size();
+    //int size_of_forest = sizeof(int)*trees.size()*trees[0].size();
     
     //check array: - wieder weg!
     /*for(int i = 0; i < 992; i++){

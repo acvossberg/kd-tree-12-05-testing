@@ -47,7 +47,6 @@ bool test(vector<Point<num_t>> treevector, SimpleKDtree<num_t>* Tsimple){
     //cout << "testing ..." << endl;
     
     if(Tsimple->sameTree(treevector, 1)){
-        //cout << "yay! trees are the same" << endl;
         return true;
     }
     else{
@@ -68,7 +67,6 @@ template <typename num_t>
 void make_tree(vector<Point<num_t>> cloud, vector<int> dimensions, vector<vector<Point<num_t>>> &trees, int Id, vector<vector<num_t>>& transformable_trees, int offset){
     KD_tree<num_t> tree(cloud, dimensions, transformable_trees, offset);
     tree.KD_tree_recursive(0, cloud.size()-1, 0, 1);
-    //std::cout << "My Id is: " << Id << " with offset " << offset << endl;
     trees[Id] = tree.get_tree_as_vector();
 }
 
@@ -84,8 +82,6 @@ vector<vector<Point<num_t>>> make_forest(vector<Point<num_t>> &cloud,vector<int>
         //TODO: maybe way to use part of vector without copying
         
         if(id == nthreads-1){
-            //cout << "i " << id << " - jetzt datapoints_per_tree verkleinern - letzter tree" << endl;
-            //cout << "remaining points: 1000 - datapoints_pertree*i " << cloud.size() -  datapoints_per_tree*id << endl;
             datapoints_per_tree = cloud.size() -  datapoints_per_tree*id;
         }
         vector<Point<num_t>> threadcloud(cloud.begin()+id*datapoints_per_tree, cloud.begin()+(id+1)*datapoints_per_tree);
@@ -213,8 +209,6 @@ int main()
     for(int i = 0; i < threads; i++){
         SimpleKDtree<num_t> *bst = new SimpleKDtree<num_t>(dimensions);
         if(i == threads-1){
-            //cout << "i " << i << " - jetzt datapoints_per_tree verkleinern - letzter tree" << endl;
-            //cout << "remaining points: 1000 - datapoints_pertree*i " << numberOfHits-  datapoints_per_tree*i << endl;
             datapoints_per_tree = numberOfHits-  datapoints_per_tree*i;
         }
         vector<Point<num_t>> threadcloud (cloud.begin()+i*datapoints_per_tree, cloud.begin()+(i+1)*datapoints_per_tree);
@@ -250,28 +244,6 @@ int main()
      int* treeArray_y_new = &trees_array_transformable[2][0];
      int* treeArray_z_new = &trees_array_transformable[3][0];
     
-    for(int i = 0; i<20; i++){
-
-        std::cout << "trans-tree[0][i] " << trees_array_transformable[0][i] << " vs trees[0][i].ID " << trees[0][i].ID <<  endl;
-    }
-    
-    cout << "AND NOW FOR ARRAYS: \n" << endl;
-    cout << "size of new "  << sizeof(treeArray_ID_new) << " size of old " << sizeof(treeArray_ID) << endl;
-    
-    for(int i = 0; i<20; i++){
-        
-        std::cout << "treeArray_ID_new[i] " << treeArray_ID_new[i] << " vs treeArray_ID[i] " << treeArray_ID[i] <<  endl;
-    }
-    
-    
-    std::cout << "trees_array_transformable.size() " << trees_array_transformable.size() <<  " trees_array_transformable[0].size() " << trees_array_transformable[0].size() << endl;
-    
-    
-    for(int i=0; i < trees_array_transformable[0].size(); i++){
-    
-        //std::cout << trees_array_transformable[1][i] << endl;
-    
-    }
     for(int i=0; i<sizeof(treeArray_ID) ; i++){
         if(treeArray_ID_new[i] == treeArray_ID[i]){
             std::cout << "correct new treeArray == treeArray " << std::endl;

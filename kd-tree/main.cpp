@@ -203,14 +203,22 @@ int main()
         print_Pointvector(trees[i]);
     }*/
     
+    
+    
+    int* treeArray_ID_new = &trees_array_transformable[0][0];
+    int* treeArray_x_new = &trees_array_transformable[1][0];
+    int* treeArray_y_new = &trees_array_transformable[2][0];
+    int* treeArray_z_new = &trees_array_transformable[3][0];
+    
     bool correctTree=true;
+    int points_in_tree = datapoints_per_tree;
     cout << "threadcloud is made for " << 0 << " till "<< threads-1 << endl;
     for(int i = 0; i < threads; i++){
         SimpleKDtree<num_t> *bst = new SimpleKDtree<num_t>(dimensions);
         if(i == threads-1){
-            datapoints_per_tree = numberOfHits-  datapoints_per_tree*i;
+            points_in_tree = numberOfHits-  datapoints_per_tree*i;
         }
-        vector<Point<num_t>> threadcloud (cloud.begin()+i*datapoints_per_tree, cloud.begin()+(i+1)*datapoints_per_tree);
+        vector<Point<num_t>> threadcloud (cloud.begin()+i*points_in_tree, cloud.begin()+(i+1)*points_in_tree);
         bst->make_SimpleKDtree(threadcloud, 0, threadcloud.size()-1, 0);
         correctTree = correctTree && test(trees[i], bst);
         delete bst;
@@ -219,7 +227,8 @@ int main()
     
     
     //make trees into array (instead vector<vector< >> and copy this array over
-    //TODO: should be done while making trees and not converted afterwards
+    //: should be done while making trees and not converted afterwards ---> DONE
+    /*
     int* treeArray_x = new int[trees.size()*trees[0].size()];
     int* treeArray_y = new int[trees.size()*trees[0].size()];
     int* treeArray_z = new int[trees.size()*trees[0].size()];
@@ -234,21 +243,7 @@ int main()
             treeArray_ID[i*trees[i].size()+j] = trees[i][j].ID;
         }
     }
-    
-    
-     int* treeArray_ID_new = &trees_array_transformable[0][0];
-     int* treeArray_x_new = &trees_array_transformable[1][0];
-     int* treeArray_y_new = &trees_array_transformable[2][0];
-     int* treeArray_z_new = &trees_array_transformable[3][0];
-    
-    for(int i=0; i<sizeof(treeArray_ID) ; i++){
-        if(treeArray_ID_new[i] == treeArray_ID[i]){
-            std::cout << "correct new treeArray == treeArray " << std::endl;
-        }
-        else{
-            std::cout << "treeArray != treeArray - NO!\n" << std::endl;
-        }
-    }
+    */
     
      
     
@@ -265,7 +260,7 @@ int main()
     
     //Cuda_class<num_t> p;
     Cuda_class<int> p;
-    p.cudaMain(trees.size(), trees[0].size(), treeArray_x_new, treeArray_y_new, treeArray_z_new, treeArray_ID_new, box);
+    p.cudaMain(threads, datapoints_per_tree, treeArray_x_new, treeArray_y_new, treeArray_z_new, treeArray_ID_new, box);
     //cudaMain<int>(trees.size(), trees[0].size(), treeArray_x, treeArray_y, treeArray_z, treeArray_ID, box);
     
     cloud.clear();

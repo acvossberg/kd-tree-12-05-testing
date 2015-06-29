@@ -30,10 +30,6 @@ KD_tree<T>::KD_tree(vector<Point<T>> &cloud, vector<int>& dimensions, vector<vec
 }
 template <class T>
 vector<Point<T>> KD_tree<T>::get_tree_as_vector(){
-    if(offset == 0){
-        cout << "!!!!!!!!!!!!!!!!tree[0][0] " << transformable_trees[0][0] << endl;
-    
-    }
     return result;
 }
 

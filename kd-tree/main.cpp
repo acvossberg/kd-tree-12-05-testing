@@ -190,7 +190,6 @@ int main()
     //round up: q = (x + y - 1) / y;
     int threads = (numberOfHits+datapoints_per_tree-1)/datapoints_per_tree;
     vector<vector<num_t>> trees_array_transformable;
-    //trees_array_transformable.resize(threads*datapoints_per_tree, vector<num_t >(number_of_dimensions+1));
     trees_array_transformable.resize(number_of_dimensions+1, vector<num_t >(threads*datapoints_per_tree));
     
     std::cout << "  trees_array_transformable.size() " << trees_array_transformable.size() << "  trees_array_transformable[0].size() " << trees_array_transformable[0].size() << endl;
@@ -227,9 +226,7 @@ int main()
     int* treeArray_ID = new int[trees.size()*trees[0].size()];
     
     
-    //cout << " number of trees " << trees.size() << endl;
     for(int i=0; i< trees.size() ; i++){
-        //cout << "size of tree: at " << i << " is " << trees[i].size() << endl;
         for(int j = 0; j < trees[i].size(); j++){
             treeArray_x[i*trees[i].size()+j] = trees[i][j].x;
             treeArray_y[i*trees[i].size()+j] = trees[i][j].y;

@@ -82,6 +82,7 @@ void make_forest(vector<Point<num_t>> &cloud,vector<int> &dimensions, int datapo
         if(id == nthreads-1){
             datapoints_per_tree = cloud.size() -  datapoints_per_tree*id;
         }
+        //TODO: NO COPY!!
         vector<Point<num_t>> threadcloud(cloud.begin()+id*datapoints_per_tree, cloud.begin()+(id+1)*datapoints_per_tree);
         futures.push_back(std::async(launch::async, make_tree<num_t>, threadcloud, dimensions, std::ref(transformable_trees), id*nodes_per_tree));
         
@@ -205,7 +206,7 @@ int main()
     
     //must be defined {1, 2, 3} = {x, y, z}
     vector<int> dimensions = {1,2,3};
-    int number_of_dimensions = 3;
+    int number_of_dimensions = dimensions.size();
     
     //get_size_of_tree from cuda_device --> #datapoints per thread.. = datapoints per tree
     int device;
@@ -231,7 +232,7 @@ int main()
     //round up: q = (x + y - 1) / y;
     int threads = (numberOfHits+datapoints_per_tree-1)/datapoints_per_tree;
     vector<vector<num_t>> trees_array_transformable;
-    trees_array_transformable.resize(number_of_dimensions+1, vector<num_t >(threads*datapoints_per_tree, -1));
+    trees_array_transformable.resize(number_of_dimensions+1, vector<num_t>(threads*datapoints_per_tree, -1));
     
     make_forest<num_t>(cloud, dimensions, datapoints_per_tree, threads, trees_array_transformable);
     //test if trees made with make_forest are correct:
@@ -239,7 +240,8 @@ int main()
     
     
     //convert trees_array to real arrays
-    int* treeArray_ID_new = &trees_array_transformable[0][0];
+    int* treeArray_ID = &trees_array_transformable[0][0];
+    
     int* treeArray_x_new = &trees_array_transformable[1][0];
     int* treeArray_y_new = &trees_array_transformable[2][0];
     int* treeArray_z_new = &trees_array_transformable[3][0];
@@ -249,7 +251,7 @@ int main()
     int box[6] = {2, 8, 0, 0, 0, 0};
     
     Cuda_class<num_t> p;
-    p.cudaMain(threads, datapoints_per_tree, treeArray_x_new, treeArray_y_new, treeArray_z_new, treeArray_ID_new, box);
+    p.cudaMain(threads, datapoints_per_tree, treeArray_x_new, treeArray_y_new, treeArray_z_new, treeArray_ID, box);
     
     cloud.clear();
     return 0;

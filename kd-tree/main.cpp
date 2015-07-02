@@ -63,17 +63,17 @@ void print_Pointvector(vector<Point<num_t>> a){
 }
 
 template <typename num_t>
-void make_tree(vector<Point<num_t>> cloud, vector<int> dimensions, vector<vector<Point<num_t>>> &trees, int Id, vector<vector<num_t>>& transformable_trees, int offset){
+void make_tree(vector<Point<num_t>> cloud, vector<int> dimensions, vector<vector<num_t>>& transformable_trees, int offset){
     KD_tree<num_t> tree(cloud, dimensions, transformable_trees, offset);
     tree.KD_tree_recursive(0, cloud.size()-1, 0, 1);
-    trees[Id] = tree.get_tree_as_vector();
+    //trees[Id] = tree.get_tree_as_vector();
 }
 
 //TODO: change all the copying around.. maybe use std::move
 //TODO: check speedup by changing number of threads
 template <typename num_t>
-vector<vector<Point<num_t>>> make_forest(vector<Point<num_t>> &cloud,vector<int> dimensions, int datapoints_per_tree, int nthreads, vector<vector<num_t>> &transformable_trees){
-    vector<vector<Point<num_t>>> trees(nthreads);
+void make_forest(vector<Point<num_t>> &cloud,vector<int> &dimensions, int datapoints_per_tree, int nthreads, vector<vector<num_t>> &transformable_trees){
+    //vector<vector<Point<num_t>>> trees(nthreads);
     vector<std::future<void>> futures;
     
     int nodes_per_tree = datapoints_per_tree;
@@ -86,7 +86,7 @@ vector<vector<Point<num_t>>> make_forest(vector<Point<num_t>> &cloud,vector<int>
         }
         //cout << "offset in main: " << id*nodes_per_tree << " id: " << id << " nodes_per_tree: " << nodes_per_tree << endl;
         vector<Point<num_t>> threadcloud(cloud.begin()+id*datapoints_per_tree, cloud.begin()+(id+1)*datapoints_per_tree);
-        futures.push_back(std::async(launch::async, make_tree<num_t>, threadcloud, dimensions, std::ref(trees), id, std::ref(transformable_trees), id*nodes_per_tree));
+        futures.push_back(std::async(launch::async, make_tree<num_t>, threadcloud, dimensions, std::ref(transformable_trees), id*nodes_per_tree));
         
     }
     
@@ -94,7 +94,7 @@ vector<vector<Point<num_t>>> make_forest(vector<Point<num_t>> &cloud,vector<int>
         e.get();
     }
     
-    return trees;
+    //return trees;
 }
 
 template <typename num_t>
@@ -247,8 +247,8 @@ int main()
     std::cout << "  trees_array_transformable.size() " << trees_array_transformable.size() << "  trees_array_transformable[0].size() " << trees_array_transformable[0].size() << endl;
 
     
-    vector<vector<Point<num_t>>> trees = make_forest<num_t>(cloud, dimensions, datapoints_per_tree, threads, trees_array_transformable);
-    cout << "Number of trees: " << trees.size()<< endl;
+    make_forest<num_t>(cloud, dimensions, datapoints_per_tree, threads, trees_array_transformable);
+    //cout << "Number of trees: " << trees.size()<< endl;
     
     
     
@@ -289,14 +289,14 @@ int main()
     vector<vector<Point<num_t>>> new_tree = test_correct_trees(trees_array_transformable, datapoints_per_tree, threads, dimensions, numberOfHits, cloud);
     
     
-    std::cout << "tree.size() " << trees.size() << " vs new: " << new_tree.size() << endl;
-    std::cout << "tree[0].size() " << trees[0].size() << " vs new: " << new_tree[0].size() << endl;
+    //std::cout << "tree.size() " << trees.size() << " vs new: " << new_tree.size() << endl;
+    //std::cout << "tree[0].size() " << trees[0].size() << " vs new: " << new_tree[0].size() << endl;
     
     
     
-        print_Pointvector(trees[trees.size()-1]);
-        cout << "vs new tree: \n" << endl;
-        print_Pointvector(new_tree[trees.size()-1]);
+       // print_Pointvector(trees[trees.size()-1]);
+        //cout << "vs new tree: \n" << endl;
+        //print_Pointvector(new_tree[trees.size()-1]);
         
 
 
@@ -322,7 +322,7 @@ int main()
     
      
     
-    int size_of_forest = sizeof(int)*trees.size()*trees[0].size();
+    //int size_of_forest = sizeof(int)*trees.size()*trees[0].size();
     
     //check array: - wieder weg!
     /*for(int i = 0; i < 992; i++){

@@ -30,7 +30,7 @@ KD_tree.o: main.cpp KD_tree.hpp simple_kd_tree.hpp sorter.hpp
 KD_tree: InsideBox.o KD_tree.o InsideBox_link.o
 	$(GCC) $(CCFLAGS) -o $@ $+ $(LDFLAGS) $(EXTRA_LDFLAGS)
 
-run: build
+run: clean build
 	./KD_tree
 
 #all:

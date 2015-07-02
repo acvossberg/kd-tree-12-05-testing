@@ -101,7 +101,7 @@ void SimpleKDtree<T>::make_SimpleKDtreeHelper(vector<Point<T>> cloud, KDnode<T> 
         root->values = cloud[0];
         if(height == 1){
             Point<T> zero_point;
-            zero_point.x = zero_point.y = zero_point.z = 0;
+            zero_point.x = zero_point.y = zero_point.z = -1;
             //cout << "put extra children here: " << cloud[0].x << " " << cloud[0].y << endl;
             root->left = new KDnode<T>(zero_point);
             root->right = new KDnode<T>(zero_point);
@@ -127,9 +127,7 @@ void SimpleKDtree<T>::make_SimpleKDtree(vector<Point<T>> cloud, int left, int ri
     else{
         root = new KDnode<T>();
         this->make_SimpleKDtreeHelper(cloud, root, 0, cloud.size()-1, 0);
-
     }
-    
 }
 template <class T>
 bool SimpleKDtree<T>::compare_tree_node(KDnode<T> root, Point<T> Kdtree){
@@ -146,14 +144,14 @@ bool SimpleKDtree<T>::sameTreeHelper(KDnode<T> *root, int i, vector<Point<T>> Kd
     
     if(i >= Kdtree.size()) return true;
     if (!root){
-     return false;
+        return false;
      }
     
     if(compare_tree_node(root->values, Kdtree[i-1])){
         return sameTreeHelper(root->left, 2*i, Kdtree) && sameTreeHelper(root->right, 2*i+1, Kdtree);
     }
     
-    else if(root->values.x == 0 && root->values.y == 0  && Kdtree[i-1].x == -1 && Kdtree[i-1].y == -1 ){
+    else if(root->values.x == -1 && root->values.y == -1  && Kdtree[i-1].x == -1 && Kdtree[i-1].y == -1 ){
         //reached end-node
         return true;
     }

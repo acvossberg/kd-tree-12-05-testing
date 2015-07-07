@@ -233,6 +233,9 @@ int main()
     int threads = (numberOfHits+datapoints_per_tree-1)/datapoints_per_tree;
     vector<vector<num_t>> trees_array_transformable;
     trees_array_transformable.resize(number_of_dimensions+1, vector<num_t>(threads*datapoints_per_tree, -1));
+    treeRealArray[number_of_dimensions][threads*datapoints_per_tree];
+    
+    int treesArray[number_of_dimensions+1][threads*datapoints_per_tree];
     
     make_forest<num_t>(cloud, dimensions, datapoints_per_tree, threads, trees_array_transformable);
     //test if trees made with make_forest are correct:
@@ -246,13 +249,40 @@ int main()
     int* treeArray_y_new = &trees_array_transformable[2][0];
     int* treeArray_z_new = &trees_array_transformable[3][0];
     
+    int *treeArray_values[number_of_dimensions];
+    cout << "treeArray sizes: " << sizeof(treeArray_values) << " " << sizeof(treeArray_values[0]) << endl;
+
+    for(int i = 0; i<number_of_dimensions; i++){
+        treeArray_values[i] = &trees_array_transformable[i+1][0];
+    }
+
+    
+    /*int *array[number_of_dimensions][datapoints_per_tree*threads];
+    
+    for(int i=0; i<number_of_dimensions;i++){
+        //array[i] = new int[threads*datapoints_per_tree];
+        array[i] = &trees_array_transformable[i][0];
+    }
+    cout << "tree array sizes: " << sizeof(array) << " " << sizeof(array[0]) << endl;
+    */
+    for(int i = 0; i< sizeof(treeArray_values[0]); i++){
+        cout << "real array " << treeArray_values[0][i] << " vs vector " << treeArray_x_new[i] << endl;
+    }
+    /*
+    //make one 2d-array with values of dimensions
+    for(int i = 1 ; i< number_of_dimensions; i++){
+        
+        *treeArray_values[1] = &trees_array_transformable[1][0];
+    }
+    */
+    
     //make box, in which should be searched for hits
     //set all other dimensions to zero, if not used:
     int box[6] = {2, 8, 0, 0, 0, 0};
     
     Cuda_class<num_t> p;
-    p.cudaMain(threads, datapoints_per_tree, treeArray_x_new, treeArray_y_new, treeArray_z_new, treeArray_ID, box);
-    
+    //p.cudaMain(threads, datapoints_per_tree, treeArray_x_new, treeArray_y_new, treeArray_z_new, treeArray_ID, box);
+    p.cudaMain(threads, datapoints_per_tree, treeArray_values, treeArray_ID, box, number_of_dimensions);
     cloud.clear();
     return 0;
 }

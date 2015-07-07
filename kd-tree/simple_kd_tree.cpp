@@ -151,7 +151,7 @@ bool SimpleKDtree<T>::sameTreeHelper(KDnode<T> *root, int i, vector<Point<T>> Kd
         return sameTreeHelper(root->left, 2*i, Kdtree) && sameTreeHelper(root->right, 2*i+1, Kdtree);
     }
     
-    else if(root->values.x == -1 && root->values.y == -1  && Kdtree[i-1].x == -1 && Kdtree[i-1].y == -1 ){
+    else if(root->values.x == -1 && root->values.y == -1  && Kdtree[i-1].x == 0 && Kdtree[i-1].y == 0 ){
         //reached end-node
         return true;
     }

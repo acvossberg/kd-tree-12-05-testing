@@ -142,7 +142,7 @@ void insideBox(T **treeArray_values, int *treeArray_ID, T *box, int tree_size, i
 
 template <typename T>
 //void Cuda_class<T>::cudaMain(int number_of_trees, int tree_size, T treeArray_x[], T treeArray_y[], T treeArray_z[], int treeArray_ID[], T box[]){
-void Cuda_class<T>::cudaMain(int number_of_trees, int tree_size, T **treeArray_values, int treeArray_ID[], T box[],  int number_of_dimensions){
+void Cuda_class<T>::cudaMain(int number_of_trees, int tree_size, T **treeArray_values, int *treeArray_ID, T box[],  int number_of_dimensions){
     
     cudaSetDevice(MYDEVICE);
     std::cout << "number of trees: " << number_of_trees << std::endl;
@@ -166,16 +166,16 @@ void Cuda_class<T>::cudaMain(int number_of_trees, int tree_size, T **treeArray_v
     cudaMalloc(&d_treeArray_values, size_of_forest);
     cudaMalloc(&d_treeArray_ID, size_of_forest);
     //TODO: generic
-    cudaMalloc(&d_box, 6*sizeof(T));
+    cudaMalloc(&d_box, number_of_dimensions*2*sizeof(T));
     
     //send trees to gpu
     /*cudaMemcpy(d_treeArray_x, treeArray_x, size_of_forest, cudaMemcpyHostToDevice);
     cudaMemcpy(d_treeArray_y, treeArray_y, size_of_forest, cudaMemcpyHostToDevice);
     cudaMemcpy(d_treeArray_z, treeArray_z, size_of_forest, cudaMemcpyHostToDevice);*/
-    cudaMemcpy(d_treeArray_values, treeArray_values, size_of_forest, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_treeArray_values, treeArray_values, size_of_forest*number_of_dimensions, cudaMemcpyHostToDevice);
     cudaMemcpy(d_treeArray_ID, treeArray_ID, size_of_forest, cudaMemcpyHostToDevice);
     //TODO: generic
-    cudaMemcpy(d_box, box, 6*sizeof(T), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_box, box, number_of_dimensions*2*sizeof(T), cudaMemcpyHostToDevice);
     
     
     //search forest for points inside box_dimensions - returns all treeArray_ID's which are inside box - rest are filled with -1

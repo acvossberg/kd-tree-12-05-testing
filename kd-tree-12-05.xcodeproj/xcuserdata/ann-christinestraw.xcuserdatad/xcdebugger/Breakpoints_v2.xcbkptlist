@@ -805,23 +805,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "85"
             endingLineNumber = "85"
-            landmarkName = "make_forest(vector&lt;Point&lt;num_t&gt;&gt; &amp;cloud,vector&lt;int&gt; &amp;dimensions, int datapoints_per_tree, int nthreads, vector&lt;vector&lt;num_t&gt;&gt; &amp;transformable_trees)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "kd-tree/main.cpp"
-            timestampString = "457960685.300772"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "247"
-            endingLineNumber = "247"
-            landmarkName = "main()"
+            landmarkName = "make_forest(vector&lt;vector&lt;num_t&gt;&gt; &amp;cloud,vector&lt;int&gt; &amp;dimensions, int datapoints_per_tree, int nthreads, num_t *transformable_trees, int *treesArray_ID)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

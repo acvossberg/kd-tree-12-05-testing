@@ -19,6 +19,7 @@
 #include <cmath>
 #include <future>
 #include "InsideBox.hpp"
+#include <numeric>
 
 #define MYDEVICE 0
 
@@ -26,8 +27,9 @@ using namespace std;
 
 
 template <typename num_t>
-void generateRandomPointCloud( vector<Point<num_t>> &point, const size_t N, const int max_range = 10)
+vector<num_t> generateRandomPointCloud( vector<Point<num_t>> &point, const size_t N, const int max_range = 10)
 {
+    vector<num_t> data;
     cout << "Generating "<< N << " point cloud...\n";
     point.resize(N);
     for (size_t i=0;i<N;i++)
@@ -36,10 +38,17 @@ void generateRandomPointCloud( vector<Point<num_t>> &point, const size_t N, cons
         point[i].y = max_range * (rand() % 1000) / num_t(1000);
         point[i].z = max_range * (rand() % 1000) / num_t(1000);
         point[i].ID = i;
+        
+        //nur so gemacht, damit testen kann, ob auch stimmt! kann ja von hand erweitert werden!!
+        data.push_back(point[i].x);
+        data.push_back(point[i].y);
+        data.push_back(point[i].z);
+        
         //cout << point[i].x << ", " << point[i].y << ", " << point[i].z << " ID: " << point[i].ID << endl;
         
     }
     std::cout << "done\n \n";
+    return data;
 }
 
 template <typename num_t>
@@ -63,15 +72,15 @@ void print_Pointvector(vector<Point<num_t>> a){
 }
 
 template <typename num_t>
-void make_tree(vector<Point<num_t>> cloud, vector<int> dimensions, num_t **transformable_trees, int *treesArray_ID, int offset){
-    KD_tree<num_t> tree(cloud, dimensions, transformable_trees, treesArray_ID, offset);
+void make_tree(vector<Point<num_t>> cloud,vector<num_t> data, vector<int> &dataID, vector<int> dimensions, num_t **transformable_trees, int *treesArray_ID, int offset){
+    KD_tree<num_t> tree(cloud,data, dataID, dimensions, transformable_trees, treesArray_ID, offset);
     tree.KD_tree_recursive(0, cloud.size()-1, 0, 1);
 }
 
 //TODO: change all the copying around.. maybe use std::move
 //TODO: check speedup by changing number of threads
 template <typename num_t>
-void make_forest(vector<Point<num_t>> &cloud,vector<int> &dimensions, int datapoints_per_tree, int nthreads, num_t **transformable_trees, int *treesArray_ID){
+void make_forest(vector<Point<num_t>> &cloud, vector<num_t> &data,vector<int> &dataID, vector<int> &dimensions, int datapoints_per_tree, int nthreads, num_t **transformable_trees, int *treesArray_ID){
     vector<std::future<void>> futures;
     
     int nodes_per_tree = datapoints_per_tree;
@@ -84,13 +93,20 @@ void make_forest(vector<Point<num_t>> &cloud,vector<int> &dimensions, int datapo
         }
         //TODO: NO COPY!!
         vector<Point<num_t>> threadcloud(cloud.begin()+id*datapoints_per_tree, cloud.begin()+(id+1)*datapoints_per_tree);
-        futures.push_back(std::async(launch::async, make_tree<num_t>, threadcloud, dimensions, transformable_trees, treesArray_ID, id*nodes_per_tree));
+        vector<num_t> threaddata(data.begin()+id*datapoints_per_tree*dimensions.size(), data.begin()+(id+1)*datapoints_per_tree*dimensions.size());
+        vector<int> threaddataID(dataID.begin()+id*datapoints_per_tree*dimensions.size(), dataID.begin()+(id+1)*datapoints_per_tree*dimensions.size());
+        /*for(int i = 0 ; i<threaddata.size(); i++){
+         cout << threaddata[i] << " vs x: " << threadcloud[i/dimensions.size()].x << endl;
+         }*/
+        cout << threaddata.size() << "datasize vs cloudsize " << threadcloud.size() << endl;
         
+        //futures.push_back(std::async(launch::async, make_tree<num_t>, threadcloud, threaddata, dimensions, transformable_trees, treesArray_ID, id*nodes_per_tree));
+        make_tree(threadcloud, threaddata, threaddataID, dimensions, transformable_trees, treesArray_ID, id*nodes_per_tree);
     }
     
-    for(auto &e : futures) {
+    /*for(auto &e : futures) {
         e.get();
-    }
+    }*/
     
 }
 
@@ -199,14 +215,20 @@ int main()
     typedef int num_t;
     
     vector<Point<num_t>> cloud;
-    
-    // Generate points:
-    int numberOfHits = 1000;
-    generateRandomPointCloud(cloud, numberOfHits);
-    
     //must be defined {1, 2, 3} = {x, y, z}
     vector<int> dimensions = {1,2,3};
     int number_of_dimensions = dimensions.size();
+    
+    // Generate points:
+    int numberOfHits = 50;//1000;
+    vector<num_t> data = generateRandomPointCloud(cloud, numberOfHits);
+    vector<int> dataIDs(numberOfHits);
+    std:iota(std::begin(dataIDs), std::end(dataIDs), 0);
+    
+    /*for(int i = 0 ; i<data.size(); i++){
+        cout << data[i] << " vs x: " << cloud[i/number_of_dimensions].x << endl;
+    }*/
+    
     
     //get_size_of_tree from cuda_device --> #datapoints per thread.. = datapoints per tree
     int device;
@@ -244,48 +266,13 @@ int main()
     }
     
     
-    make_forest<num_t>(cloud, dimensions, datapoints_per_tree, threads, treesArray, treesArray_ID);
+    num_t *treeArray;
+    treeArray = new num_t [threads*datapoints_per_tree*number_of_dimensions];//[number_of_dimensions+1][threads*datapoints_per_tree];
+    
+    make_forest<num_t>(cloud, data, dataIDs,  dimensions, datapoints_per_tree, threads, treesArray, treesArray_ID);
     //test if trees made with make_forest are correct:
     test_correct_trees(treesArray,treesArray_ID, datapoints_per_tree, threads, dimensions, numberOfHits, cloud);
     
-    /*
-    //convert trees_array to real arrays
-    int* treeArray_ID = &trees_array_transformable[0][0];
-    
-    int* treeArray_x_new = &trees_array_transformable[1][0];
-    int* treeArray_y_new = &trees_array_transformable[2][0];
-    int* treeArray_z_new = &trees_array_transformable[3][0];
-    
-    int *treeArray_values[number_of_dimensions];
-    cout << "treeArray sizes: " << sizeof(treeArray_values) << " " << sizeof(treeArray_values[0]) << endl;
-
-    for(int i = 0; i<number_of_dimensions; i++){
-        treeArray_values[i] = &trees_array_transformable[i+1][0];
-    }
-
-    
-    cout << "datapoints*threads " << threads*datapoints_per_tree << endl;
-    for(int i=0; i<number_of_dimensions;i++){
-        //a[i] = new int[threads*datapoints_per_tree];
-        array[i] = &trees_array_transformable[i][0];
-    }
-    for(int i = 0; i< number_of_dimensions; i++){
-        a[i] = trees_array_transformable[i].data();
-    
-    }
-    cout << "tree array sizes: " << sizeof(a)/sizeof(a[0]) << endl;
-    
-    for(int i = 0; i< sizeof(treeArray_values[0]); i++){
-        cout << "real array " << treeArray_values[0][i] << " vs vector " << treeArray_x_new[i] << endl;
-    }*/
-    
-    /*
-    //make one 2d-array with values of dimensions
-    for(int i = 1 ; i< number_of_dimensions; i++){
-        
-        *treeArray_values[1] = &trees_array_transformable[1][0];
-    }
-    */
     
     //make box, in which should be searched for hits
     //set all other dimensions to zero, if not used:
@@ -293,7 +280,7 @@ int main()
     
     Cuda_class<num_t> p;
     //p.cudaMain(threads, datapoints_per_tree, treeArray_x_new, treeArray_y_new, treeArray_z_new, treeArray_ID, box);
-    p.cudaMain(threads, datapoints_per_tree, treesArray, treesArray_ID, box, number_of_dimensions);
+    //p.cudaMain(threads, datapoints_per_tree, treesArray, treesArray_ID, box, number_of_dimensions);
     cloud.clear();
     return 0;
 }

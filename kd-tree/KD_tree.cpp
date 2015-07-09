@@ -14,7 +14,7 @@
 using namespace std;
 
 template < class T>
-KD_tree<T>::KD_tree(vector<Point<T>> &cloudn, vector<Hit<T>> &cloud, vector<int>& dimensions, T **transformable_trees_, int *treesArray_ID_, int& offset_) : dim(dimensions), offset(offset_), transformable_trees(transformable_trees_), treesArray_ID(treesArray_ID_), data(cloud), datan(cloudn){
+KD_tree<T>::KD_tree(vector<Point<T>> &cloudn, vector<Hit<T>> &cloud, vector<int>& dimensions, T *transformable_trees_, int *treesArray_ID_, int& offset_) : dim(dimensions), offset(offset_), transformable_trees(transformable_trees_), treesArray_ID(treesArray_ID_), data(cloud), datan(cloudn){
     
     //offset = offset_;
     //transformable_trees = transformable_trees_;
@@ -77,21 +77,10 @@ void KD_tree<T>::selectMedian(int d, int median, int left, int right, int pos)//
     
     result[pos-1] = datan[median];
     
-    //transformable_trees[0][offset+pos-1] = data[median].ID;
-    /*treesArray_ID[offset+pos-1] = datan[median].ID;
-    transformable_trees[0][offset+pos-1] = datan[median].x;
-    transformable_trees[1][offset+pos-1] = datan[median].y;
-    transformable_trees[2][offset+pos-1] = datan[median].z;*/
-    /*bool correct = true;
-    for(int i = 0; i< datan.size(); i++){
-        if(datan[i].x != data[i].datapoints[0]) correct = false;
-        if(datan[i].y != data[i].datapoints[1]) correct = false;
-        if(datan[i].z != data[i].datapoints[2]) correct = false;
-    }
     
-    cout << "correct datas is: " << correct << endl;*/
+    //insert hit into KDtree:
     for(int i = 0; i<dim.size();i++){
-        transformable_trees[i][offset+pos-1] = data[median].datapoints[i];
+        transformable_trees[offset*dim.size()+(pos-1)*dim.size()+i] = data[median].datapoints[i];
     }
     treesArray_ID[offset+pos-1] = data[median].ID;
     

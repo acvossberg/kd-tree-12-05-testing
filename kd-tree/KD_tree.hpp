@@ -21,7 +21,7 @@ class SimpleKDtree;
 template <class T>
 class KD_tree{
 public:
-    KD_tree(vector<Point<T>> &datan, vector<Hit<T>> &data, vector<int>& dimensions, T **transformable_trees_,int *treesArray_ID, int& offset_);
+    KD_tree(vector<Point<T>> &datan, vector<Hit<T>> &data, vector<int>& dimensions, T *transformable_trees_,int *treesArray_ID, int& offset_);
     void printTree();
     void KD_tree_recursive(int left, int right, int k, int pos);
     bool testTree( SimpleKDtree<T> *simpleTree);
@@ -39,7 +39,7 @@ private:
     vector<Point<T>>& datan;
     const vector<int>& dim;
     vector<Point<T>> result;
-    T** transformable_trees;
+    T* transformable_trees;
     int* treesArray_ID;
     int& offset;
 

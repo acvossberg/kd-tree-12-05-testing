@@ -72,7 +72,7 @@ void print_Pointvector(vector<Point<num_t>> a){
 }
 
 template <typename num_t>
-void make_tree(vector<Point<num_t>> cloudn, vector<Hit<num_t>> cloud, vector<int> dimensions, num_t **transformable_trees, int *treesArray_ID, int offset){
+void make_tree(vector<Point<num_t>> cloudn, vector<Hit<num_t>> cloud, vector<int> dimensions, num_t *transformable_trees, int *treesArray_ID, int offset){
     KD_tree<num_t> tree(cloudn, cloud, dimensions, transformable_trees, treesArray_ID, offset);
     tree.KD_tree_recursive(0, cloud.size()-1, 0, 1);
 }
@@ -80,7 +80,7 @@ void make_tree(vector<Point<num_t>> cloudn, vector<Hit<num_t>> cloud, vector<int
 //TODO: change all the copying around.. maybe use std::move
 //TODO: check speedup by changing number of threads
 template <typename num_t>
-void make_forest(vector<Point<num_t>> &cloudn, vector<Hit<num_t>> &cloud, vector<int> &dimensions, int datapoints_per_tree, int nthreads, num_t **transformable_trees, int *treesArray_ID){
+void make_forest(vector<Point<num_t>> &cloudn, vector<Hit<num_t>> &cloud, vector<int> &dimensions, int datapoints_per_tree, int nthreads, num_t *transformable_trees, int *treesArray_ID){
     vector<std::future<void>> futures;
     
     int nodes_per_tree = datapoints_per_tree;
@@ -125,7 +125,7 @@ vector<int> inBox(Point<num_t> start, Point<num_t> end, vector<vector<Point<num_
 }
 
 template<typename num_t>
-vector<vector<Point<num_t>>> convertTree(num_t **tree, int *treesArray_ID, int number_of_trees, int datapoints_per_tree, int numberOfHits){
+vector<vector<Point<num_t>>> convertTree(num_t *tree, int *treesArray_ID, int number_of_trees, int datapoints_per_tree, int numberOfHits){
     vector<vector<Point<num_t>>> trees;
     trees.resize(number_of_trees, vector<Point<num_t>>(datapoints_per_tree));
     
@@ -136,9 +136,9 @@ vector<vector<Point<num_t>>> convertTree(num_t **tree, int *treesArray_ID, int n
             
         }
         trees[tree_nr][i%datapoints_per_tree].ID = treesArray_ID[i];
-        trees[tree_nr][i%datapoints_per_tree].x = tree[0][i];
-        trees[tree_nr][i%datapoints_per_tree].y = tree[1][i];
-        trees[tree_nr][i%datapoints_per_tree].z = tree[2][i];
+        trees[tree_nr][i%datapoints_per_tree].x = tree[0+3*i];
+        trees[tree_nr][i%datapoints_per_tree].y = tree[1+3*i];
+        trees[tree_nr][i%datapoints_per_tree].z = tree[2+3*i];
     }
 
     trees[number_of_trees-1].resize(pow(2,floor(log2(numberOfHits - datapoints_per_tree*(number_of_trees-1))) +1) - 1);
@@ -147,7 +147,7 @@ vector<vector<Point<num_t>>> convertTree(num_t **tree, int *treesArray_ID, int n
 
 //check wether tree_array is correct by generating SimpleKDtree and comparing
 template <typename num_t>
-void test_correct_trees(num_t **trees_array_transformable, int *treesArray_ID,  int datapoints_per_tree, int threads, vector<int> dimensions, int numberOfHits, vector<Point<num_t>> &cloud){
+void test_correct_trees(num_t *trees_array_transformable, int *treesArray_ID,  int datapoints_per_tree, int threads, vector<int> dimensions, int numberOfHits, vector<Point<num_t>> &cloud){
 
     
     vector<vector<Point<num_t>>> trees = convertTree(trees_array_transformable, treesArray_ID, threads, datapoints_per_tree, numberOfHits);
@@ -207,6 +207,9 @@ int main()
     //: test for larger - random trees. -> DONE
     //: test for double/float -> DONE
     //: free kd_tree.. ?
+    //TODO: remove Point completely
+    //TODO: change 2D-array to 1D-array
+    
     
     //type to use:
     typedef int num_t;
@@ -247,15 +250,19 @@ int main()
     vector<vector<num_t>> trees_array_transformable;
     trees_array_transformable.resize(number_of_dimensions+1, vector<num_t>(threads*datapoints_per_tree, -1));
     
-    
-    int *treesArray_ID = new int[threads*datapoints_per_tree];
+   
     //all not-used elements in treesArray are by default set to zero by compiler
-    num_t **treesArray;//[number_of_dimensions+1][threads*datapoints_per_tree];
+    int *treesArray_ID = new int[threads*datapoints_per_tree];
+    num_t *treesArray;
+    treesArray = new num_t [threads*datapoints_per_tree*number_of_dimensions];//[number_of_dimensions+1][threads*datapoints_per_tree];
+    
+    //make 2D-array:
+    /*num_t **treesArray;//[number_of_dimensions+1][threads*datapoints_per_tree];
     treesArray = new int *[number_of_dimensions];
     for(int i = 0; i <number_of_dimensions; i++){
         treesArray[i] = new int[threads*datapoints_per_tree];
     }
-    
+    */
     
     make_forest<num_t>(cloudn, cloud, dimensions, datapoints_per_tree, threads, treesArray, treesArray_ID);
     
@@ -267,12 +274,11 @@ int main()
     //make box, in which should be searched for hits
     //set all other dimensions to zero, if not used:
     int box[6] = {2, 8, 0, 0, 0, 0};
-    /*
-    Cuda_class<num_t> p;
+    
+    /*Cuda_class<num_t> p;
     //p.cudaMain(threads, datapoints_per_tree, treeArray_x_new, treeArray_y_new, treeArray_z_new, treeArray_ID, box);
-    p.cudaMain(threads, datapoints_per_tree, treesArray, treesArray_ID, box, number_of_dimensions);
+    p.cudaMain(threads, datapoints_per_tree, treesArray, treesArray_ID, box, number_of_dimensions);*/
     cloud.clear();
-     */
     return 0;
 }
 

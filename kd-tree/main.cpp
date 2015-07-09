@@ -275,9 +275,9 @@ int main()
     //set all other dimensions to zero, if not used:
     int box[6] = {2, 8, 0, 0, 0, 0};
     
-    /*Cuda_class<num_t> p;
+    Cuda_class<num_t> p;
     //p.cudaMain(threads, datapoints_per_tree, treeArray_x_new, treeArray_y_new, treeArray_z_new, treeArray_ID, box);
-    p.cudaMain(threads, datapoints_per_tree, treesArray, treesArray_ID, box, number_of_dimensions);*/
+    p.cudaMain(threads, datapoints_per_tree, treesArray, treesArray_ID, box, number_of_dimensions);
     cloud.clear();
     return 0;
 }

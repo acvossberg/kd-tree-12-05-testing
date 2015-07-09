@@ -96,13 +96,13 @@ void insideBox(T *treeArray_x, T *treeArray_y, T *treeArray_z, int *treeArray_ID
 
 template <typename T>
 __device__
-void traverseTree( T **treeArray_values, int *treeArray_ID, T *box, int pos, int startOfTree, int endOfTree){
+void traverseTree( T *treeArray_values, int *treeArray_ID, T *box, int pos, int startOfTree, int endOfTree){
     
     //printf("\n threadIdx: %d startOfTree %d, endOfTree %d", threadIdx.x, startOfTree, endOfTree);
     int row = blockIdx.y * blockDim.y + threadIdx.y;
     if(startOfTree + pos -1 <= endOfTree){
         ///CHECK HERE!!!! STARTOFTREE+POS == INDEX  AND POS = i , i->2*i etc.
-       if( ((treeArray_values[row][startOfTree+pos] >= box[row] && treeArray_values[row][startOfTree+pos] <= box[row]) || (box[row] == 0 && box[row] == 0))  && ((treeArray_values[row][startOfTree+pos] >= box[row] && treeArray_values[row][startOfTree+pos] <= box[row]) || (box[row] == 0 && box[row] == 0)) && ((treeArray_values[row][startOfTree+pos] >= box[row] && treeArray_values[row][startOfTree+pos] <= box[row]) || (box[row] == 0 && box[row] == 0))){
+       if( ((treeArray_values[(startOfTree+pos)*blockDim.y+row] >= box[2*row] && treeArray_values[(startOfTree+pos)*blockDim.y+row] <= box[row*2+1]) || (box[row*2] == 0 && box[row*2+1] == 0))  && ((treeArray_values[(startOfTree+pos)*blockDim.y+row] >= box[row*2] && treeArray_values[(startOfTree+pos)*blockDim.y+row] <= box[row*2+1]) || (box[row*2] == 0 && box[row*2+1] == 0)) && ((treeArray_values[(startOfTree+pos)*blockDim.y+row] >= box[row*2] && treeArray_values[(startOfTree+pos)*blockDim.y+row] <= box[row*2+1]) || (box[row*2] == 0 && box[row*2+1] == 0))){
             //inside box
         }
         else{
@@ -128,21 +128,21 @@ void traverseTree( T **treeArray_values, int *treeArray_ID, T *box, int pos, int
 
 template <typename T>
 __global__
-void insideBox(T **treeArray_values, int *treeArray_ID, T *box, int tree_size, int number_of_dimensions){
+void insideBox(T *treeArray_values, int *treeArray_ID, T *box, int tree_size, int number_of_dimensions){
     
     int row = blockIdx.y * blockDim.y + threadIdx.y;
     int col = blockIdx.x * blockDim.x + threadIdx.x;
     //for each thread has it's own tree starting here
     int startOfTree = threadIdx.x * tree_size ;
-    int endOfTree = startOfTree + tree_size - 1;
-    printf("\n threadIdx: %d startOfTree %d, endOfTree %d, row %d, col %d", threadIdx.x, startOfTree, endOfTree, row, col);
+    int endOfTree = startOfTree + (tree_size - 1);
+    printf("\n threadIdx: %d startOfTree %d, endOfTree %d, row %d, col %d, blockDim %d", threadIdx.x, startOfTree, endOfTree, row, col, blockDim.y);
     traverseTree(treeArray_values, treeArray_ID, box, 1, startOfTree, endOfTree);
 }
 
 
 template <typename T>
 //void Cuda_class<T>::cudaMain(int number_of_trees, int tree_size, T treeArray_x[], T treeArray_y[], T treeArray_z[], int treeArray_ID[], T box[]){
-void Cuda_class<T>::cudaMain(int number_of_trees, int tree_size, T **treeArray_values, int *treeArray_ID, T box[],  int number_of_dimensions){
+void Cuda_class<T>::cudaMain(int number_of_trees, int tree_size, T *treeArray_values, int *treeArray_ID, T box[],  int number_of_dimensions){
     
     cudaSetDevice(MYDEVICE);
     std::cout << "number of trees: " << number_of_trees << std::endl;
@@ -151,7 +151,7 @@ void Cuda_class<T>::cudaMain(int number_of_trees, int tree_size, T **treeArray_v
     
     //TODO: int ----> num_t
     int size_of_forest = number_of_trees*tree_size*sizeof(int);
-    T **d_treeArray_values;
+    T *d_treeArray_values;
     //T *d_treeArray_x;
     //T *d_treeArray_y;
     //T *d_treeArray_z;
@@ -163,7 +163,7 @@ void Cuda_class<T>::cudaMain(int number_of_trees, int tree_size, T **treeArray_v
     /*cudaMalloc(&d_treeArray_x, size_of_forest);
     cudaMalloc(&d_treeArray_y, size_of_forest);
     cudaMalloc(&d_treeArray_z, size_of_forest);*/
-    cudaMalloc(&d_treeArray_values, size_of_forest);
+    cudaMalloc(&d_treeArray_values, size_of_forest*number_of_dimensions);
     cudaMalloc(&d_treeArray_ID, size_of_forest);
     //TODO: generic
     cudaMalloc(&d_box, number_of_dimensions*2*sizeof(T));

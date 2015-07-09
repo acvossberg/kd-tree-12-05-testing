@@ -9,7 +9,7 @@
 #ifndef __kd_tree_12_05__simple_kd_tree__
 #define __kd_tree_12_05__simple_kd_tree__
 
-#include <stdio.h>¨
+#include <stdio.h>
 #include <vector>
 #include "sorter.hpp"
 using namespace std;

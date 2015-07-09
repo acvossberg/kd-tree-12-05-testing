@@ -36,7 +36,7 @@ private:
     void original_order_median_new(int median, int d, int left, int right);
     T quick_select(vector<T> &input, int p, int r, int k, int d);
     int partition(vector<T> &input, int p, int r, int d);
-    T qselect(vector<T> &pArray, int k, int li, int hi, int dimension_offset);
+    T qselect(int k, int li, int hi, int dimension_offset);
     vector<Point<T>>& data;
     vector<T>& vectorData;
     vector<int> dataID;

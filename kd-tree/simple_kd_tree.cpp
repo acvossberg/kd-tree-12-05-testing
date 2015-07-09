@@ -74,8 +74,8 @@ void SimpleKDtree<T>::make_SimpleKDtreeHelper(vector<Point<T>> cloud, KDnode<T> 
 
         k = k%dim.size();
         //s.d. stable_sort die richtige Reihenfolge hat, jedes mal nach indices sortieren:
-        sort(cloud.begin(), cloud.end(), sorter<T>(ID_val));
-        stable_sort(cloud.begin(), cloud.end(), sorter<T>(dim[k]));
+        sort(cloud.begin(), cloud.end(), sortern<T>(ID_val));
+        stable_sort(cloud.begin(), cloud.end(), sortern<T>(dim[k]));
         
         if(root){
             root->values = cloud[mid];

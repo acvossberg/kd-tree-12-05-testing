@@ -14,7 +14,7 @@
 using namespace std;
 
 template < class T>
-KD_tree<T>::KD_tree(vector<Point<T>> &cloud, vector<int>& dimensions, T **transformable_trees_, int *treesArray_ID_, int& offset_) : dim(dimensions), offset(offset_), transformable_trees(transformable_trees_), treesArray_ID(treesArray_ID_), data(cloud){
+KD_tree<T>::KD_tree(vector<Point<T>> &cloudn, vector<Hit<T>> &cloud, vector<int>& dimensions, T **transformable_trees_, int *treesArray_ID_, int& offset_) : dim(dimensions), offset(offset_), transformable_trees(transformable_trees_), treesArray_ID(treesArray_ID_), data(cloud), datan(cloudn){
     
     //offset = offset_;
     //transformable_trees = transformable_trees_;
@@ -65,50 +65,115 @@ void KD_tree<T>::selectMedian(int d, int median, int left, int right, int pos)//
     //nth_element sorts data left - right.
     //sorts element s.t. all smaller than median on the left and larger on right
     nth_element(data.begin()+left, data.begin() + median, data.begin()+right, sorter<T>(d));
+    nth_element(datan.begin()+left, datan.begin() + median, datan.begin()+right, sortern<T>(d+1));
     
     //cout << "after sorted with nth_element: von " << left << " bis " <<  right << " with dim= " << d << endl;
-    //printData();
+    
     
     //bring duplicate values of median in original order
+    original_order_medianN(median, d+1, left, right);
     original_order_median(median, d, left, right);
+    //printData();
     
-    result[pos-1] = data[median];
+    result[pos-1] = datan[median];
     
     //transformable_trees[0][offset+pos-1] = data[median].ID;
-    treesArray_ID[offset+pos-1] = data[median].ID;
-    transformable_trees[0][offset+pos-1] = data[median].x;
-    transformable_trees[1][offset+pos-1] = data[median].y;
-    transformable_trees[2][offset+pos-1] = data[median].z;
-}
-
-template <class T>
-void KD_tree<T>::original_order_median(int median_position, int d, int left, int right){
-    T median_value = get_value(d, data[median_position]);
+    /*treesArray_ID[offset+pos-1] = datan[median].ID;
+    transformable_trees[0][offset+pos-1] = datan[median].x;
+    transformable_trees[1][offset+pos-1] = datan[median].y;
+    transformable_trees[2][offset+pos-1] = datan[median].z;*/
+    /*bool correct = true;
+    for(int i = 0; i< datan.size(); i++){
+        if(datan[i].x != data[i].datapoints[0]) correct = false;
+        if(datan[i].y != data[i].datapoints[1]) correct = false;
+        if(datan[i].z != data[i].datapoints[2]) correct = false;
+    }
     
+    cout << "correct datas is: " << correct << endl;*/
+    for(int i = 0; i<dim.size();i++){
+        transformable_trees[i][offset+pos-1] = data[median].datapoints[i];
+    }
+    treesArray_ID[offset+pos-1] = data[median].ID;
+    
+}
+template <class T>
+void KD_tree<T>::original_order_medianN(int median_position, int d, int left, int right){
+    T median_value = get_value(d, datan[median_position]);
     //make median values contiguous
     int med_left = median_position;
     int med_right = median_position;
     int leftIt = left;
     int rightIt = right-1;
     
+    //cout << "med_left: " << med_left << " leftIt " << leftIt << " med_right: " << med_right << " rightIt " << rightIt << endl;
+    //cout << "size of data: " << datan.size() << endl;
     while(leftIt < med_left){
         //find next element left of median, that is not median
-        while(get_value(d, data[med_left]) == median_value && med_left >= left ){ med_left--; }
+        while(get_value(d, datan[med_left]) == median_value && med_left >= left ){ med_left--; }
         //find first element from left, that is median
-        while(get_value(d, data[leftIt]) != median_value){ leftIt++;}
+        while(get_value(d, datan[leftIt]) != median_value){ leftIt++;}
         
         if(leftIt < med_left){
             //cout << "watch out - left-med switched " << leftIt << " " << med_left << endl;
-    
-            swap(data[leftIt], data[med_left]);}
+            swap(datan[leftIt], datan[med_left]);
+        }
     }
-    
     if(med_right == rightIt) med_right++;
     while(med_right < rightIt){
         //find next element left of median, that is not median
-        while(get_value(d, data[med_right]) == median_value && med_right < right){ med_right++; }
+        while(get_value(d, datan[med_right]) == median_value && med_right < right){ med_right++; //cout << "med_right: " << med_right << " and value " << get_value(d, datan[med_right]) << endl;
+        }
         //find first element from left, that is median
-        while(get_value(d, data[rightIt]) != median_value){ rightIt--;}
+        while(get_value(d, datan[rightIt]) != median_value){ rightIt--;}
+        
+        if(med_right < rightIt){
+            //cout << "watch out - right-med switched " << rightIt << " " << med_right << endl;
+            swap(datan[rightIt], datan[med_right]);
+        }
+    }
+    
+    sort(datan.begin()+leftIt, datan.begin()+med_right, sortern<T>(4));
+}
+
+template <class T>
+void KD_tree<T>::original_order_median(int median_position, int d, int left, int right){
+    //cout << "d " << d << " left " << left << " right " << right << endl;
+    T median_value = data[median_position].datapoints[d];
+    //make median values contiguous
+    int med_left = median_position;
+    int med_right = median_position;
+    int leftIt = left;
+    int rightIt = right-1;
+    //cout << "med_left: " << med_left << " leftIt " << leftIt << " med_right: " << med_right << " rightIt " << rightIt << endl;
+
+    //cout << "size of data: " << data.size() << endl;
+    while(leftIt < med_left){
+        //find next element left of median, that is not median
+        while(data[med_left].datapoints[d] == median_value && med_left >= left ){
+            med_left--;
+            if(med_left < 0){break;}
+            //cout << "med_left: " << med_left << endl;
+        }
+        //find first element from left, that is median
+        while(data[leftIt].datapoints[d] != median_value){ leftIt++; //cout << "leftIt: " << leftIt << endl;
+        }
+        
+        if(leftIt < med_left){
+            //cout << "watch out - left-med switched " << leftIt << " " << med_left << endl;
+            swap(data[leftIt], data[med_left]);
+        }
+    }
+    if(med_right == rightIt) med_right++;
+    while(med_right < rightIt){
+        //find next element left of median, that is not median
+        while(data[med_right].datapoints[d] == median_value && med_right < right){
+            med_right++;
+            if(med_right > data.size()-1){break;}
+             //cout << "med_right: " << med_right << " and value " << data[med_right].datapoints[d] << endl;
+        }
+        //find first element from left, that is median
+        while(data[rightIt].datapoints[d] != median_value){ rightIt--;//cout << "rightIt: " << rightIt << endl;
+        }
         
         if(med_right < rightIt){
             //cout << "watch out - right-med switched " << rightIt << " " << med_right << endl;
@@ -116,14 +181,14 @@ void KD_tree<T>::original_order_median(int median_position, int d, int left, int
         }
     }
     
-    sort(data.begin()+leftIt, data.begin()+med_right, sorter<T>(4));
+    sort(data.begin()+leftIt, data.begin()+med_right, sorterID<T>());
 }
 
 template < class T>
 void KD_tree<T>::printData(){
     for(int i = 0; i< data.size(); i++){
-        cout << data[i].x << ", " << data[i].y << ", " << data[i].z << " ID: " << data[i].ID << endl;
-    }
+        cout <<"data " << data[i].datapoints[0] << ", " << data[i].datapoints[1] << ", " << data[i].datapoints[2] << " ID: " << data[i].ID << endl;
+        cout << "datan " << datan[i].x << ", " << datan[i].y << ", " << datan[i].z << " ID: " << datan[i].ID << endl;    }
     cout << "\n" << endl;
 }
 template <class T>
@@ -135,7 +200,7 @@ void KD_tree<T>::KD_tree_recursive(int left, int right, int k, int pos){
         //check ob korrekt gerundet wird
         k = k%dim.size();
         int d = dim[k];
-        selectMedian( d, med, left, right+1, pos);
+        selectMedian( d-1, med, left, right+1, pos);
         k++;
     
         //left:

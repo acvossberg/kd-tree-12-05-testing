@@ -507,7 +507,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "19"
             endingLineNumber = "19"
-            landmarkName = "dataID(dataID_)"
+            landmarkName = "data(cloud)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -522,9 +522,7 @@
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "144"
-            endingLineNumber = "144"
-            landmarkName = "test_correct_trees(num_t **trees_array_transformable, int *treesArray_ID, int datapoints_per_tree, int threads, vector&lt;int&gt; dimensions, int numberOfHits, vector&lt;Point&lt;num_t&gt;&gt; &amp;cloud)"
-            landmarkType = "7">
+            endingLineNumber = "144">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -634,7 +632,9 @@
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "83"
-            endingLineNumber = "83">
+            endingLineNumber = "83"
+            landmarkName = "original_order_median(int median_position, int d, int left, int right)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -665,7 +665,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "125"
             endingLineNumber = "125"
-            landmarkName = "printData()"
+            landmarkName = "KD_tree_recursive(int left, int right, int k, int pos)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -745,7 +745,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "139"
             endingLineNumber = "139"
-            landmarkName = "test_correct_trees(num_t **trees_array_transformable, int *treesArray_ID, int datapoints_per_tree, int threads, vector&lt;int&gt; dimensions, int numberOfHits, vector&lt;Point&lt;num_t&gt;&gt; &amp;cloud)"
+            landmarkName = "printDevProp(cudaDeviceProp devProp)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -786,12 +786,42 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "kd-tree/main.cpp"
+            timestampString = "457006711.742871"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "278"
+            endingLineNumber = "278">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "kd-tree/main.cpp"
             timestampString = "457015161.107164"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "85"
             endingLineNumber = "85"
-            landmarkName = "make_forest(vector&lt;Point&lt;num_t&gt;&gt; &amp;cloud,vector&lt;int&gt; &amp;dimensions, int datapoints_per_tree, int nthreads, num_t **transformable_trees, int *treesArray_ID)"
+            landmarkName = "make_forest(vector&lt;Point&lt;num_t&gt;&gt; &amp;cloud,vector&lt;int&gt; &amp;dimensions, int datapoints_per_tree, int nthreads, vector&lt;vector&lt;num_t&gt;&gt; &amp;transformable_trees)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "kd-tree/main.cpp"
+            timestampString = "457960685.300772"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "247"
+            endingLineNumber = "247"
+            landmarkName = "main()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -808,36 +838,6 @@
             startingLineNumber = "240"
             endingLineNumber = "240"
             landmarkName = "main()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "kd-tree/KD_tree.cpp"
-            timestampString = "458125300.634232"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "129"
-            endingLineNumber = "129">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "kd-tree/KD_tree.cpp"
-            timestampString = "458125380.152334"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "130"
-            endingLineNumber = "130"
-            landmarkName = "original_order_median_new(int median_position, int d, int left, int right)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

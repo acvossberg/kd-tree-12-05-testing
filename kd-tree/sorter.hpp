@@ -11,7 +11,6 @@
 
 #include <stdio.h>
 #include <iostream>
-#include <vector>
 
 template <typename num_t>
 struct Point{
@@ -42,18 +41,6 @@ public:
         }
     }
 };
-template <class num_T>
-class sorter1 {
-private:
-    short dim_;
-public:
-    sorter1(short d) : dim_(d) {}
-    
-    bool operator()(std::vector<num_T> const &a, std::vector<num_T> const &b) const {
-        return a[dim_] < b[dim_];
-    }
-};
-
 
 
 #endif /* defined(__kd_tree_12_05__sorter__) */

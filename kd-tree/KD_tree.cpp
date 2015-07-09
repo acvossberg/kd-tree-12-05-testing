@@ -14,7 +14,7 @@
 using namespace std;
 
 template < class T>
-KD_tree<T>::KD_tree(vector<Point<T>> &cloud,vector<T> &data_,vector<int> &dataID_, vector<int>& dimensions, T **transformable_trees_, int *treesArray_ID_, int& offset_) : dim(dimensions), offset(offset_), transformable_trees(transformable_trees_), treesArray_ID(treesArray_ID_), data(cloud), vectorData(data_), dataID(dataID_){
+KD_tree<T>::KD_tree(vector<Point<T>> &cloud,vector<vector<T>> &data_,vector<int> &dataID_,int begin_, int end_, vector<int>& dimensions, T **transformable_trees_, int *treesArray_ID_, int& offset_) : dim(dimensions), offset(offset_), transformable_trees(transformable_trees_), treesArray_ID(treesArray_ID_), data(cloud), vectorData(data_), dataID(dataID_){
     
     //offset = offset_;
     //transformable_trees = transformable_trees_;
@@ -26,6 +26,8 @@ KD_tree<T>::KD_tree(vector<Point<T>> &cloud,vector<T> &data_,vector<int> &dataID
     placeholder.x = -1; //TODO: some better marker/placeholder needed!
     placeholder.y = -1;
     placeholder.z = -1;
+    begin = begin_;
+    end = end_;
     result.resize(max_number_nodes, placeholder);
 }
 template <class T>
@@ -206,16 +208,8 @@ void KD_tree<T>::selectMedian(int d, int median, int left, int right, int pos)//
 {
     //nth_element sorts data left - right.
     //sorts element s.t. all smaller than median on the left and larger on right
-    
     nth_element(data.begin()+left, data.begin() + median, data.begin()+right, sorter<T>(d));
     
-    //quick_select(vectorData, left, right-1, median, d-1);
-    qselect(median, left, right-1, d-1);
-    
-    for(int i = 0; i<data.size(); i++){
-        cout << "data " << data[i].x << " vectorData " << vectorData[i*dim.size()+0] << endl;
-    
-    }
     //cout << "after sorted with nth_element: von " << left << " bis " <<  right << " with dim= " << d << endl;
     //printData();
     

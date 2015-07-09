@@ -96,6 +96,10 @@ void make_forest(vector<Point<num_t>> &cloud, vector<vector<num_t>> &data,vector
         }
         //TODO: NO COPY!!
         vector<Point<num_t>> threadcloud(cloud.begin()+id*datapoints_per_tree, cloud.begin()+(id+1)*datapoints_per_tree);
+        //vector<vector<num_t>> threaddata(data.begin()+id*datapoints_per_tree*dimensions.size(), data.begin()+(id+1)*datapoints_per_tree*dimensions.size());
+        //vector<int> threaddataID(dataID.begin()+id*datapoints_per_tree*dimensions.size(), dataID.begin()+(id+1)*datapoints_per_tree*dimensions.size());
+        
+        //cout << threaddata.size() << " / "<< threaddata[0].size() << "threaddatasize / threaddata[0].size() vs cloudsize " << threadcloud.size() << endl;
         
         //futures.push_back(std::async(launch::async, make_tree<num_t>, threadcloud, threaddata, dimensions, transformable_trees, treesArray_ID, id*nodes_per_tree));
         make_tree(threadcloud, data, dataID, id*datapoints_per_tree*dimensions.size(), (id+1)*datapoints_per_tree*dimensions.size(), dimensions, transformable_trees, treesArray_ID, id*nodes_per_tree);

@@ -52,75 +52,9 @@ T KD_tree<T>::get_value(int d, Point<T> val ){
             
     }
 }
-template < class T>
-int KD_tree<T>::partition(vector<T> &input, int NodeP, int NodeR, int dimension_offset)
-{
-    int p = NodeP*dim.size()+dimension_offset;
-    int r = NodeR*dim.size()+dimension_offset;
-    int pivot = input[r];
-    std::cout << "IN PARTITION: input.size " << input.size() <<" NodeP:" << NodeP << " NodeR:" << NodeR << " p:" << p << " r:" << r  << " dim-offset " << dimension_offset<< " with pivot: " << pivot <<  std::endl;
-    
-    
-    
-    while ( NodeP < NodeR )
-    {
-        //std::cout << " NodeP:" << NodeP << " NodeR:" << NodeR << " p:" << p << " r:" << r  << std::endl;
-        while ( input[p] < pivot ){
-            NodeP++;
-            p+=dim.size();
-            std::cout << "p is: " << p << " input[p] " << input[p] << std::endl;
-        }
-        while ( input[r] > pivot ){
-            NodeR--;
-            r-=dim.size();
-            std::cout << "r is: " << r << " input[r] " << input[r] << std::endl;
-
-        }
-        /*if( input[p] == input[r] ){
-            r+=dim.size();
-            NodeR++;
-        }*/
-        if ( NodeP < NodeR ) {
-            //swap dim.size number of elements:
-            swap_ranges(input.begin() + p, input.begin() + p + dim.size(), input.begin() + r );
-            //std::cout << "IN PARTITION" <<std::endl;
-        }
-    }
-
-    return NodeR;
-}
-
-template < class T>
-T KD_tree<T>::quick_select(vector<T> &input, int NodeP, int NodeR, int NodeK, int dimension_offset)
-{
-    int p = NodeP*dim.size()+dimension_offset;
-    int r = NodeR*dim.size()+dimension_offset;
-    
-    std::cout << "input.size " << input.size() <<" NodeP:" << NodeP << " NodeR:" << NodeR << " p:" << p << " r:" << r  << " dim-offset " <<dimension_offset<< std::endl;
-    
-    
-    if ( p == r ) return input[p];
-    int NodeJ = partition(input, NodeP, NodeR, dimension_offset);
-    int length = NodeJ - NodeP + 1;
-    if ( length == NodeK ) return input[NodeJ*dim.size()+dimension_offset];
-    else if ( NodeK < length ) return quick_select(input, NodeP, NodeJ - 1, NodeK, dimension_offset);
-    else return quick_select(input, NodeJ + 1, NodeR, NodeK - length, dimension_offset);
-}
-
-template<class T>
-void KD_tree<T>::printTree()
-{
-    cout << "printing tree with number of nodes: " << result.size() << endl;
-    for(int i = 0; i<result.size();i++){
-        cout << "(" << result[i].x << ", " << result[i].y << ", " << result[i].z << ") with ID " << result[i].ID <<  endl;
-    
-    }
-    cout << "done" << endl;
-}
 
 
-
-template <class T>
+/*template <class T>
 T KD_tree<T>::qselect(int k, int li, int hi, int dimension_offset) {
 
     int ksmall = k*dim.size()+dimension_offset;
@@ -152,6 +86,43 @@ T KD_tree<T>::qselect(int k, int li, int hi, int dimension_offset) {
     if (k < j) return qselect(k, li, j, dimension_offset);
     if (k > j) return qselect( k - j, j + 1, hi, dimension_offset);
     return vectorData[j];
+}*/
+
+template <class T>
+T KD_tree<T>::qselect2D(int k, int li, int hi, int dimension_offset) {
+    
+    if (hi - li <= 1){ return vectorData[dimension_offset][k];}
+    int j = li;
+    
+    //std::swap(pArray[j], pArray[k]);
+    for(int p = 0; p<dim.size(); p++){
+        swap(vectorData[p][j], vectorData[p][k]);
+    }
+    std::swap(dataID[j], dataID[k]);
+    
+    //cout << "not yet dumped" << endl;
+    for (int i = j = li + 1; i < hi; i++){
+        //if (pArray[i] < pArray[li])
+        if (vectorData[dimension_offset][i] < vectorData[dimension_offset][li]){
+            //std::swap(pArray[j++], pArray[i]);
+            for(int p = 0; p<dim.size(); p++){
+                swap(vectorData[p][j], vectorData[p][i]);
+            }
+            std::swap(dataID[j], dataID[i]);
+            j++;
+        }
+    }
+    //cout << "k " << k << " j " << j << endl;
+    //std::swap(pArray[--j], pArray[li]);
+    --j;
+    for(int p = 0; p<dim.size(); p++){
+        swap(vectorData[p][j], vectorData[p][li]);
+    }
+    std::swap(dataID[j], dataID[li]);
+    
+    if (k < j) return qselect2D(k, li, j, dimension_offset);
+    if (k > j) return qselect2D( k - j, j + 1, hi, dimension_offset);
+    return vectorData[dimension_offset][j];
 }
 
 template <class T>
@@ -210,6 +181,11 @@ void KD_tree<T>::selectMedian(int d, int median, int left, int right, int pos)//
     //sorts element s.t. all smaller than median on the left and larger on right
     nth_element(data.begin()+left, data.begin() + median, data.begin()+right, sorter<T>(d));
     
+    //do nth_element for vectorData:
+    //nth_element(vectorData.begin()+left, vectorData.begin()+median, vectorData.begin()+right, sorter1<T>(d));
+    qselect2D(median, left, right-1, d-1);
+    cout << "test" << endl;
+
     //cout << "after sorted with nth_element: von " << left << " bis " <<  right << " with dim= " << d << endl;
     //printData();
     
@@ -225,11 +201,51 @@ void KD_tree<T>::selectMedian(int d, int median, int left, int right, int pos)//
     transformable_trees[1][offset+pos-1] = data[median].y;
     transformable_trees[2][offset+pos-1] = data[median].z;
     
-    //checking if all data[].ID == dataID TODO: take away!!!
-    /*for(int i = 0; i<data.size(); i++){
-        if(data[i].ID != dataID[i]){cout << " not the same" << endl;}
-        else{cout << "THE SAME!!!!" << endl;}
-    }*/
+}
+
+template <class T>
+void KD_tree<T>::original_order_median2D(int median_position, int d, int left, int right){
+    //T median_value = get_value(d, data[median_position]);
+    T median_value = vectorData[d][median_position];
+    
+    //make median values contiguous
+    int med_left = median_position;
+    int med_right = median_position;
+    int leftIt = left;
+    int rightIt = right-1;
+    
+    while(leftIt < med_left){
+        //find next element left of median, that is not median
+        while(vectorData[d][med_left] == median_value && med_left >= left ){ med_left--; }
+        //find first element from left, that is median
+        while(vectorData[d][leftIt] != median_value){ leftIt++;}
+        
+        if(leftIt < med_left){
+            //cout << "watch out - left-med switched " << leftIt << " " << med_left << endl;
+            for(int p= 0; p<dim.size(); p++){
+                swap(vectorData[p][leftIt], vectorData[p][med_left]);
+            }
+            swap(dataID[leftIt], dataID[med_left]);
+        }
+    }
+    
+    if(med_right == rightIt) med_right++;
+    while(med_right < rightIt){
+        //find next element left of median, that is not median
+        while(vectorData[d][med_right] == median_value && med_right < right){ med_right++; }
+        //find first element from left, that is median
+        while(vectorData[d][rightIt] != median_value){ rightIt--;}
+        
+        if(med_right < rightIt){
+            //cout << "watch out - right-med switched " << rightIt << " " << med_right << endl;
+            for(int p= 0; p< dim.size(); p++){
+                swap(vectorData[p][rightIt], vectorData[p][med_right]);
+            }
+            swap(dataID[rightIt], dataID[med_right]);
+        }
+    }
+    //sort data with respect to IDs
+    sort(data.begin()+leftIt, data.begin()+med_right, sorter<T>(4));
 }
 
 template <class T>
@@ -250,7 +266,7 @@ void KD_tree<T>::original_order_median(int median_position, int d, int left, int
         
         if(leftIt < med_left){
             //cout << "watch out - left-med switched " << leftIt << " " << med_left << endl;
-    
+            
             swap(data[leftIt], data[med_left]);
         }
     }

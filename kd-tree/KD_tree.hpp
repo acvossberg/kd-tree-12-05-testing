@@ -34,9 +34,12 @@ private:
     void selectMedian(int d, int median, int left, int right, int pos);
     void original_order_median(int median, int d, int left, int right);
     void original_order_median_new(int median, int d, int left, int right);
-    T quick_select(vector<T> &input, int p, int r, int k, int d);
-    int partition(vector<T> &input, int p, int r, int d);
+    void original_order_median2D(int median_position, int d, int left, int right);
+    
     T qselect(int k, int li, int hi, int dimension_offset);
+    T qselect2D(int k, int li, int hi, int dimension_offset);
+    
+    
     vector<Point<T>>& data;
     vector<vector<T>>& vectorData;
     vector<int> dataID;

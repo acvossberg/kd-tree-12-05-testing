@@ -46,7 +46,7 @@ void generateRandomPointCloud(vector<Point<num_t>> &pointn, vector<Hit<num_t>> &
         
         
         cout << point[i].datapoints[0] << ", " << point[i].datapoints[1] << ", " << point[i].datapoints[2] << " ID: " << point[i].ID << endl;
-        cout << pointn[i].x << ", " << pointn[i].y << ", " << pointn[i].z << " ID: " << pointn[i].ID << endl;
+        //cout << pointn[i].x << ", " << pointn[i].y << ", " << pointn[i].z << " ID: " << pointn[i].ID << endl;
     }
     std::cout << "done\n \n";
 }
@@ -147,7 +147,7 @@ vector<vector<Point<num_t>>> convertTree(num_t *tree, int *treesArray_ID, int nu
 
 //check wether tree_array is correct by generating SimpleKDtree and comparing
 template <typename num_t>
-void test_correct_trees(num_t *trees_array_transformable, int *treesArray_ID,  int datapoints_per_tree, int threads, vector<int> dimensions, int numberOfHits, vector<Point<num_t>> &cloud){
+vector<vector<Point<num_t>>> test_correct_trees(num_t *trees_array_transformable, int *treesArray_ID,  int datapoints_per_tree, int threads, vector<int> dimensions, int numberOfHits, vector<Point<num_t>> &cloud){
 
     
     vector<vector<Point<num_t>>> trees = convertTree(trees_array_transformable, treesArray_ID, threads, datapoints_per_tree, numberOfHits);
@@ -166,6 +166,7 @@ void test_correct_trees(num_t *trees_array_transformable, int *treesArray_ID,  i
         delete bst;
     }
     if(correctTree){cout << "\nAll tree's are correct from tree_arrays!!!!" << endl; }
+    return trees;
 }
 
 void printDevProp(cudaDeviceProp devProp)
@@ -267,8 +268,24 @@ int main()
     make_forest<num_t>(cloudn, cloud, dimensions, datapoints_per_tree, threads, treesArray, treesArray_ID);
     
     //test if trees made with make_forest are correct:
-    test_correct_trees(treesArray,treesArray_ID, datapoints_per_tree, threads, dimensions, numberOfHits, cloudn);
+    vector<vector<Point<num_t>>> trees = test_correct_trees(treesArray,treesArray_ID, datapoints_per_tree, threads, dimensions, numberOfHits, cloudn);
     
+    
+    //for testing if insideBox correct
+    int* treeArray_x = new int[trees.size()*trees[0].size()];
+    int* treeArray_y = new int[trees.size()*trees[0].size()];
+    int* treeArray_z = new int[trees.size()*trees[0].size()];
+    int* treeArray_ID = new int[trees.size()*trees[0].size()];
+    
+    
+    for(int i=0; i< trees.size() ; i++){
+        for(int j = 0; j < trees[i].size(); j++){
+            treeArray_x[i*trees[i].size()+j] = trees[i][j].x;
+            treeArray_y[i*trees[i].size()+j] = trees[i][j].y;
+            treeArray_z[i*trees[i].size()+j] = trees[i][j].z;
+            treeArray_ID[i*trees[i].size()+j] = trees[i][j].ID;
+        }
+    }
    
     
     //make box, in which should be searched for hits
@@ -277,7 +294,7 @@ int main()
     
     Cuda_class<num_t> p;
     //p.cudaMain(threads, datapoints_per_tree, treeArray_x_new, treeArray_y_new, treeArray_z_new, treeArray_ID, box);
-    p.cudaMain(threads, datapoints_per_tree, treesArray, treesArray_ID, box, number_of_dimensions);
+    p.cudaMain(threads, datapoints_per_tree, treesArray, treesArray_ID, box, number_of_dimensions, treeArray_x, treeArray_y, treeArray_z);
     cloud.clear();
     return 0;
 }

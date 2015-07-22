@@ -144,53 +144,27 @@ void insideBox(T *treeArray_values, int *treeArray_ID, T *box, int tree_size, in
 
 template <typename T>
 //void Cuda_class<T>::cudaMain(int number_of_trees, int tree_size, T treeArray_x[], T treeArray_y[], T treeArray_z[], int treeArray_ID[], T box[]){
-void Cuda_class<T>::cudaMain(int number_of_trees, int tree_size, T *treeArray_values, int *treeArray_ID, T box[],  int number_of_dimensions,  T treeArray_x[], T treeArray_y[], T treeArray_z[]){
+void Cuda_class<T>::cudaMain(int number_of_trees, int tree_size, T *treeArray_values, int *treeArray_ID, T box[],  int number_of_dimensions){
     
     cudaSetDevice(MYDEVICE);
     std::cout << "number of trees: " << number_of_trees << std::endl;
     std::cout << "tree size: " << tree_size << std::endl;
     std::cout << "number of dimensions: " << number_of_dimensions << std::endl;
     
-    //test what treeArray_values looks like DEBUG
-    for(int i = 0; i < number_of_trees; i++){
-        for(int j = 0; j< tree_size; j++){
-            if(treeArray_values[(i*tree_size + j)*number_of_dimensions+0] != treeArray_x[(i*tree_size + j)]){
-            std::cout << " testing what treeArray_values looks like --     x " << treeArray_values[(i*tree_size + j)*number_of_dimensions+0] << " y: " << treeArray_values[(i*tree_size + j)*number_of_dimensions+1] << " z: " << treeArray_values[(i*tree_size + j)*number_of_dimensions+2] <<  " at ID " << treeArray_ID[i*tree_size+j] << std::endl;
-             std::cout << " testing what TEST looks like --                  x " << treeArray_x[(i*tree_size + j)] << " y: " << treeArray_y[(i*tree_size + j)] << " z: " << treeArray_z[(i*tree_size + j)] <<  " at ID " << treeArray_ID[i*tree_size+j] << std::endl;
-            }
-            
-        }
-    }
-    
-    
     //TODO: int ----> num_t
     int size_of_forest = number_of_trees*tree_size*sizeof(int);
     T *d_treeArray_values;
-    T *d_treeArray_x;
-    T *d_treeArray_y;
-    T *d_treeArray_z;
-    //---
     int *d_treeArray_ID;
     T *d_box;
     
     
     //allocate memory
-    cudaMalloc(&d_treeArray_x, size_of_forest);
-    cudaMalloc(&d_treeArray_y, size_of_forest);
-    cudaMalloc(&d_treeArray_z, size_of_forest);
-    //---
-    
     cudaMalloc(&d_treeArray_values, size_of_forest*number_of_dimensions);
     cudaMalloc(&d_treeArray_ID, size_of_forest);
     //TODO: generic
     cudaMalloc(&d_box, number_of_dimensions*2*sizeof(T));
     
     //send trees to gpu
-    cudaMemcpy(d_treeArray_x, treeArray_x, size_of_forest, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_treeArray_y, treeArray_y, size_of_forest, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_treeArray_z, treeArray_z, size_of_forest, cudaMemcpyHostToDevice);
-    //---
-    
     cudaMemcpy(d_treeArray_values, treeArray_values, size_of_forest*number_of_dimensions, cudaMemcpyHostToDevice);
     cudaMemcpy(d_treeArray_ID, treeArray_ID, size_of_forest, cudaMemcpyHostToDevice);
     //TODO: generic
@@ -203,51 +177,7 @@ void Cuda_class<T>::cudaMain(int number_of_trees, int tree_size, T *treeArray_va
     insideBox<T><<<1,dimBlock>>>(d_treeArray_values, d_treeArray_ID, d_box, tree_size, number_of_dimensions);
     //YourKernel<<<dimGrid, dimBlock>>>(d_A,d_B); //Kernel invocation
     
-    
-    //test wether insideBox works
-    int *d_treeArray_ID_copy;
-    int test_ID[number_of_trees*tree_size];
-    //int test_treeArray_ID = std::copy(treeArray_ID);
-    cudaMalloc(&d_treeArray_ID_copy, size_of_forest);
-    cudaMemcpy(d_treeArray_ID_copy, treeArray_ID, size_of_forest, cudaMemcpyHostToDevice);
-    insideBox_test<<<1,1024>>>(d_treeArray_x, d_treeArray_y, d_treeArray_z, d_treeArray_ID_copy, d_box);
-    cudaMemcpy(test_ID, d_treeArray_ID_copy, size_of_forest, cudaMemcpyDeviceToHost);
-    //finish test
-    
     cudaMemcpy(treeArray_ID, d_treeArray_ID, size_of_forest, cudaMemcpyDeviceToHost);
-    
-    
-    bool correctID=true;
-    for(int i = 0; i < number_of_trees; i++){
-        for(int j = 0; j< tree_size; j++){
-            
-            if(treeArray_ID[i*tree_size+j] != test_ID[i*tree_size+j]){
-                std::cout << "real: x " << treeArray_values[(i*tree_size + j)*number_of_dimensions+0] << " y: " << treeArray_values[(i*tree_size + j)*number_of_dimensions+1] << " z: " << treeArray_values[(i*tree_size + j)*number_of_dimensions+2] <<  " at ID " << treeArray_ID[i*tree_size+j] << std::endl;
-                std::cout << "test: x " << treeArray_x[i*tree_size+j] << " y " << treeArray_y[i*tree_size+j] << " z: " << treeArray_z[i*tree_size+j] << std::endl;
-            
-            
-            }
-            
-            
-        }
-    }
-    for(int k = 0; k<number_of_trees; k++){
-        for( int j = 0; j< tree_size; j++){
-            int i = k*tree_size+j;
-            correctID = correctID && (treeArray_ID[i] == test_ID[i]);
-            
-            if(treeArray_ID[i]!=test_ID[i]){
-                std::cout << "treeArray     x: " << treeArray_x[test_ID[i]] << " y: " << treeArray_y[test_ID[i]] << " z: " << treeArray_z[test_ID[i]] << std::endl;
-                std::cout << "treeArray_values  x: " << treeArray_values[treeArray_ID[i]*number_of_dimensions+0] << " y: " << treeArray_values[treeArray_ID[i]*number_of_dimensions+1] << " z: " << treeArray_values[treeArray_ID[i]*number_of_dimensions+2] << std::endl;
-                std::cout << "   ERROR at i= " << i << " see ID's below"  << std::endl;
-            }
-            std::cout << "real: " << treeArray_ID[i] << " vs test: " << test_ID[i] << std::endl;
-        }
-    }
-    
-    //true = 1
-    printf("\n All ID's found in box are %d", correctID );
-     
     
     cudaError_t err = cudaGetLastError();
     if (err != cudaSuccess)
@@ -262,9 +192,6 @@ void Cuda_class<T>::cudaMain(int number_of_trees, int tree_size, T *treeArray_va
     
     
     //free space
-    cudaFree(d_treeArray_x);
-    cudaFree(d_treeArray_y);
-    cudaFree(d_treeArray_z);
     cudaFree(d_treeArray_values);
     cudaFree(d_treeArray_ID);
     cudaFree(d_box);

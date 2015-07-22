@@ -772,22 +772,6 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "kd-tree/main.cpp"
-            timestampString = "457006711.742871"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "278"
-            endingLineNumber = "278"
-            landmarkName = "main()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "kd-tree/main.cpp"
             timestampString = "457015161.107164"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"

@@ -257,38 +257,11 @@ int main()
     num_t *treesArray;
     treesArray = new num_t [threads*datapoints_per_tree*number_of_dimensions];//[number_of_dimensions+1][threads*datapoints_per_tree];
     
-    //make 2D-array:
-    /*num_t **treesArray;//[number_of_dimensions+1][threads*datapoints_per_tree];
-    treesArray = new int *[number_of_dimensions];
-    for(int i = 0; i <number_of_dimensions; i++){
-        treesArray[i] = new int[threads*datapoints_per_tree];
-    }
-    */
-    
     make_forest<num_t>(cloudn, cloud, dimensions, datapoints_per_tree, threads, treesArray, treesArray_ID);
     
     //test if trees made with make_forest are correct:
-    vector<vector<Point<num_t>>> trees = test_correct_trees(treesArray,treesArray_ID, datapoints_per_tree, threads, dimensions, numberOfHits, cloudn);
+    //vector<vector<Point<num_t>>> trees = test_correct_trees(treesArray,treesArray_ID, datapoints_per_tree, threads, dimensions, numberOfHits, cloudn);
     
-    
-    //for testing if insideBox correct
-    int* treeArray_x = new int[trees.size()*trees[0].size()];
-    int* treeArray_y = new int[trees.size()*trees[0].size()];
-    int* treeArray_z = new int[trees.size()*trees[0].size()];
-    int* treeArray_ID = new int[trees.size()*trees[0].size()];
-    
-    
-    for(int i=0; i< trees.size() ; i++){
-        for(int j = 0; j < trees[i].size(); j++){
-            treeArray_x[i*trees[i].size()+j] = trees[i][j].x;
-            treeArray_y[i*trees[i].size()+j] = trees[i][j].y;
-            treeArray_z[i*trees[i].size()+j] = trees[i][j].z;
-            treeArray_ID[i*trees[i].size()+j] = trees[i][j].ID;
-            
-            std::cout << "IN MAIN:   x :" << treeArray_x[i*trees[i].size()+j] << " y: " << treeArray_y[i*trees[i].size()+j] << " z: " << treeArray_z[i*trees[i].size()+j] << " ID: " << treeArray_ID[i*trees[i].size()+j] << endl;
-        }
-    }
-   
     
     //make box, in which should be searched for hits
     //set all other dimensions to zero, if not used:
@@ -296,7 +269,7 @@ int main()
     
     Cuda_class<num_t> p;
     //p.cudaMain(threads, datapoints_per_tree, treeArray_x_new, treeArray_y_new, treeArray_z_new, treeArray_ID, box);
-    p.cudaMain(threads, datapoints_per_tree, treesArray, treesArray_ID, box, number_of_dimensions, treeArray_x, treeArray_y, treeArray_z);
+    p.cudaMain(threads, datapoints_per_tree, treesArray, treesArray_ID, box, number_of_dimensions);
     cloud.clear();
     return 0;
 }

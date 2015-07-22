@@ -284,6 +284,8 @@ int main()
             treeArray_y[i*trees[i].size()+j] = trees[i][j].y;
             treeArray_z[i*trees[i].size()+j] = trees[i][j].z;
             treeArray_ID[i*trees[i].size()+j] = trees[i][j].ID;
+            
+            std::cout << "IN MAIN:   x :" << treeArray_x[i*trees[i].size()+j] << " y: " << treeArray_y[i*trees[i].size()+j] << " z: " << treeArray_z[i*trees[i].size()+j] << " ID: " << treeArray_ID[i*trees[i].size()+j] << endl;
         }
     }
    

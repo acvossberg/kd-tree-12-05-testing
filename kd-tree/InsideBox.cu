@@ -151,11 +151,13 @@ void Cuda_class<T>::cudaMain(int number_of_trees, int tree_size, T *treeArray_va
     std::cout << "tree size: " << tree_size << std::endl;
     std::cout << "number of dimensions: " << number_of_dimensions << std::endl;
     
-    //test what treeArray_values looks like
+    //test what treeArray_values looks like DEBUG
     for(int i = 0; i < number_of_trees; i++){
         for(int j = 0; j< tree_size; j++){
-            std::cout << " testing what treeArray_values looks like --    x " << treeArray_values[(i*tree_size + j)*number_of_dimensions+0] << " y: " << treeArray_values[(i*tree_size + j)*number_of_dimensions+1] << " z: " << treeArray_values[(i*tree_size + j)*number_of_dimensions+2] <<  " at ID " << treeArray_ID[i*tree_size+j] << std::endl;
-            
+            if(treeArray_values[(i*tree_size + j)*number_of_dimensions+0] != treeArray_x[(i*tree_size + j)]){
+            std::cout << " testing what treeArray_values looks like --     x " << treeArray_values[(i*tree_size + j)*number_of_dimensions+0] << " y: " << treeArray_values[(i*tree_size + j)*number_of_dimensions+1] << " z: " << treeArray_values[(i*tree_size + j)*number_of_dimensions+2] <<  " at ID " << treeArray_ID[i*tree_size+j] << std::endl;
+             std::cout << " testing what TEST looks like --                  x " << treeArray_x[(i*tree_size + j)] << " y: " << treeArray_y[(i*tree_size + j)] << " z: " << treeArray_z[(i*tree_size + j)] <<  " at ID " << treeArray_ID[i*tree_size+j] << std::endl;
+            }
             
         }
     }
@@ -216,15 +218,31 @@ void Cuda_class<T>::cudaMain(int number_of_trees, int tree_size, T *treeArray_va
     
     
     bool correctID=true;
-    for(int i = 0; i<number_of_trees*tree_size; i++){
-       
-        correctID = correctID && (treeArray_ID[i] == test_ID[i]);
-        if(treeArray_ID[i]!=test_ID[i]){
-            std::cout << "treeArray     x: " << treeArray_x[test_ID[i]] << " y: " << treeArray_y[test_ID[i]] << " z: " << treeArray_z[test_ID[i]] << std::endl;
-            std::cout << "treeArray_values  x: " << treeArray_values[treeArray_ID[i]*number_of_dimensions+0] << " y: " << treeArray_values[treeArray_ID[i]*number_of_dimensions+1] << " z: " << treeArray_values[treeArray_ID[i]*number_of_dimensions+2] << std::endl;
-            std::cout << "   ERROR at i= " << i << " see ID's below"  << std::endl;
+    for(int i = 0; i < number_of_trees; i++){
+        for(int j = 0; j< tree_size; j++){
+            
+            if(treeArray_ID[i*tree_size+j] != test_ID[i*tree_size+j]){
+                std::cout << "real: x " << treeArray_values[(i*tree_size + j)*number_of_dimensions+0] << " y: " << treeArray_values[(i*tree_size + j)*number_of_dimensions+1] << " z: " << treeArray_values[(i*tree_size + j)*number_of_dimensions+2] <<  " at ID " << treeArray_ID[i*tree_size+j] << std::endl;
+                std::cout << "test: x " << treeArray_x[i*tree_size+j] << " y " << treeArray_y[i*tree_size+j] << " z: " << treeArray_z[i*tree_size+j] << std::endl;
+            
+            
+            }
+            
+            
         }
-         std::cout << "real: " << treeArray_ID[i] << " vs test: " << test_ID[i] << std::endl;
+    }
+    for(int k = 0; k<number_of_trees; k++){
+        for( int j = 0; j< tree_size; j++){
+            int i = k*tree_size+j;
+            correctID = correctID && (treeArray_ID[i] == test_ID[i]);
+            
+            if(treeArray_ID[i]!=test_ID[i]){
+                std::cout << "treeArray     x: " << treeArray_x[test_ID[i]] << " y: " << treeArray_y[test_ID[i]] << " z: " << treeArray_z[test_ID[i]] << std::endl;
+                std::cout << "treeArray_values  x: " << treeArray_values[treeArray_ID[i]*number_of_dimensions+0] << " y: " << treeArray_values[treeArray_ID[i]*number_of_dimensions+1] << " z: " << treeArray_values[treeArray_ID[i]*number_of_dimensions+2] << std::endl;
+                std::cout << "   ERROR at i= " << i << " see ID's below"  << std::endl;
+            }
+            std::cout << "real: " << treeArray_ID[i] << " vs test: " << test_ID[i] << std::endl;
+        }
     }
     
     //true = 1

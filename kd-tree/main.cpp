@@ -19,7 +19,8 @@
 #include <cmath>
 #include <future>
 #include "InsideBox.hpp"
-
+#include <fstream>
+#include <iomanip>
 #define MYDEVICE 0
 
 using namespace std;
@@ -45,7 +46,7 @@ void generateRandomPointCloud(vector<Point<num_t>> &pointn, vector<Hit<num_t>> &
         point[i].ID = i;
         
         
-        cout << point[i].datapoints[0] << ", " << point[i].datapoints[1] << ", " << point[i].datapoints[2] << " ID: " << point[i].ID << endl;
+        //cout << point[i].datapoints[0] << ", " << point[i].datapoints[1] << ", " << point[i].datapoints[2] << " ID: " << point[i].ID << endl;
         //cout << pointn[i].x << ", " << pointn[i].y << ", " << pointn[i].z << " ID: " << pointn[i].ID << endl;
     }
     std::cout << "done\n \n";
@@ -217,60 +218,80 @@ int main()
     
     vector<Hit<num_t>> cloud;
     vector<Point<num_t>> cloudn;
-    // Generate points:
-    int numberOfHits = 1000;
-    generateRandomPointCloud(cloudn, cloud, numberOfHits);
+    vector<int> VectNumberOfHits = {100,1000,2000,5000, 10000, 20000, 50000, 100000};
     
-    //must be defined {1, 2, 3} = {x, y, z}
-    vector<int> dimensions = {1,2,3};
-    int number_of_dimensions = dimensions.size();
-    
-    //get_size_of_tree from cuda_device --> #datapoints per thread.. = datapoints per tree
-    int device;
-    cudaGetDevice(&device);
-    std::cout<< "devices are: " << device << endl;
-    
-    cudaDeviceProp devProp;
-    cudaGetDeviceProperties(&devProp, device);
-    printDevProp(devProp);
-    int max_threads = devProp.warpSize;
-    //TODO: here calculate #nodes need
-    
-    cout << "number of warps " << max_threads << endl;
-    
-    int warp_size = max_threads;
-    
-    //???: will it be one tree per warp or per block?
-    //formula: 2^(floor(log_2(64)+1))-1 is always max when one less than warp_size
-    int datapoints_per_tree = warp_size-1;
-    cout << "datapoints_per_tree: " << datapoints_per_tree << endl;
-    
-    
-    //round up: q = (x + y - 1) / y;
-    int threads = (numberOfHits+datapoints_per_tree-1)/datapoints_per_tree;
-    vector<vector<num_t>> trees_array_transformable;
-    trees_array_transformable.resize(number_of_dimensions+1, vector<num_t>(threads*datapoints_per_tree, -1));
-    
-   
-    //all not-used elements in treesArray are by default set to zero by compiler
-    int *treesArray_ID = new int[threads*datapoints_per_tree];
-    num_t *treesArray;
-    treesArray = new num_t [threads*datapoints_per_tree*number_of_dimensions];//[number_of_dimensions+1][threads*datapoints_per_tree];
-    
-    make_forest<num_t>(cloudn, cloud, dimensions, datapoints_per_tree, threads, treesArray, treesArray_ID);
-    
-    //test if trees made with make_forest are correct:
-    //vector<vector<Point<num_t>>> trees = test_correct_trees(treesArray,treesArray_ID, datapoints_per_tree, threads, dimensions, numberOfHits, cloudn);
-    
-    
-    //make box, in which should be searched for hits
-    //set all other dimensions to zero, if not used:
-    int box[6] = {2, 8, 0, 0, 0, 0};
-    
-    Cuda_class<num_t> p;
-    //p.cudaMain(threads, datapoints_per_tree, treeArray_x_new, treeArray_y_new, treeArray_z_new, treeArray_ID, box);
-    p.cudaMain(threads, datapoints_per_tree, treesArray, treesArray_ID, box, number_of_dimensions);
-    cloud.clear();
+    ofstream myThreadFile ("ThreadingTimes.txt");
+    ofstream myCudaFile("CudaTimes.txt");
+    std::chrono::high_resolution_clock::time_point startThreading;
+    std::chrono::high_resolution_clock::time_point endThreading;
+    std::chrono::high_resolution_clock::time_point startCuda;
+    std::chrono::high_resolution_clock::time_point endCuda;
+    for(int i = 0; i < 8; i++){
+
+        // Generate points:
+        int numberOfHits = VectNumberOfHits[i];
+        generateRandomPointCloud(cloudn, cloud, numberOfHits);
+        
+        //must be defined {1, 2, 3} = {x, y, z}
+        vector<int> dimensions = {1,2,3};
+        int number_of_dimensions = dimensions.size();
+        
+        //get_size_of_tree from cuda_device --> #datapoints per thread.. = datapoints per tree
+        int device;
+        cudaGetDevice(&device);
+        std::cout<< "devices are: " << device << endl;
+        
+        cudaDeviceProp devProp;
+        cudaGetDeviceProperties(&devProp, device);
+        printDevProp(devProp);
+        int max_threads = devProp.warpSize;
+        //TODO: here calculate #nodes need
+        
+        cout << "number of warps " << max_threads << endl;
+        
+        int warp_size = max_threads;
+        
+        //???: will it be one tree per warp or per block?
+        //formula: 2^(floor(log_2(64)+1))-1 is always max when one less than warp_size
+        int datapoints_per_tree = warp_size-1;
+        cout << "datapoints_per_tree: " << datapoints_per_tree << endl;
+        
+        
+        //round up: q = (x + y - 1) / y;
+        int threads = (numberOfHits+datapoints_per_tree-1)/datapoints_per_tree;
+        vector<vector<num_t>> trees_array_transformable;
+        trees_array_transformable.resize(number_of_dimensions+1, vector<num_t>(threads*datapoints_per_tree, -1));
+        
+       
+        //all not-used elements in treesArray are by default set to zero by compiler
+        int *treesArray_ID = new int[threads*datapoints_per_tree];
+        num_t *treesArray;
+        treesArray = new num_t [threads*datapoints_per_tree*number_of_dimensions];//[number_of_dimensions+1][threads*datapoints_per_tree];
+        startThreading = std::chrono::high_resolution_clock::now();
+        make_forest<num_t>(cloudn, cloud, dimensions, datapoints_per_tree, threads, treesArray, treesArray_ID);
+        endThreading = std::chrono::high_resolution_clock::now();
+        
+        //test if trees made with make_forest are correct:
+        //vector<vector<Point<num_t>>> trees = test_correct_trees(treesArray,treesArray_ID, datapoints_per_tree, threads, dimensions, numberOfHits, cloudn);
+        
+        
+        //make box, in which should be searched for hits
+        //set all other dimensions to zero, if not used:
+        int box[6] = {2, 8, 0, 0, 0, 0};
+        
+        Cuda_class<num_t> p;
+        //p.cudaMain(threads, datapoints_per_tree, treeArray_x_new, treeArray_y_new, treeArray_z_new, treeArray_ID, box);
+        startCuda = std::chrono::high_resolution_clock::now();
+        p.cudaMain(threads, datapoints_per_tree, treesArray, treesArray_ID, box, number_of_dimensions);
+        endCuda = std::chrono::high_resolution_clock::now();
+        cloud.clear();
+        
+        myThreadFile << std::chrono::duration_cast<std::chrono::microseconds>(endThreading-startThreading).count() << ",";
+        myCudaFile  << std::chrono::duration_cast<std::chrono::nanoseconds>(endCuda-startCuda).count() << ",";
+    }
+    myThreadFile.close();
+    myCudaFile.close();
+
     return 0;
 }
 

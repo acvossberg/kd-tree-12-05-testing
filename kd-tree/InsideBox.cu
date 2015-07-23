@@ -108,7 +108,7 @@ void traverseTree( T *treeArray_values, int *treeArray_ID, T *box, int pos, int 
             //inside box
         }
         else{
-            //printf("\n not inside box at position %d with thread nr: %d ", startOfTree+pos, threadIdx.x);
+            printf("\n not inside box at position %d with thread nr: %d ", startOfTree+pos, threadIdx.x);
             treeArray_ID[startOfTree+pos] = -1;
         }
         
@@ -178,7 +178,7 @@ void Cuda_class<T>::cudaMain(int number_of_trees, int tree_size, T *treeArray_va
     //YourKernel<<<dimGrid, dimBlock>>>(d_A,d_B); //Kernel invocation
     
     cudaMemcpy(treeArray_ID, d_treeArray_ID, size_of_forest, cudaMemcpyDeviceToHost);
-    
+    std::cout << "test" << std::endl;
     cudaError_t err = cudaGetLastError();
     if (err != cudaSuccess)
         printf("Error: %s\n", cudaGetErrorString(err));

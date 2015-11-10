@@ -78,7 +78,7 @@ void make_tree(vector<Point<num_t>> cloudn, vector<Hit<num_t>> cloud, vector<int
     tree.KD_tree_recursive(0, cloud.size()-1, 0, 1);
 }
 
-//TODO: change all the copying around.. maybe use std::move
+//TODO: change all the copying around.. maybe use std::move --> DONE through references and pointers
 //TODO: check speedup by changing number of threads
 template <typename num_t>
 void make_forest(vector<Point<num_t>> &cloudn, vector<Hit<num_t>> &cloud, vector<int> &dimensions, int datapoints_per_tree, int nthreads, num_t *transformable_trees, int *treesArray_ID){
@@ -92,6 +92,7 @@ void make_forest(vector<Point<num_t>> &cloudn, vector<Hit<num_t>> &cloud, vector
         if(id == nthreads-1){
             datapoints_per_tree = cloud.size() -  datapoints_per_tree*id;
         }
+        
         //TODO: NO COPY!!
         vector<Hit<num_t>> threadcloud(cloud.begin()+id*datapoints_per_tree, cloud.begin()+(id+1)*datapoints_per_tree);
         vector<Point<num_t>> threadcloudn(cloudn.begin()+id*datapoints_per_tree, cloudn.begin()+(id+1)*datapoints_per_tree);
@@ -150,7 +151,7 @@ vector<vector<Point<num_t>>> convertTree(num_t *tree, int *treesArray_ID, int nu
 template <typename num_t>
 vector<vector<Point<num_t>>> test_correct_trees(num_t *trees_array_transformable, int *treesArray_ID,  int datapoints_per_tree, int threads, vector<int> dimensions, int numberOfHits, vector<Point<num_t>> &cloud){
 
-    
+    //convertTree only for 3D tree. Convers 1D tree to trees.x, trees.y, trees.z, trees.ID
     vector<vector<Point<num_t>>> trees = convertTree(trees_array_transformable, treesArray_ID, threads, datapoints_per_tree, numberOfHits);
 
 
@@ -226,10 +227,10 @@ int main()
     std::chrono::high_resolution_clock::time_point endThreading;
     std::chrono::high_resolution_clock::time_point startCuda;
     std::chrono::high_resolution_clock::time_point endCuda;
-    for(int i = 0; i < 8; i++){
+    //for(int i = 0; i < 8; i++){
 
         // Generate points:
-        int numberOfHits = VectNumberOfHits[i];
+        int numberOfHits = VectNumberOfHits[0];
         generateRandomPointCloud(cloudn, cloud, numberOfHits);
         
         //must be defined {1, 2, 3} = {x, y, z}
@@ -271,14 +272,32 @@ int main()
         make_forest<num_t>(cloudn, cloud, dimensions, datapoints_per_tree, threads, treesArray, treesArray_ID);
         endThreading = std::chrono::high_resolution_clock::now();
         
+        
+        
         //test if trees made with make_forest are correct:
-        //vector<vector<Point<num_t>>> trees = test_correct_trees(treesArray,treesArray_ID, datapoints_per_tree, threads, dimensions, numberOfHits, cloudn);
+        vector<vector<Point<num_t>>> trees = test_correct_trees(treesArray, treesArray_ID, datapoints_per_tree, threads, dimensions, numberOfHits, cloudn);
         
-        
+        //print treesArray
+        /*int c=0;
+        for(int i=0; i<datapoints_per_tree*threads*number_of_dimensions-1; i+=number_of_dimensions){
+            cout << treesArray[i+0] << " " << treesArray[i+1] << " " << treesArray[i+2] << " ID:" << treesArray_ID[c] << endl;
+            c++;
+            
+        }
+        for(int i=0; i<threads; i++){
+            for( int j=0; j< datapoints_per_tree; j++){
+                //cout << i*datapoints_per_tree+j << endl;
+                //cout << treesArray[i*datapoints_per_tree+j+0] << " " << treesArray[i*datapoints_per_tree+j+1] << " " << treesArray[i*datapoints_per_tree+j+2] << " ID:" << treesArray_ID[i] << endl;
+
+                cout << trees[i][j].x << " " << trees[i][j].y << " " << trees[i][j].z << " ID:" << trees[i][j].ID <<  endl;
+            }
+        }
+         */
+    
         //make box, in which should be searched for hits
         //set all other dimensions to zero, if not used:
-        int box[6] = {2, 8, 0, 0, 0, 0};
-        
+        int box[6] = {2, 8, 1, 3, 2, 5};
+    
         Cuda_class<num_t> p;
         //p.cudaMain(threads, datapoints_per_tree, treeArray_x_new, treeArray_y_new, treeArray_z_new, treeArray_ID, box);
         startCuda = std::chrono::high_resolution_clock::now();
@@ -288,7 +307,8 @@ int main()
         
         myThreadFile << std::chrono::duration_cast<std::chrono::microseconds>(endThreading-startThreading).count() << ",";
         myCudaFile  << std::chrono::duration_cast<std::chrono::nanoseconds>(endCuda-startCuda).count() << ",";
-    }
+    
+    //}
     myThreadFile.close();
     myCudaFile.close();
 

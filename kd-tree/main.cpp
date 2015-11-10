@@ -260,9 +260,6 @@ int main()
         
         //round up: q = (x + y - 1) / y;
         int threads = (numberOfHits+datapoints_per_tree-1)/datapoints_per_tree;
-        vector<vector<num_t>> trees_array_transformable;
-        trees_array_transformable.resize(number_of_dimensions+1, vector<num_t>(threads*datapoints_per_tree, -1));
-        
        
         //all not-used elements in treesArray are by default set to zero by compiler
         int *treesArray_ID = new int[threads*datapoints_per_tree];
@@ -298,11 +295,22 @@ int main()
         //set all other dimensions to zero, if not used:
         int box[6] = {2, 8, 1, 3, 2, 5};
     
-        Cuda_class<num_t> p;
-        //p.cudaMain(threads, datapoints_per_tree, treeArray_x_new, treeArray_y_new, treeArray_z_new, treeArray_ID, box);
+        Cuda_class<num_t> tree;
+    
         startCuda = std::chrono::high_resolution_clock::now();
-        p.cudaMain(threads, datapoints_per_tree, treesArray, treesArray_ID, box, number_of_dimensions);
+        tree.cudaMain(threads, datapoints_per_tree, treesArray, treesArray_ID, box, number_of_dimensions);
         endCuda = std::chrono::high_resolution_clock::now();
+    
+        /*
+        vector<vector<num_t>> trees_array_transformable;
+        trees_array_transformable.resize(number_of_dimensions+1, vector<num_t>(threads*datapoints_per_tree, -1));
+        make_Dummyforest<num_t>(cloud, dimensions, datapoints_per_tree, threads, trees_array_transformable);
+        int* treeArray_x_new = &trees_array_transformable[1][0];
+        int* treeArray_y_new = &trees_array_transformable[2][0];
+        int* treeArray_z_new = &trees_array_transformable[3][0];
+        Cuda_class<num_t> dummyTree;
+        dummyTree.cudaMainDummy(threads, datapoints_per_tree, treeArray_x_new, treeArray_y_new, treeArray_z_new, treesArray_ID, box);
+         */
         cloud.clear();
         
         myThreadFile << std::chrono::duration_cast<std::chrono::microseconds>(endThreading-startThreading).count() << ",";

@@ -117,19 +117,6 @@ void traverseTree( T *treeArray_values, int *treeArray_ID, T *box, int pos, int 
             
         }
         
-        ///CHECK HERE!!!! STARTOFTREE+POS == INDEX  AND POS = i , i->2*i etc.
-        //TODO: hier!!!! kann nicht überall +row haben - ist ja für jeden thread!!!! sieht so aus, als müsste das trotzdem klappen!
-        /*if( ((treeArray_values[(startOfTree+pos)*blockDim.y+row] >= box[2*row] && treeArray_values[(startOfTree+pos)*blockDim.y+row] <= box[row*2+1]) 
-         || (box[row*2] == 0 && box[row*2+1] == 0))  && ((treeArray_values[(startOfTree+pos)*blockDim.y+row] >= box[row*2] && treeArray_values[(startOfTree+pos)*blockDim.y+row] <= box[row*2+1])
-         || (box[row*2] == 0 && box[row*2+1] == 0)) && ((treeArray_values[(startOfTree+pos)*blockDim.y+row] >= box[row*2] && treeArray_values[(startOfTree+pos)*blockDim.y+row] <= box[row*2+1]) 
-         || (box[row*2] == 0 && box[row*2+1] == 0))){
-            //inside box
-        }
-        else{
-            printf("\n not inside box at position %d with thread nr: %d ", startOfTree+pos, threadIdx.x);
-            treeArray_ID[startOfTree+pos] = -1;
-        }*/
-        
         //Abbruchkriterium:
         //TODO: < oder <= ???
         //TODO: if hier weg
@@ -151,8 +138,6 @@ template <typename T>
 __global__
 void insideBox(T *treeArray_values, int *treeArray_ID, T *box, int tree_size, int number_of_dimensions){
     
-    //int row = blockIdx.y * blockDim.y + threadIdx.y;
-    //int col = blockIdx.x * blockDim.x + threadIdx.x;
     //for each thread has it's own tree starting here
     int startOfTree = threadIdx.x * tree_size ;
     int endOfTree = startOfTree + (tree_size - 1);
@@ -181,26 +166,19 @@ void Cuda_class<T>::cudaMain(int number_of_trees, int tree_size, T *treeArray_va
     //TODO: do outside of cudaMain
     cudaMalloc(&d_treeArray_values, size_of_forest*number_of_dimensions);
     cudaMalloc(&d_treeArray_ID, size_of_forest);
-    //TODO: generic
     cudaMalloc(&d_box, number_of_dimensions*2*sizeof(T));
     
     //send trees to gpu
     cudaMemcpy(d_treeArray_values, treeArray_values, size_of_forest*number_of_dimensions, cudaMemcpyHostToDevice);
     cudaMemcpy(d_treeArray_ID, treeArray_ID, size_of_forest, cudaMemcpyHostToDevice);
-    //TODO: generic
     cudaMemcpy(d_box, box, number_of_dimensions*2*sizeof(T), cudaMemcpyHostToDevice);
     
     
     //search forest for points inside box_dimensions - returns all treeArray_ID's which are inside box - rest are filled with -1
     //TODO: do not change treeArray_ID's - make separate array.
-    //TODO: dimBlock weg
-    //dim3 dimBlock(number_of_trees, number_of_dimensions);
-    
-    
     
     //insideBox<T><<<Anzahl benutzte Blöcke, Anzahl Threads>>> = <<<Anzahl benutzte Blöcke, Anzahl Baeume >>>
     //weil ein Thread == ein Baum
-    //TODO: 32 -> anzahl bäume bzw. :  1*32 = anzahl bäume
     insideBox<T><<<1,number_of_trees>>>(d_treeArray_values, d_treeArray_ID, d_box, tree_size, number_of_dimensions);
     //YourKernel<<<dimGrid, dimBlock>>>(d_A,d_B); //Kernel invocation
     
@@ -225,4 +203,61 @@ void Cuda_class<T>::cudaMain(int number_of_trees, int tree_size, T *treeArray_va
     cudaFree(d_box);
 
 }
+
+//dummy cudaMain
+/*template <typename T>
+void Cuda_class<T>::cudaMainDummy(int number_of_trees, int tree_size, T treeArray_x[], T treeArray_y[], T treeArray_z[], int treeArray_ID[], T box[]){
+    
+    cudaSetDevice(MYDEVICE);
+    std::cout << "number of trees: " << number_of_trees << std::endl;
+    std::cout << "tree size: " << tree_size << std::endl;
+    std::cout << "number of dimensions: " << number_of_dimensions << std::endl;
+    std::cout << "box: " << box[0] << " " << box[1] << " " << box[2] << " " << box[3] << " " << box[4] << " " << box[5] << std::endl;
+    //TODO: int ----> num_t
+    int size_of_forest = number_of_trees*tree_size*sizeof(int);
+    T *d_treeArray_values;
+    int *d_treeArray_ID;
+    T *d_box;
+    
+    
+    //allocate memory
+    //TODO: do outside of cudaMain
+    cudaMalloc(&d_treeArray_values, size_of_forest*number_of_dimensions);
+    cudaMalloc(&d_treeArray_ID, size_of_forest);
+    cudaMalloc(&d_box, number_of_dimensions*2*sizeof(T));
+    
+    //send trees to gpu
+    cudaMemcpy(d_treeArray_values, treeArray_values, size_of_forest*number_of_dimensions, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_treeArray_ID, treeArray_ID, size_of_forest, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_box, box, number_of_dimensions*2*sizeof(T), cudaMemcpyHostToDevice);
+    
+    
+    //search forest for points inside box_dimensions - returns all treeArray_ID's which are inside box - rest are filled with -1
+    //TODO: do not change treeArray_ID's - make separate array.
+    
+    //insideBox<T><<<Anzahl benutzte Blöcke, Anzahl Threads>>> = <<<Anzahl benutzte Blöcke, Anzahl Baeume >>>
+    //weil ein Thread == ein Baum
+    insideBox_test<<<1,1024>>>(d_treeArray_x, d_treeArray_y, d_treeArray_z, d_treeArray_ID_copy, d_box);
+    //YourKernel<<<dimGrid, dimBlock>>>(d_A,d_B); //Kernel invocation
+    
+    
+    cudaMemcpy(treeArray_ID, d_treeArray_ID, size_of_forest, cudaMemcpyDeviceToHost);
+    
+    cudaError_t err = cudaGetLastError();
+    if (err != cudaSuccess)
+        printf("Error: %s\n", cudaGetErrorString(err));
+    
+    std::cout << "\n Size of forest: " << size_of_forest << std::endl;
+    //
+    //    //print out ID's which are in box:
+    //    for(int i = 0; i< number_of_trees*tree_size; i++){
+    //        std::cout << "ID: " << treeArray_ID[i]<< std::endl;
+    //    }
+    
+    
+    //free space
+    cudaFree(d_treeArray_values);
+    cudaFree(d_treeArray_ID);
+    cudaFree(d_box);
+}*/
 template class Cuda_class<int>;

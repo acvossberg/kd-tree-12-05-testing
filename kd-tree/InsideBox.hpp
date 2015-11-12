@@ -26,7 +26,6 @@ void insideBox(T *treeArray_values, int *treeArray_ID, T *box, int tree_size, in
 
 template <class T>
 class Cuda_class{
-    //(int tree_size_, int number_of_trees_, int number_of_dimensions_, T *d_treeArray_values_, int *d_treeArray_ID_, T *d_box_):tree_size(tree_size_),  number_of_trees(number_of_trees_), number_of_dimensions(number_of_dimensions_), d_treeArray_ID(d_treeArray_ID_), d_box(d_box_){
 public:
     
     //void cudaMain(int number_of_trees, int tree_size, T *treeArray_values, int *treeArray_ID, T box[],  int number_of_dimensions);
@@ -37,7 +36,7 @@ private:
     int tree_size;
     int number_of_trees;
     int number_of_dimensions;
-    int size_of_forest;// = number_of_trees*tree_size*sizeof(int);
+    int size_of_forest;
     T *d_treeArray_values;
     int *d_treeArray_ID;
     T *d_box;

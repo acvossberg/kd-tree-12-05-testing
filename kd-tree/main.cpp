@@ -110,19 +110,32 @@ void make_forest(vector<Point<num_t>> &cloudn, vector<Hit<num_t>> &cloud, vector
 }
 
 template <typename num_t>
-vector<int> inBox(Point<num_t> start, Point<num_t> end, vector<vector<Point<num_t>>> &trees ){
+vector<int> inBox(int threads, int datapoints_per_tree, int box[], vector<vector<Point<num_t>>> &trees ){
     vector<int> result;
     
+    for(int i=0; i<threads; i++){
+        for(int j=0; j< datapoints_per_tree; j++){
+            //cout << trees[i][j].x << " " << trees[i][j].y << " " << trees[i][j].z << " ID:" << trees[i][j].ID <<  endl;
+            if( box[0] <= trees[i][j].x && box[1]>=trees[i][j].x && box[2] <=trees[i][j].y && box[3] >= trees[i][j].y && box[4] <= trees[i][j].z && box[5] >= trees[i][j].z){
+                result.push_back(trees[i][j].ID);
+            }
+            else{ result.push_back(-1);}
+        }
+    }
+    /*
     for(int i=0; i<trees.size(); i++){
         for(int j = 0; j< trees[i].size();j++){
             
-            if( ((trees[i][j].x >= start.x && trees[i][j].x <= end.x) || (end.x == 0 && start.x == 0))  && ((trees[i][j].y >= start.y && trees[i][j].y <= end.y) || (end.y == 0 && start.y == 0)) && ((trees[i][j].z >= start.z && trees[i][j].z <= end.z) || (end.z == 0 && start.z == 0))){
-                result.push_back(trees[i][j].ID);
+            if( (trees[i][j].x >= start.x && trees[i][j].x <= end.x)  && (trees[i][j].y >= start.y && trees[i][j].y <= end.y) && (trees[i][j].z >= start.z && trees[i][j].z <= end.z) ){
+                    result.push_back(trees[i][j].ID);
+            }
+            else{
+                result.push_back(-1);
             }
         
         }
     
-    }
+    }*/
     return result;
 }
 
@@ -280,16 +293,18 @@ int main()
             cout << treesArray[i+0] << " " << treesArray[i+1] << " " << treesArray[i+2] << " ID:" << treesArray_ID[c] << endl;
             c++;
             
-        }
+        }*/
+    
+    /*
         for(int i=0; i<threads; i++){
+            cout << " NEW TREE" << endl;
+            
             for( int j=0; j< datapoints_per_tree; j++){
-                //cout << i*datapoints_per_tree+j << endl;
-                //cout << treesArray[i*datapoints_per_tree+j+0] << " " << treesArray[i*datapoints_per_tree+j+1] << " " << treesArray[i*datapoints_per_tree+j+2] << " ID:" << treesArray_ID[i] << endl;
-
+                cout << treesArray[i*datapoints_per_tree*number_of_dimensions+j*number_of_dimensions+0] << " " << treesArray[i*datapoints_per_tree*number_of_dimensions+j*number_of_dimensions+1] << " " << treesArray[i*datapoints_per_tree*number_of_dimensions+j*number_of_dimensions+2] << " ID:" << treesArray_ID[i*datapoints_per_tree+j] << endl;
                 cout << trees[i][j].x << " " << trees[i][j].y << " " << trees[i][j].z << " ID:" << trees[i][j].ID <<  endl;
             }
         }
-         */
+      */
     
         //make box, in which should be searched for hits
         //set all other dimensions to zero, if not used:
@@ -301,16 +316,21 @@ int main()
         tree.cudaMain(threads, datapoints_per_tree, treesArray, treesArray_ID, box, number_of_dimensions);
         endCuda = std::chrono::high_resolution_clock::now();
     
+    
+    
+        //test wether the resulting ID's are correct, and the only ones inside box:
+        vector<int> dummyResult = inBox(threads, datapoints_per_tree, box,trees);
+    
+        for( int i = 0; i<threads*datapoints_per_tree; i++){
+            if(treesArray_ID[i] != dummyResult[i]){
+                std::cout << "NOT same" << "ID real: " << treesArray_ID[i]<< " ID dummy: " << dummyResult[i]<<std::endl;
+            }
+        }
         /*
-        vector<vector<num_t>> trees_array_transformable;
-        trees_array_transformable.resize(number_of_dimensions+1, vector<num_t>(threads*datapoints_per_tree, -1));
-        make_Dummyforest<num_t>(cloud, dimensions, datapoints_per_tree, threads, trees_array_transformable);
-        int* treeArray_x_new = &trees_array_transformable[1][0];
-        int* treeArray_y_new = &trees_array_transformable[2][0];
-        int* treeArray_z_new = &trees_array_transformable[3][0];
-        Cuda_class<num_t> dummyTree;
-        dummyTree.cudaMainDummy(threads, datapoints_per_tree, treeArray_x_new, treeArray_y_new, treeArray_z_new, treesArray_ID, box);
-         */
+        for(int i = 0; i< threads*datapoints_per_tree; i++){
+            std::cout << "ID: " << treesArray_ID[i]<< std::endl;
+        }*/
+    
         cloud.clear();
         
         myThreadFile << std::chrono::duration_cast<std::chrono::microseconds>(endThreading-startThreading).count() << ",";

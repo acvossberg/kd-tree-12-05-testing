@@ -236,10 +236,12 @@ int main()
     
     ofstream myThreadFile ("ThreadingTimes.txt");
     ofstream myCudaFile("CudaTimes.txt");
-    std::chrono::high_resolution_clock::time_point startThreading;
-    std::chrono::high_resolution_clock::time_point endThreading;
-    std::chrono::high_resolution_clock::time_point startCuda;
-    std::chrono::high_resolution_clock::time_point endCuda;
+    std::chrono::high_resolution_clock::time_point startMakingForestWithThreads;
+    std::chrono::high_resolution_clock::time_point endMakingForestWithThreads;
+    std::chrono::high_resolution_clock::time_point startInsideBox; 
+    std::chrono::high_resolution_clock::time_point endInsideBox;
+    std::chrono::high_resolution_clock::time_point startCopyToDevice;
+    std::chrono::high_resolution_clock::time_point endCopyToDevice;
     //for(int i = 0; i < 8; i++){
 
         // Generate points:
@@ -278,9 +280,9 @@ int main()
         int *treesArray_ID = new int[threads*datapoints_per_tree];
         num_t *treesArray;
         treesArray = new num_t [threads*datapoints_per_tree*number_of_dimensions];//[number_of_dimensions+1][threads*datapoints_per_tree];
-        startThreading = std::chrono::high_resolution_clock::now();
+        startMakingForestWithThreads = std::chrono::high_resolution_clock::now();
         make_forest<num_t>(cloudn, cloud, dimensions, datapoints_per_tree, threads, treesArray, treesArray_ID);
-        endThreading = std::chrono::high_resolution_clock::now();
+        endMakingForestWithThreads = std::chrono::high_resolution_clock::now();
         
         
         
@@ -312,11 +314,14 @@ int main()
     
         Cuda_class<num_t> tree;
     
-        startCuda = std::chrono::high_resolution_clock::now();
-//        tree.cudaMain(threads, datapoints_per_tree, treesArray, treesArray_ID, box, number_of_dimensions);
-        endCuda = std::chrono::high_resolution_clock::now();
+        startCopyToDevice = std::chrono::high_resolution_clock::now();
         tree.cudaCopyToDevice(threads, datapoints_per_tree, treesArray, treesArray_ID, box, number_of_dimensions);
+        endCopyToDevice = std::chrono::high_resolution_clock::now();
+    
+        startInsideBox = std::chrono::high_resolution_clock::now();
         tree.cudaInsideBox(threads, datapoints_per_tree, number_of_dimensions, treesArray, treesArray_ID, box);
+        endInsideBox = std::chrono::high_resolution_clock::now();
+    
         tree.cudaCopyToHost(treesArray_ID);
     
         //test wether the resulting ID's are correct, and the only ones inside box:
@@ -334,8 +339,8 @@ int main()
     
         cloud.clear();
         
-        myThreadFile << std::chrono::duration_cast<std::chrono::microseconds>(endThreading-startThreading).count() << ",";
-        myCudaFile  << std::chrono::duration_cast<std::chrono::nanoseconds>(endCuda-startCuda).count() << ",";
+        myThreadFile << std::chrono::duration_cast<std::chrono::microseconds>(endMakingForestWithThreads-startMakingForestWithThreads).count() << ",";
+        myCudaFile  << std::chrono::duration_cast<std::chrono::nanoseconds>(endInsideBox-startInsideBox).count() << ",";
     
     //}
     myThreadFile.close();

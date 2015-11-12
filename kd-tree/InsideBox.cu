@@ -101,18 +101,18 @@ void traverseTree( T *treeArray_values, int *treeArray_ID, T *box, int pos, int 
     //int row = blockIdx.y * blockDim.y + threadIdx.y;
     //printf("\n first value: startOfTree+pos*blokDim.y + row %d, row %d", (startOfTree+pos)*blockDim.y+row, row);
     //printf("\n box[0] %d, box[1] %d, box[2] %d, box[3] %d, box[4] %d, box[5] %d, thread %d", box[0], box[1], box[2], box[3], box[4], box[5], threadIdx.x);
-
-    if(startOfTree + pos -1 <= endOfTree){
+    
+    //TODO: erstes/ erst hits in tree wird nicht processed
+    if(startOfTree + pos - 1 <= endOfTree){
         
-        for( int i=0; i< number_of_dimensions; i++){
-            if( treeArray_values[startOfTree+number_of_dimensions*pos+i] >= box[2*i] && treeArray_values[startOfTree+number_of_dimensions*pos+i] <= box[2*i+1] ){
+        for( int i=0; i<number_of_dimensions; i++){
+            if( treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*(pos-1)+i] >= box[2*i] && treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*(pos-1)+i] <= box[2*i+1] ){
                 //inside box
-                printf("\n inside box at position %d with thread nr: %d ", startOfTree+pos, threadIdx.x);
-                printf("\n value is: %d , box-min: %d, box-max: %d", treeArray_values[startOfTree+number_of_dimensions*pos+i], box[2*i], box[2*i+1]);
+                //printf("\n value: %d , box-min: %d, box-max: %d, ID: %d, thread %d", treeArray_values[startOfTree+number_of_dimensions*(pos-1)+i], box[2*i], box[2*i+1], treeArray_ID[startOfTree+pos-1], threadIdx.x);
             }
             else{
-                printf("\n not inside box at position %d with thread nr: %d ", startOfTree+pos, threadIdx.x);
-                treeArray_ID[startOfTree+pos] = -1;
+                //printf("\n value: %d , box-min: %d, box-max: %d, ID: %d, thread %d NOOOOOT", treeArray_values[startOfTree+number_of_dimensions*(pos-1)+i], box[2*i], box[2*i+1], treeArray_ID[startOfTree+pos-1], threadIdx.x);
+                treeArray_ID[startOfTree+pos-1] = -1;
             }
             
         }
@@ -139,8 +139,12 @@ __global__
 void insideBox(T *treeArray_values, int *treeArray_ID, T *box, int tree_size, int number_of_dimensions){
     
     //for each thread has it's own tree starting here
-    int startOfTree = threadIdx.x * tree_size ;
+    //TODO: STARTOFTREE falsch.. ist die gesamte position, ohne berücksichtigung der number_of_dimensions. Die müssen berücksichtigt werden!!!
+    int startOfTree = threadIdx.x * tree_size;
     int endOfTree = startOfTree + (tree_size - 1);
+    for(int i = startOfTree; i<endOfTree; i++ ){
+        //printf("\n (%d, %d, %d) \t ID: %d,\t startOfTree: %d, \t position of point: %d, thread: %d", treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*i+0], treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*i+1], treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*i+2], treeArray_ID[startOfTree+i], startOfTree*number_of_dimensions, startOfTree*number_of_dimensions+number_of_dimensions*i, threadIdx.x);
+    }
     //printf("\n threadIdx: %d startOfTree %d, endOfTree %d, row %d, col %d, blockDim %d", threadIdx.x, startOfTree, endOfTree, row, col, blockDim.y);
     traverseTree(treeArray_values, treeArray_ID, box, 1, startOfTree, endOfTree, number_of_dimensions);
 }
@@ -190,8 +194,8 @@ void Cuda_class<T>::cudaMain(int number_of_trees, int tree_size, T *treeArray_va
         printf("Error: %s\n", cudaGetErrorString(err));
     
     std::cout << "\n Size of forest: " << size_of_forest << std::endl;
-//
-//    //print out ID's which are in box:
+
+    //print out ID's which are in box:
 //    for(int i = 0; i< number_of_trees*tree_size; i++){
 //        std::cout << "ID: " << treeArray_ID[i]<< std::endl;
 //    }
@@ -204,60 +208,4 @@ void Cuda_class<T>::cudaMain(int number_of_trees, int tree_size, T *treeArray_va
 
 }
 
-//dummy cudaMain
-/*template <typename T>
-void Cuda_class<T>::cudaMainDummy(int number_of_trees, int tree_size, T treeArray_x[], T treeArray_y[], T treeArray_z[], int treeArray_ID[], T box[]){
-    
-    cudaSetDevice(MYDEVICE);
-    std::cout << "number of trees: " << number_of_trees << std::endl;
-    std::cout << "tree size: " << tree_size << std::endl;
-    std::cout << "number of dimensions: " << number_of_dimensions << std::endl;
-    std::cout << "box: " << box[0] << " " << box[1] << " " << box[2] << " " << box[3] << " " << box[4] << " " << box[5] << std::endl;
-    //TODO: int ----> num_t
-    int size_of_forest = number_of_trees*tree_size*sizeof(int);
-    T *d_treeArray_values;
-    int *d_treeArray_ID;
-    T *d_box;
-    
-    
-    //allocate memory
-    //TODO: do outside of cudaMain
-    cudaMalloc(&d_treeArray_values, size_of_forest*number_of_dimensions);
-    cudaMalloc(&d_treeArray_ID, size_of_forest);
-    cudaMalloc(&d_box, number_of_dimensions*2*sizeof(T));
-    
-    //send trees to gpu
-    cudaMemcpy(d_treeArray_values, treeArray_values, size_of_forest*number_of_dimensions, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_treeArray_ID, treeArray_ID, size_of_forest, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_box, box, number_of_dimensions*2*sizeof(T), cudaMemcpyHostToDevice);
-    
-    
-    //search forest for points inside box_dimensions - returns all treeArray_ID's which are inside box - rest are filled with -1
-    //TODO: do not change treeArray_ID's - make separate array.
-    
-    //insideBox<T><<<Anzahl benutzte Blöcke, Anzahl Threads>>> = <<<Anzahl benutzte Blöcke, Anzahl Baeume >>>
-    //weil ein Thread == ein Baum
-    insideBox_test<<<1,1024>>>(d_treeArray_x, d_treeArray_y, d_treeArray_z, d_treeArray_ID_copy, d_box);
-    //YourKernel<<<dimGrid, dimBlock>>>(d_A,d_B); //Kernel invocation
-    
-    
-    cudaMemcpy(treeArray_ID, d_treeArray_ID, size_of_forest, cudaMemcpyDeviceToHost);
-    
-    cudaError_t err = cudaGetLastError();
-    if (err != cudaSuccess)
-        printf("Error: %s\n", cudaGetErrorString(err));
-    
-    std::cout << "\n Size of forest: " << size_of_forest << std::endl;
-    //
-    //    //print out ID's which are in box:
-    //    for(int i = 0; i< number_of_trees*tree_size; i++){
-    //        std::cout << "ID: " << treeArray_ID[i]<< std::endl;
-    //    }
-    
-    
-    //free space
-    cudaFree(d_treeArray_values);
-    cudaFree(d_treeArray_ID);
-    cudaFree(d_box);
-}*/
 template class Cuda_class<int>;

@@ -21,6 +21,7 @@ void checkCUDAError(const char *msg);
 //think about: threadIDx.y!! index s.d. threadIDx.y die treeArray_y bearbeitet -
 //for this would have to change treeArray_x & treeArray_y etc --> tree..
 //no nested if's no recursive.. -
+/*
 template <typename T>
 __global__
 void insideBox_test( T *treeArray_x, T *treeArray_y, T *treeArray_z, int *treeArray_ID, T *box)
@@ -90,7 +91,7 @@ void insideBox(T *treeArray_x, T *treeArray_y, T *treeArray_z, int *treeArray_ID
     traverseTree(treeArray_x, treeArray_y, treeArray_z, treeArray_ID, box, 1, startOfTree, endOfTree);
 }
 
-
+*/
 
 //more generic approach!!
 
@@ -149,10 +150,75 @@ void insideBox(T *treeArray_values, int *treeArray_ID, T *box, int tree_size, in
     traverseTree(treeArray_values, treeArray_ID, box, 1, startOfTree, endOfTree, number_of_dimensions);
 }
 
+template <typename T>
+void Cuda_class<T>::cudaInsideBox(int number_of_trees, int tree_size, int number_of_dimensions, T *treeArray_values, int *treeArray_ID, T box[]){
+
+    insideBox<T><<<1,number_of_trees>>>(d_treeArray_values, d_treeArray_ID, d_box, tree_size, number_of_dimensions);
+}
 
 template <typename T>
+void Cuda_class<T>::cudaCopyToDevice(int number_of_trees_, int tree_size_, T *treeArray_values, int *treeArray_ID, T box[],  int number_of_dimensions_){
+    number_of_trees = number_of_trees_;
+    number_of_dimensions = number_of_dimensions_;
+    tree_size = tree_size_;
+
+    cudaSetDevice(MYDEVICE);
+    std::cout << "number of trees: " << number_of_trees << std::endl;
+    std::cout << "tree size: " << tree_size << std::endl;
+    std::cout << "number of dimensions: " << number_of_dimensions << std::endl;
+    std::cout << "box: " << box[0] << " " << box[1] << " " << box[2] << " " << box[3] << " " << box[4] << " " << box[5] << std::endl;
+    //TODO: int ----> num_t
+    size_of_forest =  number_of_trees*tree_size*sizeof(int);
+    
+    //allocate memory
+    //TODO: do outside of cudaMain
+    cudaMalloc(&d_treeArray_values, size_of_forest*number_of_dimensions);
+    cudaMalloc(&d_treeArray_ID, size_of_forest);
+    cudaMalloc(&d_box, number_of_dimensions*2*sizeof(T));
+    
+    //send trees to gpu
+    cudaMemcpy(d_treeArray_values, treeArray_values, size_of_forest*number_of_dimensions, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_treeArray_ID, treeArray_ID, size_of_forest, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_box, box, number_of_dimensions*2*sizeof(T), cudaMemcpyHostToDevice);
+}
+
+template <typename T>
+void Cuda_class<T>::cudaCopyToHost(int* treeArray_ID){
+    
+    cudaMemcpy(treeArray_ID, d_treeArray_ID, size_of_forest, cudaMemcpyDeviceToHost);
+    
+    cudaError_t err = cudaGetLastError();
+    if (err != cudaSuccess)
+        printf("Error: %s\n", cudaGetErrorString(err));
+    
+    std::cout << "\n Size of forest: " << size_of_forest << std::endl;
+    
+//    //print out ID's which are in box:
+//        for(int i = 0; i< number_of_trees*tree_size; i++){
+//            std::cout << "ID: " << treeArray_ID[i]<< std::endl;
+//        }
+    
+    
+    //free space
+    cudaFree(d_treeArray_values);
+    cudaFree(d_treeArray_ID);
+    cudaFree(d_box);
+
+}
+
+
+
+
+
+
+//VERALTET - NICHT MEHR IN GEBRAUCH
+/*
+template <typename T>
 //void Cuda_class<T>::cudaMain(int number_of_trees, int tree_size, T treeArray_x[], T treeArray_y[], T treeArray_z[], int treeArray_ID[], T box[]){
-void Cuda_class<T>::cudaMain(int number_of_trees, int tree_size, T *treeArray_values, int *treeArray_ID, T box[],  int number_of_dimensions){
+void Cuda_class<T>::cudaMain(int number_of_trees_, int tree_size_, T *treeArray_values, int *treeArray_ID, T box[],  int number_of_dimensions_){
+    number_of_trees = number_of_trees_;
+    number_of_dimensions = number_of_dimensions_;
+    tree_size = tree_size_;
     
     cudaSetDevice(MYDEVICE);
     std::cout << "number of trees: " << number_of_trees << std::endl;
@@ -160,6 +226,7 @@ void Cuda_class<T>::cudaMain(int number_of_trees, int tree_size, T *treeArray_va
     std::cout << "number of dimensions: " << number_of_dimensions << std::endl;
     std::cout << "box: " << box[0] << " " << box[1] << " " << box[2] << " " << box[3] << " " << box[4] << " " << box[5] << std::endl;
     //TODO: int ----> num_t
+    size_of_forest =  number_of_trees*tree_size*sizeof(int);
     int size_of_forest = number_of_trees*tree_size*sizeof(int);
     T *d_treeArray_values;
     int *d_treeArray_ID;
@@ -206,6 +273,6 @@ void Cuda_class<T>::cudaMain(int number_of_trees, int tree_size, T *treeArray_va
     cudaFree(d_treeArray_ID);
     cudaFree(d_box);
 
-}
+}*/
 
 template class Cuda_class<int>;

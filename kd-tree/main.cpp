@@ -313,10 +313,11 @@ int main()
         Cuda_class<num_t> tree;
     
         startCuda = std::chrono::high_resolution_clock::now();
-        tree.cudaMain(threads, datapoints_per_tree, treesArray, treesArray_ID, box, number_of_dimensions);
+//        tree.cudaMain(threads, datapoints_per_tree, treesArray, treesArray_ID, box, number_of_dimensions);
         endCuda = std::chrono::high_resolution_clock::now();
-    
-    
+        tree.cudaCopyToDevice(threads, datapoints_per_tree, treesArray, treesArray_ID, box, number_of_dimensions);
+        tree.cudaInsideBox(threads, datapoints_per_tree, number_of_dimensions, treesArray, treesArray_ID, box);
+        tree.cudaCopyToHost(treesArray_ID);
     
         //test wether the resulting ID's are correct, and the only ones inside box:
         vector<int> dummyResult = inBox(threads, datapoints_per_tree, box,trees);

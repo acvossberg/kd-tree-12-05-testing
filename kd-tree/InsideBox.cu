@@ -75,8 +75,15 @@ void insideBox(T *treeArray_values, int *treeArray_ID, T *box, int tree_size, in
 
 template <typename T>
 void Cuda_class<T>::cudaInsideBox(int number_of_trees, int tree_size, int number_of_dimensions, T *treeArray_values, int *treeArray_ID, T box[]){
-
-    insideBox<T><<<1,number_of_trees>>>(d_treeArray_values, d_treeArray_ID, d_box, tree_size, number_of_dimensions);
+    
+    //insideBox<T><<<Anzahl benutzte Blöcke, Anzahl Threads>>> = <<<Anzahl benutzte Blöcke, Anzahl Baeume >>>
+    //weil ein Thread == ein Baum
+    int max_threads_per_block = 1024;
+    int number_of_blocks = (number_of_trees + max_threads_per_block -1) / max_threads_per_block ;
+    if(number_of_trees > 1024){number_of_trees = 1024;}
+    
+    insideBox<T><<<number_of_blocks,number_of_trees>>>(d_treeArray_values, d_treeArray_ID, d_box, tree_size, number_of_dimensions);
+    //YourKernel<<<dimGrid, dimBlock>>>(d_A,d_B); //Kernel invocation
 }
 
 template <typename T>

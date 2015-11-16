@@ -232,7 +232,7 @@ int main()
     
     vector<Hit<num_t>> cloud;
     vector<Point<num_t>> cloudn;
-    vector<int> VectNumberOfHits = {100,1000,2000,5000, 10000, 20000, 50000, 100000};
+    vector<int> VectNumberOfHits = {100,100,100,1000,2000,3000, 4000, 5000, 10000,15000, 20000,30000};
     
     ofstream myThreadFile ("ThreadingTimes.txt");
     ofstream myCudaFile("CudaTimes.txt");
@@ -242,10 +242,12 @@ int main()
     std::chrono::high_resolution_clock::time_point endInsideBox;
     std::chrono::high_resolution_clock::time_point startCopyToDevice;
     std::chrono::high_resolution_clock::time_point endCopyToDevice;
-    //for(int i = 0; i < 8; i++){
-
+    //for(int i = 0; i < 12; i++){
+    int numberOfHits = 0;
+    while( numberOfHits <= 30000){
+        numberOfHits+=100;
         // Generate points:
-        int numberOfHits = VectNumberOfHits[0];
+        //int numberOfHits = VectNumberOfHits[i];
         generateRandomPointCloud(cloudn, cloud, numberOfHits);
         
         //must be defined {1, 2, 3} = {x, y, z}
@@ -261,6 +263,7 @@ int main()
         cudaGetDeviceProperties(&devProp, device);
         printDevProp(devProp);
         int max_threads = devProp.warpSize;
+        int max_threads_per_block = devProp.maxThreadsPerBlock;
         //TODO: here calculate #nodes need
         
         cout << "number of warps " << max_threads << endl;
@@ -340,9 +343,9 @@ int main()
         cloud.clear();
         
         myThreadFile << std::chrono::duration_cast<std::chrono::microseconds>(endMakingForestWithThreads-startMakingForestWithThreads).count() << ",";
-        myCudaFile  << std::chrono::duration_cast<std::chrono::nanoseconds>(endInsideBox-startInsideBox).count() << ",";
+        myCudaFile  << std::chrono::duration_cast<std::chrono::microseconds>(endInsideBox-startInsideBox).count() << ",";
     
-    //}
+    }
     myThreadFile.close();
     myCudaFile.close();
 

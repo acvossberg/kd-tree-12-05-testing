@@ -237,6 +237,7 @@ int main()
     
     ofstream myThreadFile ("ThreadingTimes.txt");
     ofstream myCudaFile("CudaTimes.txt");
+    ofstream myTreeSizeFile("TreeSizes.txt");
     std::chrono::high_resolution_clock::time_point startMakingForestWithThreads;
     std::chrono::high_resolution_clock::time_point endMakingForestWithThreads;
     std::chrono::high_resolution_clock::time_point startInsideBox; 
@@ -353,7 +354,7 @@ int main()
         
         myThreadFile << std::chrono::duration_cast<std::chrono::microseconds>(endMakingForestWithThreads-startMakingForestWithThreads).count() << ",";
         myCudaFile  << std::chrono::duration_cast<std::chrono::microseconds>(endInsideBox-startInsideBox).count() << ",";
-    
+        myTreeSizeFile << to_string(treeSize) << ",";
     }
     myThreadFile.close();
     myCudaFile.close();

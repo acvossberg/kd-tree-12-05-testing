@@ -91,6 +91,7 @@ void make_forest(vector<Point<num_t>> &cloudn, vector<Hit<num_t>> &cloud, vector
         
         if(id == nthreads-1){
             datapoints_per_tree = cloud.size() -  datapoints_per_tree*id;
+            cout << "new datapoints_per_tree: " << datapoints_per_tree << endl;
         }
         
         //TODO: NO COPY!!
@@ -98,7 +99,7 @@ void make_forest(vector<Point<num_t>> &cloudn, vector<Hit<num_t>> &cloud, vector
         vector<Point<num_t>> threadcloudn(cloudn.begin()+id*datapoints_per_tree, cloudn.begin()+(id+1)*datapoints_per_tree);
         
         
-        //cout << "cloud.size() " << threadcloud.size() << " cloudn.size() " << threadcloudn.size() << endl;
+        cout << "id " << id << " von " << id*datapoints_per_tree << " bis " << (id+1)*datapoints_per_tree << endl;
         futures.push_back(std::async(launch::async, make_tree<num_t>, threadcloudn, threadcloud, dimensions, transformable_trees, treesArray_ID, id*nodes_per_tree));
         //make_tree<num_t>(threadcloudn, threadcloud, dimensions, transformable_trees, treesArray_ID, id*nodes_per_tree);
     }
@@ -243,7 +244,7 @@ int main()
     std::chrono::high_resolution_clock::time_point startCopyToDevice;
     std::chrono::high_resolution_clock::time_point endCopyToDevice;
     //for(int i = 0; i < 12; i++){
-    int numberOfHits = 0;
+    int numberOfHits = 200;
     while( numberOfHits <= 30000){
         numberOfHits+=100;
         // Generate points:
@@ -262,23 +263,28 @@ int main()
         cudaDeviceProp devProp;
         cudaGetDeviceProperties(&devProp, device);
         printDevProp(devProp);
-        int max_threads = devProp.warpSize;
+        int warp_size = devProp.warpSize;
         int max_threads_per_block = devProp.maxThreadsPerBlock;
         //TODO: here calculate #nodes need
         
-        cout << "number of warps " << max_threads << endl;
-        
-        int warp_size = max_threads;
+        cout << "number of warps " << warp_size << endl;
         
         //???: will it be one tree per warp or per block?
         //formula: 2^(floor(log_2(64)+1))-1 is always max when one less than warp_size
-        int datapoints_per_tree = warp_size-1;
+        //int datapoints_per_tree = warp_size-1;
+        int datapoints_per_tree = (numberOfHits+warp_size-1)/warp_size;
         cout << "datapoints_per_tree: " << datapoints_per_tree << endl;
         
+        int treeSize = pow(2, floor(log2(datapoints_per_tree)+1))-1;
+        cout << "treeSize " << treeSize << endl;
+        datapoints_per_tree = treeSize;
         
         //round up: q = (x + y - 1) / y;
         int threads = (numberOfHits+datapoints_per_tree-1)/datapoints_per_tree;
-       
+        //threads = warp_size-1;
+        cout << "number of threads e.g. number of trees " << threads << endl;
+        
+        
         //all not-used elements in treesArray are by default set to zero by compiler
         int *treesArray_ID = new int[threads*datapoints_per_tree];
         num_t *treesArray;
@@ -288,12 +294,11 @@ int main()
         endMakingForestWithThreads = std::chrono::high_resolution_clock::now();
         
         
-        
         //test if trees made with make_forest are correct:
-        vector<vector<Point<num_t>>> trees = test_correct_trees(treesArray, treesArray_ID, datapoints_per_tree, threads, dimensions, numberOfHits, cloudn);
-        
+        //vector<vector<Point<num_t>>> trees = test_correct_trees(treesArray, treesArray_ID, datapoints_per_tree, threads, dimensions, numberOfHits, cloudn);
+        /*
         //print treesArray
-        /*int c=0;
+        int c=0;
         for(int i=0; i<datapoints_per_tree*threads*number_of_dimensions-1; i+=number_of_dimensions){
             cout << treesArray[i+0] << " " << treesArray[i+1] << " " << treesArray[i+2] << " ID:" << treesArray_ID[c] << endl;
             c++;
@@ -323,13 +328,17 @@ int main()
     
         startInsideBox = std::chrono::high_resolution_clock::now();
         tree.cudaInsideBox(threads, datapoints_per_tree, number_of_dimensions, treesArray, treesArray_ID, box);
+        cudaDeviceSynchronize();
         endInsideBox = std::chrono::high_resolution_clock::now();
     
         tree.cudaCopyToHost(treesArray_ID);
-    
+         
+         
+         
+        //TESTING CORRECTNESS ------------------------------------------------------------------------------------------------------
         //test wether the resulting ID's are correct, and the only ones inside box:
-        vector<int> dummyResult = inBox(threads, datapoints_per_tree, box,trees);
-    
+        /*vector<int> dummyResult = inBox(threads, datapoints_per_tree, box,trees);
+        
         for( int i = 0; i<threads*datapoints_per_tree; i++){
             if(treesArray_ID[i] != dummyResult[i]){
                 std::cout << "NOT same" << "ID real: " << treesArray_ID[i]<< " ID dummy: " << dummyResult[i]<<std::endl;

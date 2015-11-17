@@ -66,10 +66,11 @@ void insideBox(T *treeArray_values, int *treeArray_ID, T *box, int tree_size, in
     //TODO: STARTOFTREE falsch.. ist die gesamte position, ohne berücksichtigung der number_of_dimensions. Die müssen berücksichtigt werden!!!
     int startOfTree = threadIdx.x * tree_size;
     int endOfTree = startOfTree + (tree_size - 1);
-    for(int i = startOfTree; i<endOfTree; i++ ){
-        //printf("\n (%d, %d, %d) \t ID: %d,\t startOfTree: %d, \t position of point: %d, thread: %d", treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*i+0], treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*i+1], treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*i+2], treeArray_ID[startOfTree+i], startOfTree*number_of_dimensions, startOfTree*number_of_dimensions+number_of_dimensions*i, threadIdx.x);
+    /*for(int i = startOfTree; i<endOfTree; i++ ){
+        printf("\n (%d, %d, %d) \t ID: %d,\t startOfTree: %d, \t position of point: %d, thread: %d", treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*i+0], treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*i+1], treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*i+2], treeArray_ID[startOfTree+i], startOfTree*number_of_dimensions, startOfTree*number_of_dimensions+number_of_dimensions*i, threadIdx.x);
     }
-    //printf("\n threadIdx: %d startOfTree %d, endOfTree %d, row %d, col %d, blockDim %d", threadIdx.x, startOfTree, endOfTree, row, col, blockDim.y);
+    printf("\n threadIdx: %d startOfTree %d, endOfTree %d, row %d, col %d, blockDim %d", threadIdx.x, startOfTree, endOfTree, row, col, blockDim.y);
+     */
     traverseTree(treeArray_values, treeArray_ID, box, 1, startOfTree, endOfTree, number_of_dimensions);
 }
 

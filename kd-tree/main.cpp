@@ -12,13 +12,13 @@
 #include "KD_tree.cpp"
 #include "simple_kd_tree.hpp"
 #include "simple_kd_tree.cpp"
-#include "cuda_runtime.h"
-#include "cuda.h"
+//#include "cuda_runtime.h"
+//#include "cuda.h"
 #include <iostream>
 #include <algorithm>
 #include <cmath>
 #include <future>
-#include "InsideBox.hpp"
+//#include "InsideBox.hpp"
 #include <fstream>
 #include <iomanip>
 #define MYDEVICE 0
@@ -185,7 +185,7 @@ vector<vector<Point<num_t>>> test_correct_trees(num_t *trees_array_transformable
     return trees;
 }
 
-void printDevProp(cudaDeviceProp devProp)
+/*void printDevProp(cudaDeviceProp devProp)
 {
     //http://www.cs.fsu.edu/~xyuan/cda5125/examples/lect24/devicequery.cu
     printf("Major revision number:         %d\n",  devProp.major);
@@ -209,7 +209,7 @@ void printDevProp(cudaDeviceProp devProp)
     printf("Kernel execution timeout:      %s\n",  (devProp.kernelExecTimeoutEnabled ? "Yes" : "No"));
     
     return;
-}
+}*/
 void traverseTreeCPU( int *treeArray_values, int *treeArray_ID, int *box, int pos, int startOfTree, int endOfTree, int number_of_dimensions){
     
     //printf("\n first value: startOfTree+pos*blokDim.y + row %d, row %d", (startOfTree+pos)*blockDim.y+row, row);
@@ -334,7 +334,6 @@ int main()
     while( numberOfHits <= 30000){
         numberOfHits+=100;
         // Generate points:
-        //int numberOfHits = VectNumberOfHits[i];
         generateRandomPointCloud(cloudn, cloud, numberOfHits);
         
         //must be defined {1, 2, 3} = {x, y, z}
@@ -342,7 +341,7 @@ int main()
         int number_of_dimensions = dimensions.size();
         
         //get_size_of_tree from cuda_device --> #datapoints per thread.. = datapoints per tree
-        int device;
+        /*int device;
         cudaGetDevice(&device);
         std::cout<< "devices are: " << device << endl;
         
@@ -350,9 +349,12 @@ int main()
         cudaGetDeviceProperties(&devProp, device);
         printDevProp(devProp);
         int warp_size = devProp.warpSize;
-        int max_threads_per_block = devProp.maxThreadsPerBlock;
+        int max_threads_per_block = devProp.maxThreadsPerBlock;*/
         //TODO: here calculate #nodes need
         
+        
+        
+        int warp_size = 32;
         cout << "number of warps " << warp_size << endl;
         
         //???: will it be one tree per warp or per block?

@@ -35,7 +35,7 @@ void traverseTree( T *treeArray_values, int *treeArray_ID, T *box, int pos, int 
         int level_of_dimension = level%number_of_dimensions;
         //a mod b = a - floor(a / b) * b
         
-        printf("\n level %d, lastlevel %d,levelOfDimension %d, ID %d, pos %d, startOfTree %d, thrad %d", level, lastLevel,level_of_dimension, treeArray_ID[startOfTree+pos-1], pos, startOfTree, threadIdx.x);
+        //printf("\n level %d, lastlevel %d,levelOfDimension %d, ID %d, pos %d, startOfTree %d, thrad %d", level, lastLevel,level_of_dimension, treeArray_ID[startOfTree+pos-1], pos, startOfTree, threadIdx.x);
         
         
         

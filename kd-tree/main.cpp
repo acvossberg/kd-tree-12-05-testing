@@ -210,9 +210,94 @@ void printDevProp(cudaDeviceProp devProp)
     
     return;
 }
+void traverseTreeCPU( int *treeArray_values, int *treeArray_ID, int *box, int pos, int startOfTree, int endOfTree, int number_of_dimensions){
+    
+    //printf("\n first value: startOfTree+pos*blokDim.y + row %d, row %d", (startOfTree+pos)*blockDim.y+row, row);
+    //printf("\n box[0] %d, box[1] %d, box[2] %d, box[3] %d, box[4] %d, box[5] %d, thread %d", box[0], box[1], box[2], box[3], box[4], box[5], threadIdx.x);
+    bool flag_not_found_invalid = true;
+    int lastLevel = ceil(log2(double(endOfTree+1))-1);
+    
+    
+    if(startOfTree + pos - 1 <= endOfTree){
+        //calculate which tree level we are on to know which dimension was sorted
+        int level = ceil(log2(double(pos+1))-1);
+        int level_of_dimension = level%number_of_dimensions;
+        //a mod b = a - floor(a / b) * b
+        
+        //printf("\n level %d, lastlevel %d,levelOfDimension %d, ID %d, pos %d, startOfTree %d, thrad %d", level, lastLevel,level_of_dimension, treeArray_ID[startOfTree+pos-1], pos, startOfTree, threadIdx.x);
+        
+        
+        
+        //check wether invalid encountered, continue search:
+        if((treeArray_ID[startOfTree+pos-1] != -1)){
+            
+            //if node has sorted dimension in box, continue both branches:
+            if(treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*(pos-1)+level_of_dimension] >= box[2*level_of_dimension] && treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*(pos-1)+level_of_dimension] <= box[2*level_of_dimension+1]){
+                
+                //check wether the node is inside the box:
+                for(int i=0; i<number_of_dimensions; i++){
+                    if(i == level_of_dimension) continue;
+                    if( treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*(pos-1)+i] >= box[2*i] && treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*(pos-1)+i] <= box[2*i+1] ){
+                        //entirely inside box for all dimensions
+                    }
+                    else{
+                        //not totally inside box
+                        //printf("\n thread %d is changing ID %d of tree starting at %d, exact position: %d", threadIdx.x, treeArray_ID[startOfTree+pos-1], startOfTree, startOfTree+pos-1);
+                        treeArray_ID[startOfTree+pos-1] = -2;
+                    }
+                }
+                
+                //continue both branches:
+                if( ! (level == lastLevel-1 && flag_not_found_invalid==false)){
+                    //left child:
+                    pos *= 2;
+                    traverseTreeCPU(treeArray_values, treeArray_ID, box, pos, startOfTree, endOfTree, number_of_dimensions);
+                }
+                if( ! (level == lastLevel-1 && flag_not_found_invalid==false)){
+                    //right child:
+                    pos += 1;
+                    traverseTreeCPU(treeArray_values, treeArray_ID, box, pos, startOfTree, endOfTree, number_of_dimensions);
+                }
+            }
+            //if sorted dimension is larger than box follow branch of smaller child = left child
+            else if(treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*(pos-1)+level] > box[2*level+1]){
+                treeArray_ID[startOfTree+pos-1] = -2;
+                if( ! (level == lastLevel-1 && flag_not_found_invalid==false)){
+                    //left child:
+                    pos *= 2;
+                    traverseTreeCPU(treeArray_values, treeArray_ID, box, pos, startOfTree, endOfTree, number_of_dimensions);
+                }
+            }
+            //if sorted dimension is smaller than box, follow branch of larger child = right child
+            else{
+                treeArray_ID[startOfTree+pos-1] = -2;
+                if( ! (level == lastLevel-1 && flag_not_found_invalid==false)){
+                    //right child:
+                    pos += 1;
+                    traverseTreeCPU(treeArray_values, treeArray_ID, box, pos, startOfTree, endOfTree, number_of_dimensions);
+                }
+            }
+        }
+        //if invalid is encountered, all future lastLevel checks don't have to be done
+        //flag is set
+        else{
+            flag_not_found_invalid = false;
+        }
+    }
+}
 
-
-
+void insideBoxCPU(int *treeArray_values, int *treeArray_ID, int *box, int tree_size, int number_of_dimensions){
+    
+    int threadIdx = 0;
+    int startOfTree = threadIdx* tree_size;
+    int endOfTree = startOfTree + (tree_size - 1);
+    /*for(int i = startOfTree; i<endOfTree; i++ ){
+     printf("\n (%d, %d, %d) \t ID: %d,\t startOfTree: %d, \t position of point: %d, thread: %d", treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*i+0], treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*i+1], treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*i+2], treeArray_ID[startOfTree+i], startOfTree*number_of_dimensions, startOfTree*number_of_dimensions+number_of_dimensions*i, threadIdx.x);
+     }
+     printf("\n threadIdx: %d startOfTree %d, endOfTree %d, row %d, col %d, blockDim %d", threadIdx.x, startOfTree, endOfTree, row, col, blockDim.y);
+     */
+    traverseTreeCPU(treeArray_values, treeArray_ID, box, 1, startOfTree, endOfTree, number_of_dimensions);
+}
 
 int main()
 {
@@ -320,7 +405,14 @@ int main()
         //make box, in which should be searched for hits
         //set all other dimensions to zero, if not used:
         int box[6] = {2, 8, 1, 3, 2, 5};
-    
+        
+        //testing on CPU
+        startInsideBox = std::chrono::high_resolution_clock::now();
+        insideBoxCPU(treesArray, treesArray_ID, box, treeSize, number_of_dimensions);
+        endInsideBox = std::chrono::high_resolution_clock::now();
+        
+        
+        /*
         Cuda_class<num_t> tree;
     
         startCopyToDevice = std::chrono::high_resolution_clock::now();
@@ -333,7 +425,7 @@ int main()
         endInsideBox = std::chrono::high_resolution_clock::now();
     
         tree.cudaCopyToHost(treesArray_ID);
-         
+         */
          
          
         //TESTING CORRECTNESS ------------------------------------------------------------------------------------------------------

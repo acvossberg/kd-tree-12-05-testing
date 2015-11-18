@@ -91,7 +91,7 @@ void make_forest(vector<Point<num_t>> &cloudn, vector<Hit<num_t>> &cloud, vector
         
         if(id == nthreads-1){
             datapoints_per_tree = cloud.size() -  datapoints_per_tree*id;
-            cout << "new datapoints_per_tree: " << datapoints_per_tree << endl;
+            cout << "datapoints_per_tree for last tree: " << datapoints_per_tree << endl;
         }
         
         //TODO: NO COPY!!
@@ -99,7 +99,7 @@ void make_forest(vector<Point<num_t>> &cloudn, vector<Hit<num_t>> &cloud, vector
         vector<Point<num_t>> threadcloudn(cloudn.begin()+id*datapoints_per_tree, cloudn.begin()+(id+1)*datapoints_per_tree);
         
         
-        cout << "id " << id << " von " << id*datapoints_per_tree << " bis " << (id+1)*datapoints_per_tree << endl;
+        //cout << "id " << id << " von " << id*datapoints_per_tree << " bis " << (id+1)*datapoints_per_tree << endl;
         futures.push_back(std::async(launch::async, make_tree<num_t>, threadcloudn, threadcloud, dimensions, transformable_trees, treesArray_ID, id*nodes_per_tree));
         //make_tree<num_t>(threadcloudn, threadcloud, dimensions, transformable_trees, treesArray_ID, id*nodes_per_tree);
     }

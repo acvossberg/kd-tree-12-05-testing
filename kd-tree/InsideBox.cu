@@ -26,17 +26,72 @@ void traverseTree( T *treeArray_values, int *treeArray_ID, T *box, int pos, int 
     //printf("\n first value: startOfTree+pos*blokDim.y + row %d, row %d", (startOfTree+pos)*blockDim.y+row, row);
     //printf("\n box[0] %d, box[1] %d, box[2] %d, box[3] %d, box[4] %d, box[5] %d, thread %d", box[0], box[1], box[2], box[3], box[4], box[5], threadIdx.x);
     
-    //TODO: erstes/ erst hits in tree wird nicht processed
     if(startOfTree + pos - 1 <= endOfTree){
+        //calculate which tree level we are on to know which dimension was sorted
+        int level = ceil(log2(double(pos+1))-1);
+        level = level%number_of_dimensions;
+        //a mod b = a - floor(a / b) * b
+            
+            
+        //if node has sorted dimension in box, continue both branches:
+        if(treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*(pos-1)+level] >= box[2*level] && treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*(pos-1)+level] <= box[2*level+1]){
+            
+            //check wether the node is inside the box:
+            for(int i=0; i<number_of_dimensions; i++){
+                if(i == level) continue;
+                if( treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*(pos-1)+i] >= box[2*i] && treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*(pos-1)+i] <= box[2*i+1] ){
+                //totally inside box
+                }
+                else{
+                    //not totally inside box
+                    treeArray_ID[startOfTree+pos-1] = -1;
+                }
+            }
+            
+            //continue both branches
+            //left child:
+            pos *= 2;
+            traverseTree(treeArray_values, treeArray_ID, box, pos, startOfTree, endOfTree, number_of_dimensions);
+            
+            //right child:
+            pos += 1;
+            traverseTree(treeArray_values, treeArray_ID, box, pos, startOfTree, endOfTree, number_of_dimensions);
+        }
+        //if sorted dimension is larger than box follow branch of smaller child = left child
+        else if(treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*(pos-1)+level] > box[2*level+1]){
+            //left child:
+            pos *= 2;
+            traverseTree(treeArray_values, treeArray_ID, box, pos, startOfTree, endOfTree, number_of_dimensions);
+        }
+        //if sorted dimension is smaller than box, follow branch of larger child = right child
+        else{
+            //right child:
+            pos += 1;
+            traverseTree(treeArray_values, treeArray_ID, box, pos, startOfTree, endOfTree, number_of_dimensions);
+        }
         
-        for( int i=0; i<number_of_dimensions; i++){
+            
+            
+            
+            
+            
+            /*
             if( treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*(pos-1)+i] >= box[2*i] && treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*(pos-1)+i] <= box[2*i+1] ){
+                
                 //inside box
                 //printf("\n value: %d , box-min: %d, box-max: %d, ID: %d, thread %d", treeArray_values[startOfTree+number_of_dimensions*(pos-1)+i], box[2*i], box[2*i+1], treeArray_ID[startOfTree+pos-1], threadIdx.x);
             }
             else{
                 //printf("\n value: %d , box-min: %d, box-max: %d, ID: %d, thread %d NOOOOOT", treeArray_values[startOfTree+number_of_dimensions*(pos-1)+i], box[2*i], box[2*i+1], treeArray_ID[startOfTree+pos-1], threadIdx.x);
                 treeArray_ID[startOfTree+pos-1] = -1;
+                
+                //left child:
+                pos *= 2;
+                traverseTree(treeArray_values, treeArray_ID, box, pos, startOfTree, endOfTree, number_of_dimensions);
+                
+                //right child:
+                pos += 1;
+                traverseTree(treeArray_values, treeArray_ID, box, pos, startOfTree, endOfTree, number_of_dimensions);c
             }
             
         }
@@ -53,7 +108,7 @@ void traverseTree( T *treeArray_values, int *treeArray_ID, T *box, int pos, int 
             //right child:
             pos += 1;
             traverseTree(treeArray_values, treeArray_ID, box, pos, startOfTree, endOfTree, number_of_dimensions);
-        }
+        }*/
     }
 }
 

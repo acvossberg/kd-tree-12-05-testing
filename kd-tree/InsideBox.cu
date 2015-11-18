@@ -35,11 +35,7 @@ void traverseTree( T *treeArray_values, int *treeArray_ID, T *box, int pos, int 
         int level_of_dimension = level%number_of_dimensions;
         //a mod b = a - floor(a / b) * b
         
-        //if(threadIdx.x == 0){
-            //printf("\n startOfTree: %d , level: %d, lastLevel: %d, ID: %d, thread %d, pos %d", startOfTree, level, lastLevel, treeArray_ID[startOfTree+pos-1], threadIdx.x, pos);
-             printf("\n level %d, lastlevel %d,levelOfDimension %d, ID %d, pos %d, startOfTree %d, thrad %d", level, lastLevel,level_of_dimension, treeArray_ID[startOfTree+pos-1], pos, startOfTree, threadIdx.x);
-        //}
-        
+        printf("\n level %d, lastlevel %d,levelOfDimension %d, ID %d, pos %d, startOfTree %d, thrad %d", level, lastLevel,level_of_dimension, treeArray_ID[startOfTree+pos-1], pos, startOfTree, threadIdx.x);
         
         
         
@@ -53,7 +49,7 @@ void traverseTree( T *treeArray_values, int *treeArray_ID, T *box, int pos, int 
                 for(int i=0; i<number_of_dimensions; i++){
                     if(i == level_of_dimension) continue;
                     if( treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*(pos-1)+i] >= box[2*i] && treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*(pos-1)+i] <= box[2*i+1] ){
-                    //totally inside box
+                    //entirely inside box for all dimensions
                     }
                     else{
                         //not totally inside box
@@ -62,7 +58,7 @@ void traverseTree( T *treeArray_values, int *treeArray_ID, T *box, int pos, int 
                     }
                 }
                 
-                //continue both branches
+                //continue both branches:
                 if( ! (level == lastLevel-1 && flag_not_found_invalid==false)){
                     //left child:
                     pos *= 2;

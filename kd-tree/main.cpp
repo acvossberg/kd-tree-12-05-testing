@@ -46,7 +46,7 @@ void generateRandomPointCloud(vector<Point<num_t>> &pointn, vector<Hit<num_t>> &
         point[i].ID = i;
         
         
-        cout << point[i].datapoints[0] << ", " << point[i].datapoints[1] << ", " << point[i].datapoints[2] << " ID: " << point[i].ID << endl;
+        //cout << point[i].datapoints[0] << ", " << point[i].datapoints[1] << ", " << point[i].datapoints[2] << " ID: " << point[i].ID << endl;
         //cout << pointn[i].x << ", " << pointn[i].y << ", " << pointn[i].z << " ID: " << pointn[i].ID << endl;
     }
     std::cout << "done\n \n";
@@ -245,10 +245,9 @@ int main()
     std::chrono::high_resolution_clock::time_point startCopyToDevice;
     std::chrono::high_resolution_clock::time_point endCopyToDevice;
     //for(int i = 0; i < 12; i++){
-    int numberOfHits = 50;
-    //while( numberOfHits <= 30000){
-    //while(numberOfHits <=1000){
-        //numberOfHits+=100;
+    int numberOfHits = 200;
+    while( numberOfHits <= 30000){
+        numberOfHits+=100;
         // Generate points:
         //int numberOfHits = VectNumberOfHits[i];
         generateRandomPointCloud(cloudn, cloud, numberOfHits);
@@ -297,7 +296,7 @@ int main()
         
         
         //test if trees made with make_forest are correct:
-        vector<vector<Point<num_t>>> trees = test_correct_trees(treesArray, treesArray_ID, datapoints_per_tree, threads, dimensions, numberOfHits, cloudn);
+        //vector<vector<Point<num_t>>> trees = test_correct_trees(treesArray, treesArray_ID, datapoints_per_tree, threads, dimensions, numberOfHits, cloudn);
         /*
         //print treesArray
         int c=0;
@@ -339,12 +338,12 @@ int main()
          
         //TESTING CORRECTNESS ------------------------------------------------------------------------------------------------------
         //test wether the resulting ID's are correct, and the only ones inside box:
-        vector<int> dummyResult = inBox(threads, datapoints_per_tree, box,trees);
+        /*vector<int> dummyResult = inBox(threads, datapoints_per_tree, box,trees);
         
         for( int i = 0; i<threads*datapoints_per_tree; i++){
-            if(treesArray_ID[i] != dummyResult[i] ){
+            if(treesArray_ID[i] != dummyResult[i]){
                 if(treesArray_ID[i] == -2 && dummyResult[i] == -1) continue;
-                std::cout << "NOT same" << "ID real: " << treesArray_ID[i]<< " ID dummy: " << dummyResult[i]<<std::endl;
+                    std::cout << "NOT same" << "ID real: " << treesArray_ID[i]<< " ID dummy: " << dummyResult[i]<<std::endl;
             }
         }
         /*
@@ -357,7 +356,7 @@ int main()
         myThreadFile << std::chrono::duration_cast<std::chrono::microseconds>(endMakingForestWithThreads-startMakingForestWithThreads).count() << ",";
         myCudaFile  << std::chrono::duration_cast<std::chrono::microseconds>(endInsideBox-startInsideBox).count() << ",";
         myTreeSizeFile << to_string(treeSize) << ",";
-    //}
+    }
     myThreadFile.close();
     myCudaFile.close();
 

@@ -39,7 +39,7 @@ struct KDnode<T> *SimpleKDtree<T>::newSimpleKDtreeNode(Point<T> data)
 template < class T>
 SimpleKDtree<T>::SimpleKDtree(vector<int> const &dimensions){
     dim = dimensions;
-    zero_point.x = zero_point.y = zero_point.z = -1;
+    zero_point.x = zero_point.y = zero_point.z = 0;
 
 }
 template < class T>
@@ -101,7 +101,7 @@ void SimpleKDtree<T>::make_SimpleKDtreeHelper(vector<Point<T>> cloud, KDnode<T> 
         root->values = cloud[0];
         if(height == 1){
             Point<T> zero_point;
-            zero_point.x = zero_point.y = zero_point.z = -1;
+            zero_point.x = zero_point.y = zero_point.z = 0;
             //cout << "put extra children here: " << cloud[0].x << " " << cloud[0].y << endl;
             root->left = new KDnode<T>(zero_point);
             root->right = new KDnode<T>(zero_point);
@@ -115,9 +115,9 @@ void SimpleKDtree<T>::make_SimpleKDtree(vector<Point<T>> cloud, int left, int ri
     height = floor(log2(cloud.size()))+1;
     number_nodes = pow(2,floor(log2(cloud.size())) +1) - 1;
     Point<T> placeholder;
-    placeholder.x = -1; //TODO: some better marker/placeholder needed!
-    placeholder.y = -1;
-    placeholder.z = -1;
+    placeholder.x = 0; //TODO: some better marker/placeholder needed!
+    placeholder.y = 0;
+    placeholder.z = 0;
     res_vector.resize(number_nodes,placeholder);
     
     if(root){
@@ -131,6 +131,8 @@ void SimpleKDtree<T>::make_SimpleKDtree(vector<Point<T>> cloud, int left, int ri
 }
 template <class T>
 bool SimpleKDtree<T>::compare_tree_node(KDnode<T> root, Point<T> Kdtree){
+    
+    //std::cout << "simpletree: (" << get_value(1, root.values) << ", " << get_value(2, root.values) << ", " << get_value(3, root.values) << ") ID: "<< get_value(4, root.values) << "\t realtree: (" << get_value(1, Kdtree) << ", " << get_value(2, Kdtree) << ", " << get_value(3, Kdtree) << ") ID:" << get_value(4, Kdtree) << std::endl;
     
     for(int i = 0; i<dim.size()-1; ++i){
         int d = dim[i];

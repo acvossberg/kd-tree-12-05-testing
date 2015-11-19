@@ -185,7 +185,7 @@ void KD_tree<T>::KD_tree_recursive(int left, int right, int k, int pos){
     int med = left + (right+1 - left)/2; //left + (right - left)/2;
     //if even:
     if(left <= right){
-    
+        
         //check ob korrekt gerundet wird
         k = k%dim.size();
         int d = dim[k];

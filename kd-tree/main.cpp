@@ -211,29 +211,32 @@ vector<vector<Point<num_t>>> test_correct_trees(num_t *trees_array_transformable
     
     return;
 }*/
-bool flag_not_found_invalid = true;
+int number_of_nodes_traversed = 0;
 void traverseTreeCPU( vector<int> &treeArray_values, vector<int> &treeArray_ID, vector<int> &results, vector<int> &box, int pos, int startOfTree, int endOfTree, int number_of_dimensions){
     
-    int lastLevel = ceil(log2(double(endOfTree+1))-1);
-    
-    flag_not_found_invalid = true;
+    number_of_nodes_traversed++;
+
     if(startOfTree + pos - 1 <= endOfTree){
+        
         //calculate which tree level we are on to know which dimension was sorted
         int level = ceil(log2(double(pos+1))-1);
         int level_of_dimension = level%number_of_dimensions;
+        int lastLevel = ceil(log2(double(endOfTree+1))-1);
         //a mod b = a - floor(a / b) * b
-        //cout << "global position: " << startOfTree+pos -1 << " und ID: " << treeArray_ID[startOfTree+pos-1] << " level: " << level <<  " levelofDimension: " << level_of_dimension << endl;
-        //printf("\n level %d, lastlevel %d,levelOfDimension %d, ID %d, pos %d, startOfTree %d, thrad %d", level, lastLevel,level_of_dimension, treeArray_ID[startOfTree+pos-1], pos, startOfTree, threadIdx.x);
         
+        //cout << "global position: " << startOfTree+pos -1 << " und ID: " << treeArray_ID[startOfTree+pos-1] << " level: " << level <<  " levelofDimension: " << level_of_dimension << endl;
         
         
         //check wether invalid encountered, continue search:
-        if((treeArray_ID[startOfTree+pos-1] != -1)){
+        if(treeArray_ID[startOfTree+pos-1] != 0){
             
             //if node has sorted dimension in box, continue both branches:
-            //cout << treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*(pos-1)+level_of_dimension] << " >= " << box[2*level_of_dimension] <<  " && " << treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*(pos-1)+level_of_dimension] << " <= " << box[2*level_of_dimension+1] << endl;
+            //cout << box[2*level_of_dimension] <<  " <= " << treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*(pos-1)+level_of_dimension] << " <= " << box[2*level_of_dimension+1] << endl;
+            
             if(treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*(pos-1)+level_of_dimension] >= box[2*level_of_dimension] && treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*(pos-1)+level_of_dimension] <= box[2*level_of_dimension+1]){
                 bool inside = true;
+                //cout << "number of nodes traversed " << number_of_nodes_traversed << endl;
+                
                 //check wether the node is inside the box:
                 for(int i=0; i<number_of_dimensions; i++){
                     if(i == level_of_dimension) continue;
@@ -248,7 +251,6 @@ void traverseTreeCPU( vector<int> &treeArray_values, vector<int> &treeArray_ID, 
                         //printf("\n thread %d is changing ID %d of tree starting at %d, exact position: %d", threadIdx.x, treeArray_ID[startOfTree+pos-1], startOfTree, startOfTree+pos-1);
                         //cout << "not inside \t ID: " << treeArray_ID[startOfTree+pos-1] <<" bei pos: " << startOfTree+pos-1 << " weg! BEIDE BRANCHES" << endl;
                         inside = false;
-                        //treeArray_ID[startOfTree+pos-1] = -2;
                     }
                 }
                 if(inside){
@@ -257,43 +259,39 @@ void traverseTreeCPU( vector<int> &treeArray_values, vector<int> &treeArray_ID, 
                 }
                 
                 //continue both branches:
-                if( ! (level == lastLevel-1 && flag_not_found_invalid==false)){
+                if(level != lastLevel){
+                    //cout << "ID: " << treeArray_ID[startOfTree+pos-1] <<" bei pos: " << startOfTree+pos-1 << " BEIDE BRANCHES" << endl;
                     //left child:
                     pos *= 2;
                     traverseTreeCPU(treeArray_values, treeArray_ID,results, box, pos, startOfTree, endOfTree, number_of_dimensions);
-                }
-                if( ! (level == lastLevel-1 && flag_not_found_invalid==false)){
+                
                     //right child:
                     pos += 1;
                     traverseTreeCPU(treeArray_values, treeArray_ID,results, box, pos, startOfTree, endOfTree, number_of_dimensions);
                 }
+            
             }
             //if sorted dimension is larger than box follow branch of smaller child = left child
             else if(treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*(pos-1)+level_of_dimension] > box[2*level_of_dimension+1]){
-                //cout << "ID: " << treeArray_ID[startOfTree+pos-1] << " weg! LINKES KIND" << endl;
-                //treeArray_ID[startOfTree+pos-1] = -2;
-                if( ! (level == lastLevel-1 && flag_not_found_invalid==false)){
-                    //left child:
+                //cout << "ID: " << treeArray_ID[startOfTree+pos-1] << " bei pos: " << startOfTree+pos-1 << " LINKES KIND" << endl;
+                //cout << "number of nodes traversed " << number_of_nodes_traversed << endl;
+                //left child:
+                if(level != lastLevel){
                     pos *= 2;
                     traverseTreeCPU(treeArray_values, treeArray_ID,results, box, pos, startOfTree, endOfTree, number_of_dimensions);
                 }
             }
             //if sorted dimension is smaller than box, follow branch of larger child = right child
             else{
-                //cout << "ID: " << treeArray_ID[startOfTree+pos-1] << " weg! RECHTES KIND" << endl;
-                //treeArray_ID[startOfTree+pos-1] = -2;
-                if( ! (level == lastLevel-1 && flag_not_found_invalid==false)){
+                //cout << "ID: " << treeArray_ID[startOfTree+pos-1] << " bei pos: " << startOfTree+pos-1 << " RECHTES KIND" << endl;
+                //cout << "number of nodes traversed " << number_of_nodes_traversed << endl;
+                if(level != lastLevel){
                     //right child:
                     pos *= 2;
                     pos += 1;
                     traverseTreeCPU(treeArray_values, treeArray_ID, results, box, pos, startOfTree, endOfTree, number_of_dimensions);
                 }
             }
-        }
-        //if invalid is encountered, all future lastLevel checks don't have to be done
-        //flag is set
-        else{
-            flag_not_found_invalid = false;
         }
     }
 }
@@ -303,11 +301,7 @@ void insideBoxCPU(vector<int> &treeArray_values, vector<int> &treeArray_ID, vect
     int threadIdx = 0;
     int startOfTree = threadIdx* tree_size;
     int endOfTree = startOfTree + (tree_size - 1);
-    /*for(int i = startOfTree; i<endOfTree; i++ ){
-     printf("\n (%d, %d, %d) \t ID: %d,\t startOfTree: %d, \t position of point: %d, thread: %d", treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*i+0], treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*i+1], treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*i+2], treeArray_ID[startOfTree+i], startOfTree*number_of_dimensions, startOfTree*number_of_dimensions+number_of_dimensions*i, threadIdx.x);
-     }
-     printf("\n threadIdx: %d startOfTree %d, endOfTree %d, row %d, col %d, blockDim %d", threadIdx.x, startOfTree, endOfTree, row, col, blockDim.y);
-     */
+    
     traverseTreeCPU(treeArray_values, treeArray_ID,results, box, 1, startOfTree, endOfTree, number_of_dimensions);
 }
 
@@ -335,6 +329,8 @@ int main()
     ofstream myThreadFile ("ThreadingTimes.txt");
     ofstream myCudaFile("CudaTimes.txt");
     ofstream myTreeSizeFile("TreeSizes.txt");
+    ofstream myNodesTraversed("NodesTraversed.txt");
+    ofstream myNodesInsideBox("InsideBox.txt");
     std::chrono::high_resolution_clock::time_point startMakingForestWithThreads;
     std::chrono::high_resolution_clock::time_point endMakingForestWithThreads;
     std::chrono::high_resolution_clock::time_point startInsideBox; 
@@ -343,10 +339,12 @@ int main()
     std::chrono::high_resolution_clock::time_point endCopyToDevice;
     //for(int i = 0; i < 12; i++){
     int numberOfHits = 100;
+    vector<int> number_nodes;
     while( numberOfHits <= 30000){
         numberOfHits+=100;
         // Generate points:
         generateRandomPointCloud(cloudn, cloud, numberOfHits);
+        number_of_nodes_traversed = 0;
         
         //must be defined {1, 2, 3} = {x, y, z}
         vector<int> dimensions = {1,2,3};
@@ -386,7 +384,6 @@ int main()
         cout << "treeSize " << treeSize << endl;
         cout << "number of threads e.g. number of trees " << threads << endl;
         
-        
         //all not-used elements in treesArray are by default set to zero by compiler
         int *treesArray_ID = new int[threads*datapoints_per_tree]();
         //initializing results with 0
@@ -400,6 +397,8 @@ int main()
         
         //test if trees made with make_forest are correct:
         vector<vector<Point<num_t>>> trees = test_correct_trees(treesArray, treesArray_ID, datapoints_per_tree, threads, dimensions, numberOfHits, cloudn);
+        
+        
         /*
         //print treesArray
         int c=0;
@@ -408,8 +407,6 @@ int main()
             c++;
             
         }
-        
-    
         for(int i=0; i<threads; i++){
             cout << " NEW TREE" << endl;
             
@@ -422,29 +419,25 @@ int main()
     
         //make box, in which should be searched for hits
         //set all other dimensions to zero, if not used:
-        int box[6] = {2, 8, 1, 3, 2, 5};
+        int box[6] = {8, 8, 1, 1, 2, 2};
         
         //testing on CPU
         std::vector<int> VtreesArray(treesArray, treesArray + threads*datapoints_per_tree*number_of_dimensions);
         std::vector<int> VtreesArray_ID(treesArray_ID, treesArray_ID + threads*datapoints_per_tree);
         std::vector<int> VtreeResults_ID(treeResults_ID, treeResults_ID + threads*datapoints_per_tree);
-//        int c=0;
-//        for(int i=0; i<datapoints_per_tree*threads*number_of_dimensions-1; i+=number_of_dimensions){
-//            cout << VtreesArray[i+0] << " " << VtreesArray[i+1] << " " << VtreesArray[i+2] << " ID:" << VtreesArray_ID[c] << endl;
-//            c++;
-//        }
         std::vector<int> Vbox(box, box + 6);
-        
-        vector<int> dummyResult = inBox(threads, datapoints_per_tree, box,trees);
-//        for( int i = 0; i<threads*datapoints_per_tree; i++){
-//            if(dummyResult[i] != -1){
-//                std::cout << "dummy ID's:  " << dummyResult[i]<<std::endl;
-//            }
-//        }
         startInsideBox = std::chrono::high_resolution_clock::now();
         insideBoxCPU(VtreesArray, VtreesArray_ID, VtreeResults_ID, Vbox, treeSize, number_of_dimensions);
         endInsideBox = std::chrono::high_resolution_clock::now();
         
+        number_nodes.push_back(number_of_nodes_traversed);
+        for(int i=0; i<number_nodes.size();i++){
+            cout  << number_nodes[i] << ",";
+        }
+        
+        //get unique ID's
+        auto last = std::unique(VtreeResults_ID.begin(), VtreeResults_ID.end());
+        VtreeResults_ID.erase(last, VtreeResults_ID.end());
         
         /*
         Cuda_class<num_t> tree;
@@ -464,12 +457,12 @@ int main()
         
         //TESTING CORRECTNESS ------------------------------------------------------------------------------------------------------
         //test wether the resulting ID's are correct, and the only ones inside box:
-        //vector<int> dummyResult = inBox(threads, datapoints_per_tree, box,trees);
+        /*vector<int> dummyResult = inBox(threads, datapoints_per_tree, box,trees);
         
         for( int i = 0; i<threads*datapoints_per_tree; i++){
-//            if(VtreeResults_ID[i] != 0){
-//                std::cout << "ID real: " << VtreeResults_ID[i]<< " ID dummy: " << dummyResult[i]<<std::endl;
-//            }
+            if(VtreeResults_ID[i] != 0){
+                std::cout << "ID real: " << VtreeResults_ID[i]<< " ID dummy: " << dummyResult[i]<<std::endl;
+            }
             if(VtreeResults_ID[i] != dummyResult[i]){
                 //std::cout << "ID real: " << VtreeResults_ID[i]<< " ID dummy: " << dummyResult[i]<<std::endl;
                 if(VtreeResults_ID[i] == 0 && dummyResult[i] == -1) continue;
@@ -477,21 +470,25 @@ int main()
             }
         }
         
-//        for(int i = 0; i< threads*datapoints_per_tree; i++){
-//            if(VtreeResults_ID[i] != 0){
-//            std::cout << "ID: " << VtreeResults_ID[i]<< std::endl;
-//            }
-//        }
+        for(int i = 0; i< threads*datapoints_per_tree; i++){
+            if(VtreeResults_ID[i] != 0){
+            std::cout << "ID: " << VtreeResults_ID[i]<< std::endl;
+            }
+        }*/
         
         cloud.clear();
         
         myThreadFile << std::chrono::duration_cast<std::chrono::microseconds>(endMakingForestWithThreads-startMakingForestWithThreads).count() << ",";
         myCudaFile  << std::chrono::duration_cast<std::chrono::microseconds>(endInsideBox-startInsideBox).count() << ",";
         myTreeSizeFile << to_string(treeSize) << ",";
+        myNodesTraversed << to_string(number_of_nodes_traversed) << ",";
+        myNodesInsideBox << to_string(VtreeResults_ID.size()) << ",";
     }
     myThreadFile.close();
     myCudaFile.close();
-
+    myTreeSizeFile.close();
+    myNodesTraversed.close();
+    
     return 0;
 }
 

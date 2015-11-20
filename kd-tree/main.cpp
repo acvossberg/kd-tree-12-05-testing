@@ -227,7 +227,7 @@ vector<vector<Point<num_t>>> test_correct_trees(num_t *trees_array_transformable
     return;
 }*/
 int number_of_nodes_traversed = 0;
-void traverseTreeCPU( vector<int> &treeArray_values, vector<int> &treeArray_ID, vector<int> &results, vector<int> &box, int pos, int startOfTree, int endOfTree, int number_of_dimensions){
+void CPUtraverseTreeRecursiveIF( vector<int> &treeArray_values, vector<int> &treeArray_ID, vector<int> &results, vector<int> &box, int pos, int startOfTree, int endOfTree, int number_of_dimensions){
     
     number_of_nodes_traversed++;
 
@@ -278,11 +278,11 @@ void traverseTreeCPU( vector<int> &treeArray_values, vector<int> &treeArray_ID, 
                     //cout << "ID: " << treeArray_ID[startOfTree+pos-1] <<" bei pos: " << startOfTree+pos-1 << " BEIDE BRANCHES" << endl;
                     //left child:
                     pos *= 2;
-                    traverseTreeCPU(treeArray_values, treeArray_ID,results, box, pos, startOfTree, endOfTree, number_of_dimensions);
+                    CPUtraverseTreeRecursiveIF(treeArray_values, treeArray_ID,results, box, pos, startOfTree, endOfTree, number_of_dimensions);
                 
                     //right child:
                     pos += 1;
-                    traverseTreeCPU(treeArray_values, treeArray_ID,results, box, pos, startOfTree, endOfTree, number_of_dimensions);
+                    CPUtraverseTreeRecursiveIF(treeArray_values, treeArray_ID,results, box, pos, startOfTree, endOfTree, number_of_dimensions);
                 }
             
             }
@@ -293,7 +293,7 @@ void traverseTreeCPU( vector<int> &treeArray_values, vector<int> &treeArray_ID, 
                 //left child:
                 if(level != lastLevel){
                     pos *= 2;
-                    traverseTreeCPU(treeArray_values, treeArray_ID,results, box, pos, startOfTree, endOfTree, number_of_dimensions);
+                    CPUtraverseTreeRecursiveIF(treeArray_values, treeArray_ID,results, box, pos, startOfTree, endOfTree, number_of_dimensions);
                 }
             }
             //if sorted dimension is smaller than box, follow branch of larger child = right child
@@ -304,12 +304,83 @@ void traverseTreeCPU( vector<int> &treeArray_values, vector<int> &treeArray_ID, 
                     //right child:
                     pos *= 2;
                     pos += 1;
-                    traverseTreeCPU(treeArray_values, treeArray_ID, results, box, pos, startOfTree, endOfTree, number_of_dimensions);
+                    CPUtraverseTreeRecursiveIF(treeArray_values, treeArray_ID, results, box, pos, startOfTree, endOfTree, number_of_dimensions);
                 }
             }
         }
     }
 }
+void CPUtraverseTreeIterative(vector<int> &treeArray_values, vector<int> &treeArray_ID, vector<int> &results, vector<int> &box, int pos, int startOfTree, int endOfTree, int number_of_dimensions){
+    
+    int lastLevel = ceil(log2(double(endOfTree+1))-1);
+    
+    
+    //for GPU queue will be array (for debugging reasons vector here)
+    std::vector<int> queue(endOfTree - startOfTree);
+    queue[0]= pos;
+    int queueFront = 0;
+    int queueRear = 1;
+    int queueSize = 1;
+    int numberOfMightHits = 0;
+    
+    while(queueSize != 0){
+        
+        int level = ceil(log2(double(pos+1))-1);
+        int level_of_dimension = level%number_of_dimensions;
+        
+        queueSize--;
+        pos = queue[queueFront++];
+        
+        //if sorted dimension inside box continue with both branches
+        if(treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*(pos-1)+level_of_dimension] >= box[2*level_of_dimension] && treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*(pos-1)+level_of_dimension] <= box[2*level_of_dimension+1]){
+            //put left and right child in queue:
+            queue[queueRear++] = pos*2;
+            queue[queueRear++] = pos*2+1;
+            queueSize+=2;
+            
+            
+            //and check if node is totally inside box - then right it to results
+            //possibility(?) can this be checked after tree traversed? Can an extra thread check this? 2 threads per tree?
+            //write pos to array? What about size of array on GPU? Size of tree must be allocated? Is there so much space?
+            //per warp needed memory: 3*TreeSize - NO !!! can be put into results :)
+            //toCheckIfInside.push_back(pos);
+            //these results have to be checked again!!!
+            results[startOfTree+numberOfMightHits] = pos; //treeArray_ID[startOfTree+pos-1];
+            numberOfMightHits++;
+            
+        }
+        //else if sorted dimensions > inside box continue with left child
+        else if(treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*(pos-1)+level_of_dimension] > box[2*level_of_dimension+1]){
+            queue[queueRear++] = pos*2;
+            queueSize++;
+        }
+        //else sorted dimension < inside box continue with right child
+        else{
+            queue[queueRear] = pos+1;
+        }
+        
+        
+        //check nodes, that might be inside box:
+        for(int j = 0; j<=numberOfMightHits;j++){
+            pos = results[startOfTree+j];
+            results[startOfTree+j] = 0;
+            
+            bool inside = true;
+            for(int i=0; i<number_of_dimensions; i++){
+                if( treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*(pos-1)+i] >= box[2*i] && treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*(pos-1)+i] <= box[2*i+1] ){
+                    //entirely inside box for all dimensions
+                }
+                else{
+                    inside = false;
+                }
+            }
+            if(inside){
+                results[startOfTree+pos-1] = treeArray_ID[startOfTree+pos-1];
+            }
+        }
+    }
+}
+
 
 void insideBoxCPU(vector<int> &treeArray_values, vector<int> &treeArray_ID, vector<int> &results, vector<int> &box, int tree_size, int number_of_dimensions){
     
@@ -317,7 +388,9 @@ void insideBoxCPU(vector<int> &treeArray_values, vector<int> &treeArray_ID, vect
     int startOfTree = threadIdx* tree_size;
     int endOfTree = startOfTree + (tree_size - 1);
     
-    traverseTreeCPU(treeArray_values, treeArray_ID,results, box, 1, startOfTree, endOfTree, number_of_dimensions);
+    CPUtraverseTreeRecursiveIF(treeArray_values, treeArray_ID,results, box, 1, startOfTree, endOfTree, number_of_dimensions);
+    //CPUtraverseTreeIterative(treeArray_values, treeArray_ID,results, box, 1, startOfTree, endOfTree, number_of_dimensions);
+    //CPUtraverseTreeBFSQueue(treeArray_values, treeArray_ID,results, box, 1, startOfTree, endOfTree, number_of_dimensions);
 }
 
 int main()

@@ -33,12 +33,27 @@ void generateRandomPointCloud(vector<Point<num_t>> &pointn, vector<Hit<num_t>> &
     cout << "Generating "<< N << " point cloud...\n";
     point.resize(N);
     pointn.resize(N);
+    int counter = 0;
     for (size_t i=0;i<N;i++)
     {
-        pointn[i].x = max_range * (rand() % 1000) / num_t(1000);
-        pointn[i].y = max_range * (rand() % 1000) / num_t(1000);
-        pointn[i].z = max_range * (rand() % 1000) / num_t(1000);
+        pointn[i].x = max_range * (rand() % 1000) / num_t(500);
+        pointn[i].y = max_range * (rand() % 1000) / num_t(500);
+        pointn[i].z = max_range * (rand() % 1000) / num_t(500);
         pointn[i].ID = i+1;
+        
+        if(i==30){
+            pointn[i].x = 15;
+            pointn[i].y = 14;
+            pointn[i].z = 5;
+        }
+        
+        while(pointn[i].x == 15 && pointn[i].y == 14 && pointn[i].y == 5){
+             pointn[i].x = max_range * (rand() % 1000) / num_t(500);
+             pointn[i].y = max_range * (rand() % 1000) / num_t(500);
+             pointn[i].z = max_range * (rand() % 1000) / num_t(500);
+         }
+        
+             
         //vector<num_t> p = {max_range * (rand() % 1000) / num_t(1000), max_range * (rand() % 1000) / num_t(1000), max_range * (rand() % 1000) / num_t(1000)};
         
         vector<num_t> p = {pointn[i].x, pointn[i].y,pointn[i].z};
@@ -340,7 +355,7 @@ int main()
     //for(int i = 0; i < 12; i++){
     int numberOfHits = 100;
     vector<int> number_nodes;
-    while( numberOfHits <= 30000){
+    while( numberOfHits <= 100000){
         numberOfHits+=100;
         // Generate points:
         generateRandomPointCloud(cloudn, cloud, numberOfHits);
@@ -419,7 +434,7 @@ int main()
     
         //make box, in which should be searched for hits
         //set all other dimensions to zero, if not used:
-        int box[6] = {8, 8, 1, 1, 2, 2};
+        int box[6] = {15, 15, 14, 14, 5, 5};
         
         //testing on CPU
         std::vector<int> VtreesArray(treesArray, treesArray + threads*datapoints_per_tree*number_of_dimensions);

@@ -41,17 +41,29 @@ void generateRandomPointCloud(vector<Point<num_t>> &pointn, vector<Hit<num_t>> &
         pointn[i].z = max_range * (rand() % 1000) / num_t(500);
         pointn[i].ID = i+1;
         
+        int a = (int)pointn[i].x;
+        int b = (int)pointn[i].y;
+        int c = (int)pointn[i].z;
+    
+        while(a == 15 && b == 14 && c == 5){
+            //cout << " 15 14 5 ID:" << i+1 << endl;
+            pointn[i].x = max_range * (rand() % 1000) / num_t(500);
+            pointn[i].y = max_range * (rand() % 1000) / num_t(500);
+            pointn[i].z = max_range * (rand() % 1000) / num_t(500);
+            
+            a = pointn[i].x;
+            b = pointn[i].y;
+            c = pointn[i].z;
+        }
+        
+        
         if(i==30){
             pointn[i].x = 15;
             pointn[i].y = 14;
             pointn[i].z = 5;
         }
         
-        while(pointn[i].x == 15 && pointn[i].y == 14 && pointn[i].y == 5){
-             pointn[i].x = max_range * (rand() % 1000) / num_t(500);
-             pointn[i].y = max_range * (rand() % 1000) / num_t(500);
-             pointn[i].z = max_range * (rand() % 1000) / num_t(500);
-         }
+        
         
              
         //vector<num_t> p = {max_range * (rand() % 1000) / num_t(1000), max_range * (rand() % 1000) / num_t(1000), max_range * (rand() % 1000) / num_t(1000)};
@@ -417,10 +429,10 @@ int main()
     std::chrono::high_resolution_clock::time_point startCopyToDevice;
     std::chrono::high_resolution_clock::time_point endCopyToDevice;
     //for(int i = 0; i < 12; i++){
-    int numberOfHits = 50;
+    int numberOfHits = 200;
     vector<int> number_nodes;
-    while( numberOfHits <= 100000){
-        numberOfHits+=5;
+    while( numberOfHits <= 60000){
+        numberOfHits+=200;
         // Generate points:
         generateRandomPointCloud(cloudn, cloud, numberOfHits);
         number_of_nodes_traversed = 0;
@@ -522,9 +534,9 @@ int main()
         endInsideBox = std::chrono::high_resolution_clock::now();
         
         number_nodes.push_back(number_of_nodes_traversed);
-        for(int i=0; i<number_nodes.size();i++){
+        /*for(int i=0; i<number_nodes.size();i++){
             cout  << number_nodes[i] << ",";
-        }
+        }*/
         
         
         
@@ -551,6 +563,7 @@ int main()
         for( int i = 0; i<threads*datapoints_per_tree; i++){
             if(VtreeResults_ID[i] != 0){
                 std::cout << "ID real: " << VtreeResults_ID[i]<< " ID dummy: " << dummyResult[i]<<std::endl;
+                cout << "Values: " << VtreesArray[i*number_of_dimensions+0] << " " << VtreesArray[i*number_of_dimensions+1] << " " << VtreesArray[i*number_of_dimensions+2] << endl;
             }
             if(VtreeResults_ID[i] != dummyResult[i]){
                 //std::cout << "ID real: " << VtreeResults_ID[i]<< " ID dummy: " << dummyResult[i]<<std::endl;
@@ -560,15 +573,12 @@ int main()
             }
         }
         if(resultsCorrect) cout << "All inside Box are correct!" << endl;
-        //get unique ID's
-        auto last = std::unique(VtreeResults_ID.begin(), VtreeResults_ID.end());
-        VtreeResults_ID.erase(last, VtreeResults_ID.end());
+        sort( VtreeResults_ID.begin(), VtreeResults_ID.end() );
+        VtreeResults_ID.erase( unique( VtreeResults_ID.begin(), VtreeResults_ID.end() ), VtreeResults_ID.end() );
         
-//        for(int i = 0; i< threads*datapoints_per_tree; i++){
-//            if(VtreeResults_ID[i] != 0){
-//            std::cout << "ID: " << VtreeResults_ID[i]<< std::endl;
-//            }
-//        }
+        for(int i = 0; i< VtreeResults_ID.size(); i++){
+            std::cout << "FINAL ID: " << VtreeResults_ID[i]<< std::endl;
+        }
         
         cloud.clear();
         
@@ -576,6 +586,7 @@ int main()
         myCudaFile  << std::chrono::duration_cast<std::chrono::microseconds>(endInsideBox-startInsideBox).count() << ",";
         myTreeSizeFile << to_string(treeSize) << ",";
         myNodesTraversed << to_string(number_of_nodes_traversed) << ",";
+        cout << "VtreeResults_ID.size() " << VtreeResults_ID.size() << endl;
         myNodesInsideBox << to_string(VtreeResults_ID.size()) << ",";
     }
     myThreadFile.close();

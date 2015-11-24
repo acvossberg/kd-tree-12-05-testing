@@ -521,24 +521,6 @@ int main()
             //test if trees made with make_forest are correct:
             vector<vector<Point<num_t>>> trees = test_correct_trees(treesArray, treesArray_ID, datapoints_per_tree, threads, dimensions, numberOfHits, cloudn);
             
-            
-            /*
-            //print treesArray
-            int c=0;
-            for(int i=0; i<datapoints_per_tree*threads*number_of_dimensions-1; i+=number_of_dimensions){
-                cout << treesArray[i+0] << " " << treesArray[i+1] << " " << treesArray[i+2] << " ID:" << treesArray_ID[c] << endl;
-                c++;
-                
-            }
-            for(int i=0; i<threads; i++){
-                cout << " NEW TREE" << endl;
-                
-                for( int j=0; j< datapoints_per_tree; j++){
-                    cout << treesArray[i*datapoints_per_tree*number_of_dimensions+j*number_of_dimensions+0] << " " << treesArray[i*datapoints_per_tree*number_of_dimensions+j*number_of_dimensions+1] << " " << treesArray[i*datapoints_per_tree*number_of_dimensions+j*number_of_dimensions+2] << " ID:" << treesArray_ID[i*datapoints_per_tree+j] << endl;
-                    cout << trees[i][j].x << " " << trees[i][j].y << " " << trees[i][j].z << " ID:" << trees[i][j].ID <<  endl;
-                }
-            }
-          */
         
             //make box, in which should be searched for hits
             //set all other dimensions to zero, if not used:
@@ -551,17 +533,7 @@ int main()
             std::vector<int> Vbox(box, box + 6);*/
             
             
-    //        int c=0;
-    //        for(int i=0; i<datapoints_per_tree*threads*number_of_dimensions-1; i+=number_of_dimensions){
-    //            cout << VtreesArray[i+0] << " " << VtreesArray[i+1] << " " << VtreesArray[i+2] << " ID:" << VtreesArray_ID[c] << endl;
-    //            c++;
-    //        }
             vector<int> dummyResult = inBox(threads, datapoints_per_tree, box,trees);
-    //        for( int i = 0; i<threads*datapoints_per_tree; i++){
-    //            if(dummyResult[i] != -1){
-    //                std::cout << "dummy ID's:  " << dummyResult[i]<<std::endl;
-    //            }
-    //        }
             
             
             /*

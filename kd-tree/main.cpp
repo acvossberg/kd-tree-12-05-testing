@@ -21,6 +21,7 @@
 #include <future>
 //#include "InsideBox.hpp"
 #include <fstream>
+#include <numeric>
 #include <iomanip>
 #define MYDEVICE 0
 
@@ -28,12 +29,13 @@ using namespace std;
 
 
 template <typename num_t>
-void generateRandomPointCloud(vector<Point<num_t>> &pointn, vector<Hit<num_t>> &point, const size_t N, const int max_range = 10)
+void generateRandomPointCloud(int specialPoint_x, int specialPoint_y, int specialPoint_z, vector<Point<num_t>> &pointn, vector<Hit<num_t>> &point, const size_t N, const int max_range = 10)
 {
     cout << "Generating "<< N << " point cloud...\n";
     point.resize(N);
     pointn.resize(N);
     int counter = 0;
+    
     for (size_t i=0;i<N;i++)
     {
         pointn[i].x = max_range * (rand() % 1000) / num_t(500);
@@ -45,7 +47,7 @@ void generateRandomPointCloud(vector<Point<num_t>> &pointn, vector<Hit<num_t>> &
         int b = (int)pointn[i].y;
         int c = (int)pointn[i].z;
     
-        while(a == 15 && b == 14 && c == 5){
+        while(a == specialPoint_x && b == specialPoint_y && c == specialPoint_z){
             //cout << " 15 14 5 ID:" << i+1 << endl;
             pointn[i].x = max_range * (rand() % 1000) / num_t(500);
             pointn[i].y = max_range * (rand() % 1000) / num_t(500);
@@ -58,9 +60,9 @@ void generateRandomPointCloud(vector<Point<num_t>> &pointn, vector<Hit<num_t>> &
         
         
         if(i==30){
-            pointn[i].x = 15;
-            pointn[i].y = 14;
-            pointn[i].z = 5;
+            pointn[i].x = specialPoint_x;
+            pointn[i].y = specialPoint_y;
+            pointn[i].z = specialPoint_z;
         }
         
         
@@ -306,21 +308,23 @@ void CPUtraverseTreeRecursiveIF( vector<int> &treeArray_values, vector<int> &tre
         }
     }
 }
-void CPUtraverseTreeIterative(vector<int> &treeArray_values, vector<int> &treeArray_ID, vector<int> &results, vector<int> &box, int pos, int startOfTree, int endOfTree, int number_of_dimensions){
+void CPUtraverseTreeIterative(vector<int> &treeArray_values, vector<int> &treeArray_ID, vector<int> &results, vector<int> &box, vector<int> &queue,int pos, int startOfTree, int endOfTree, int number_of_dimensions){
     
     int lastLevel = ceil(log2(double(endOfTree+1))-1);
     
     
     //for GPU queue will be array (for debugging reasons vector here)
-    std::vector<int> queue(endOfTree - startOfTree);
+    
     queue[0]= pos;
     int queueFront = 0;
     int queueRear = 1;
     int queueSize = 1;
     int numberOfMightHits = 0;
+    number_of_nodes_traversed = 0;
+    
     
     while(queueSize != 0){
-        
+        number_of_nodes_traversed++;
         queueSize--;
         pos = queue[queueFront++];
         
@@ -328,6 +332,7 @@ void CPUtraverseTreeIterative(vector<int> &treeArray_values, vector<int> &treeAr
         int level_of_dimension = level%number_of_dimensions;
         
         //cout << "position " << pos-1 << endl;
+        
         //if sorted dimension inside box continue with both branches
         if(treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*(pos-1)+level_of_dimension] >= box[2*level_of_dimension] && treeArray_values[startOfTree*number_of_dimensions+number_of_dimensions*(pos-1)+level_of_dimension] <= box[2*level_of_dimension+1]){
             //put left and right child in queue:
@@ -364,6 +369,7 @@ void CPUtraverseTreeIterative(vector<int> &treeArray_values, vector<int> &treeAr
             queueSize++;
         }
     }
+    
     //check nodes, that might be inside box:
     for(int j = 0; j<=numberOfMightHits;j++){
         pos = results[startOfTree+j];
@@ -385,14 +391,14 @@ void CPUtraverseTreeIterative(vector<int> &treeArray_values, vector<int> &treeAr
 }
 
 
-void insideBoxCPU(vector<int> &treeArray_values, vector<int> &treeArray_ID, vector<int> &results, vector<int> &box, int tree_size, int number_of_dimensions){
+void insideBoxCPU(vector<int> &treeArray_values, vector<int> &treeArray_ID, vector<int> &results, vector<int> &box,vector<int> &queue, int tree_size, int number_of_dimensions){
     
     int threadIdx = 0;
     int startOfTree = threadIdx* tree_size;
     int endOfTree = startOfTree + (tree_size - 1);
     
-    //CPUtraverseTreeRecursiveIF(treeArray_values, treeArray_ID,results, box, 1, startOfTree, endOfTree, number_of_dimensions);
-    CPUtraverseTreeIterative(treeArray_values, treeArray_ID,results, box, 1, startOfTree, endOfTree, number_of_dimensions);
+    CPUtraverseTreeRecursiveIF(treeArray_values, treeArray_ID,results, box, 1, startOfTree, endOfTree, number_of_dimensions);
+    //CPUtraverseTreeIterative(treeArray_values, treeArray_ID,results, box, queue, 1, startOfTree, endOfTree, number_of_dimensions);
     //CPUtraverseTreeBFSQueue(treeArray_values, treeArray_ID,results, box, 1, startOfTree, endOfTree, number_of_dimensions);
 }
 
@@ -415,13 +421,23 @@ int main()
     
     vector<Hit<num_t>> cloud;
     vector<Point<num_t>> cloudn;
-    vector<int> VectNumberOfHits = {100,100,100,1000,2000,3000, 4000, 5000, 10000,15000, 20000,30000};
-    
+    /*
+    ofstream myThreadFile ("ThreadingTimesIterative.txt");
+    ofstream myCudaFile("CudaTimesIterative.txt");
+    ofstream myCudaStdev("CudaStdDevIterative.txt");
+    ofstream myTreeSizeFile("TreeSizesIterative.txt");
+    ofstream myNodesTraversed("NodesTraversedIterative.txt");
+    ofstream myNodesStdev("NodesStdDevIterative.txt");
+    ofstream myNodesInsideBox("InsideBoxIterative.txt");
+    */
     ofstream myThreadFile ("ThreadingTimes.txt");
     ofstream myCudaFile("CudaTimes.txt");
+    ofstream myCudaStdev("CudaStdDev.txt");
     ofstream myTreeSizeFile("TreeSizes.txt");
     ofstream myNodesTraversed("NodesTraversed.txt");
+    ofstream myNodesStdev("NodesStdDev.txt");
     ofstream myNodesInsideBox("InsideBox.txt");
+    
     std::chrono::high_resolution_clock::time_point startMakingForestWithThreads;
     std::chrono::high_resolution_clock::time_point endMakingForestWithThreads;
     std::chrono::high_resolution_clock::time_point startInsideBox; 
@@ -431,162 +447,196 @@ int main()
     //for(int i = 0; i < 12; i++){
     int numberOfHits = 200;
     vector<int> number_nodes;
-    while( numberOfHits <= 60000){
+    
+    while( numberOfHits <= 30000){
         numberOfHits+=200;
-        // Generate points:
-        generateRandomPointCloud(cloudn, cloud, numberOfHits);
-        number_of_nodes_traversed = 0;
+        int treeSize;
+        std::vector<int> VtreeResults_ID;
         
-        //must be defined {1, 2, 3} = {x, y, z}
-        vector<int> dimensions = {1,2,3};
-        int number_of_dimensions = dimensions.size();
+        //for deviation and median
+        std::vector<double> CudaTimes;
+        std::vector<int> NodesTraversed;
+        for(int p = 0; p<=10;p++){
+            // Generate points:
+            const int max_range = 10;
+            int specialPoint_x = max_range * (rand() % 1000) / num_t(500);
+            int specialPoint_y = max_range * (rand() % 1000) / num_t(500);
+            int specialPoint_z = max_range * (rand() % 1000) / num_t(500);
+
+            
+            generateRandomPointCloud(specialPoint_x, specialPoint_y, specialPoint_z, cloudn, cloud, numberOfHits);
+            number_of_nodes_traversed = 0;
+            
+            //must be defined {1, 2, 3} = {x, y, z}
+            vector<int> dimensions = {1,2,3};
+            int number_of_dimensions = dimensions.size();
+            
+            //get_size_of_tree from cuda_device --> #datapoints per thread.. = datapoints per tree
+            /*int device;
+            cudaGetDevice(&device);
+            std::cout<< "devices are: " << device << endl;
+            
+            cudaDeviceProp devProp;
+            cudaGetDeviceProperties(&devProp, device);
+            printDevProp(devProp);
+            int warp_size = devProp.warpSize;
+            int max_threads_per_block = devProp.maxThreadsPerBlock;*/
+            //TODO: here calculate #nodes need
+            
+            
+            //cup-version
+            int warp_size = 1;
+            
+            
+            //???: will it be one tree per warp or per block?
+            //formula: 2^(floor(log_2(64)+1))-1 is always max when one less than warp_size
+            //int datapoints_per_tree = warp_size-1;
+            int datapoints_per_tree = (numberOfHits+warp_size-1)/warp_size;
+            int treeSize = pow(2, floor(log2(datapoints_per_tree)+1))-1;
+            datapoints_per_tree = treeSize;
+            //round up: q = (x + y - 1) / y;
+            int threads = (numberOfHits+datapoints_per_tree-1)/datapoints_per_tree;
+            //threads = warp_size-1;
+            
+            //for cpu:
+            threads = 1;
+            cout << "number of warps " << warp_size << endl;
+            cout << "datapoints_per_tree: " << datapoints_per_tree << endl;
+            cout << "treeSize " << treeSize << endl;
+            cout << "number of threads e.g. number of trees " << threads << endl;
+            
+            //all not-used elements in treesArray are by default set to zero by compiler
+            int *treesArray_ID = new int[threads*datapoints_per_tree]();
+            //initializing results with 0
+            int *treeResults_ID = new int[threads*datapoints_per_tree]();
+            num_t *treesArray;
+            treesArray = new num_t [threads*datapoints_per_tree*number_of_dimensions]();//[number_of_dimensions+1][threads*datapoints_per_tree];
+            startMakingForestWithThreads = std::chrono::high_resolution_clock::now();
+            make_forest<num_t>(cloudn, cloud, dimensions, datapoints_per_tree, threads, treesArray, treesArray_ID);
+            endMakingForestWithThreads = std::chrono::high_resolution_clock::now();
+            
+            
+            //test if trees made with make_forest are correct:
+            vector<vector<Point<num_t>>> trees = test_correct_trees(treesArray, treesArray_ID, datapoints_per_tree, threads, dimensions, numberOfHits, cloudn);
+            
+            
+            /*
+            //print treesArray
+            int c=0;
+            for(int i=0; i<datapoints_per_tree*threads*number_of_dimensions-1; i+=number_of_dimensions){
+                cout << treesArray[i+0] << " " << treesArray[i+1] << " " << treesArray[i+2] << " ID:" << treesArray_ID[c] << endl;
+                c++;
+                
+            }
+            for(int i=0; i<threads; i++){
+                cout << " NEW TREE" << endl;
+                
+                for( int j=0; j< datapoints_per_tree; j++){
+                    cout << treesArray[i*datapoints_per_tree*number_of_dimensions+j*number_of_dimensions+0] << " " << treesArray[i*datapoints_per_tree*number_of_dimensions+j*number_of_dimensions+1] << " " << treesArray[i*datapoints_per_tree*number_of_dimensions+j*number_of_dimensions+2] << " ID:" << treesArray_ID[i*datapoints_per_tree+j] << endl;
+                    cout << trees[i][j].x << " " << trees[i][j].y << " " << trees[i][j].z << " ID:" << trees[i][j].ID <<  endl;
+                }
+            }
+          */
         
-        //get_size_of_tree from cuda_device --> #datapoints per thread.. = datapoints per tree
-        /*int device;
-        cudaGetDevice(&device);
-        std::cout<< "devices are: " << device << endl;
+            //make box, in which should be searched for hits
+            //set all other dimensions to zero, if not used:
+            int box[6] = {specialPoint_x, specialPoint_x, specialPoint_y, specialPoint_y, specialPoint_z, specialPoint_z};
+            
+            //testing on CPU
+            std::vector<int> VtreesArray(treesArray, treesArray + threads*datapoints_per_tree*number_of_dimensions);
+            std::vector<int> VtreesArray_ID(treesArray_ID, treesArray_ID + threads*datapoints_per_tree);
+            std::vector<int> VtreeResults_ID(treeResults_ID, treeResults_ID + threads*datapoints_per_tree);
+            std::vector<int> Vbox(box, box + 6);
+    //        int c=0;
+    //        for(int i=0; i<datapoints_per_tree*threads*number_of_dimensions-1; i+=number_of_dimensions){
+    //            cout << VtreesArray[i+0] << " " << VtreesArray[i+1] << " " << VtreesArray[i+2] << " ID:" << VtreesArray_ID[c] << endl;
+    //            c++;
+    //        }
+            vector<int> dummyResult = inBox(threads, datapoints_per_tree, box,trees);
+    //        for( int i = 0; i<threads*datapoints_per_tree; i++){
+    //            if(dummyResult[i] != -1){
+    //                std::cout << "dummy ID's:  " << dummyResult[i]<<std::endl;
+    //            }
+    //        }
+            std::vector<int> Vqueue(treeSize);
+            startInsideBox = std::chrono::high_resolution_clock::now();
+            insideBoxCPU(VtreesArray, VtreesArray_ID, VtreeResults_ID, Vbox, Vqueue, treeSize, number_of_dimensions);
+            endInsideBox = std::chrono::high_resolution_clock::now();
+            
+            number_nodes.push_back(number_of_nodes_traversed);
+            /*for(int i=0; i<number_nodes.size();i++){
+                cout  << number_nodes[i] << ",";
+            }*/
+            
+            
+            
+            /*
+            Cuda_class<num_t> tree;
         
-        cudaDeviceProp devProp;
-        cudaGetDeviceProperties(&devProp, device);
-        printDevProp(devProp);
-        int warp_size = devProp.warpSize;
-        int max_threads_per_block = devProp.maxThreadsPerBlock;*/
-        //TODO: here calculate #nodes need
+            startCopyToDevice = std::chrono::high_resolution_clock::now();
+            tree.cudaCopyToDevice(threads, datapoints_per_tree, treesArray, treesArray_ID, box, number_of_dimensions);
+            endCopyToDevice = std::chrono::high_resolution_clock::now();
         
+            startInsideBox = std::chrono::high_resolution_clock::now();
+            tree.cudaInsideBox(threads, datapoints_per_tree, number_of_dimensions, treesArray, treesArray_ID, box);
+            cudaDeviceSynchronize();
+            endInsideBox = std::chrono::high_resolution_clock::now();
         
-        //cup-version
-        int warp_size = 1;
+            tree.cudaCopyToHost(treesArray_ID);
+             */
+             
+            
+            //TESTING CORRECTNESS ------------------------------------------------------------------------------------------------------
+            //test wether the resulting ID's are correct, and the only ones inside box:
+            //vector<int> dummyResult = inBox(threads, datapoints_per_tree, box,trees);
+            bool resultsCorrect = true;
+            for( int i = 0; i<threads*datapoints_per_tree; i++){
+                if(VtreeResults_ID[i] != 0){
+                    std::cout << "ID real: " << VtreeResults_ID[i]<< " ID dummy: " << dummyResult[i]<<std::endl;
+                    cout << "Values: " << VtreesArray[i*number_of_dimensions+0] << " " << VtreesArray[i*number_of_dimensions+1] << " " << VtreesArray[i*number_of_dimensions+2] << endl;
+                }
+                if(VtreeResults_ID[i] != dummyResult[i]){
+                    //std::cout << "ID real: " << VtreeResults_ID[i]<< " ID dummy: " << dummyResult[i]<<std::endl;
+                    if(VtreeResults_ID[i] == 0 && dummyResult[i] == -1) continue;
+                        std::cout << "NOT same!!! ID real: " << VtreeResults_ID[i]<< " ID dummy: " << dummyResult[i]<< " cloudsize " << numberOfHits << std::endl;
+                    resultsCorrect = false;
+                }
+            }
+            if(resultsCorrect) cout << "All inside Box are correct!" << endl;
+            sort( VtreeResults_ID.begin(), VtreeResults_ID.end() );
+            VtreeResults_ID.erase( unique( VtreeResults_ID.begin(), VtreeResults_ID.end() ), VtreeResults_ID.end() );
+            
+            for(int i = 0; i< VtreeResults_ID.size(); i++){
+                std::cout << "FINAL ID: " << VtreeResults_ID[i]<< std::endl;
+            }
         
-        
-        //???: will it be one tree per warp or per block?
-        //formula: 2^(floor(log_2(64)+1))-1 is always max when one less than warp_size
-        //int datapoints_per_tree = warp_size-1;
-        int datapoints_per_tree = (numberOfHits+warp_size-1)/warp_size;
-        int treeSize = pow(2, floor(log2(datapoints_per_tree)+1))-1;
-        datapoints_per_tree = treeSize;
-        //round up: q = (x + y - 1) / y;
-        int threads = (numberOfHits+datapoints_per_tree-1)/datapoints_per_tree;
-        //threads = warp_size-1;
-        
-        //for cpu:
-        threads = 1;
-        cout << "number of warps " << warp_size << endl;
-        cout << "datapoints_per_tree: " << datapoints_per_tree << endl;
-        cout << "treeSize " << treeSize << endl;
-        cout << "number of threads e.g. number of trees " << threads << endl;
-        
-        //all not-used elements in treesArray are by default set to zero by compiler
-        int *treesArray_ID = new int[threads*datapoints_per_tree]();
-        //initializing results with 0
-        int *treeResults_ID = new int[threads*datapoints_per_tree]();
-        num_t *treesArray;
-        treesArray = new num_t [threads*datapoints_per_tree*number_of_dimensions]();//[number_of_dimensions+1][threads*datapoints_per_tree];
-        startMakingForestWithThreads = std::chrono::high_resolution_clock::now();
-        make_forest<num_t>(cloudn, cloud, dimensions, datapoints_per_tree, threads, treesArray, treesArray_ID);
-        endMakingForestWithThreads = std::chrono::high_resolution_clock::now();
-        
-        
-        //test if trees made with make_forest are correct:
-        vector<vector<Point<num_t>>> trees = test_correct_trees(treesArray, treesArray_ID, datapoints_per_tree, threads, dimensions, numberOfHits, cloudn);
-        
-        
-        /*
-        //print treesArray
-        int c=0;
-        for(int i=0; i<datapoints_per_tree*threads*number_of_dimensions-1; i+=number_of_dimensions){
-            cout << treesArray[i+0] << " " << treesArray[i+1] << " " << treesArray[i+2] << " ID:" << treesArray_ID[c] << endl;
-            c++;
+            cloud.clear();
+            
+            CudaTimes.push_back(std::chrono::duration_cast<std::chrono::microseconds>(endInsideBox-startInsideBox).count());
+            NodesTraversed.push_back(number_of_nodes_traversed);
             
         }
-        for(int i=0; i<threads; i++){
-            cout << " NEW TREE" << endl;
-            
-            for( int j=0; j< datapoints_per_tree; j++){
-                cout << treesArray[i*datapoints_per_tree*number_of_dimensions+j*number_of_dimensions+0] << " " << treesArray[i*datapoints_per_tree*number_of_dimensions+j*number_of_dimensions+1] << " " << treesArray[i*datapoints_per_tree*number_of_dimensions+j*number_of_dimensions+2] << " ID:" << treesArray_ID[i*datapoints_per_tree+j] << endl;
-                cout << trees[i][j].x << " " << trees[i][j].y << " " << trees[i][j].z << " ID:" << trees[i][j].ID <<  endl;
-            }
-        }
-      */
-    
-        //make box, in which should be searched for hits
-        //set all other dimensions to zero, if not used:
-        int box[6] = {15, 15, 14, 14, 5, 5};
+        //getting mean and standard deviation
+        double CudaSum = std::accumulate(CudaTimes.begin(), CudaTimes.end(), 0.0);
+        double CudaMean = CudaSum / CudaTimes.size();
+        double CudaSq_sum = std::inner_product(CudaTimes.begin(), CudaTimes.end(), CudaTimes.begin(), 0.0);
+        double CudaStdev = std::sqrt(CudaSq_sum / CudaTimes.size() - CudaMean * CudaMean);
         
-        //testing on CPU
-        std::vector<int> VtreesArray(treesArray, treesArray + threads*datapoints_per_tree*number_of_dimensions);
-        std::vector<int> VtreesArray_ID(treesArray_ID, treesArray_ID + threads*datapoints_per_tree);
-        std::vector<int> VtreeResults_ID(treeResults_ID, treeResults_ID + threads*datapoints_per_tree);
-        std::vector<int> Vbox(box, box + 6);
-//        int c=0;
-//        for(int i=0; i<datapoints_per_tree*threads*number_of_dimensions-1; i+=number_of_dimensions){
-//            cout << VtreesArray[i+0] << " " << VtreesArray[i+1] << " " << VtreesArray[i+2] << " ID:" << VtreesArray_ID[c] << endl;
-//            c++;
-//        }
-        vector<int> dummyResult = inBox(threads, datapoints_per_tree, box,trees);
-//        for( int i = 0; i<threads*datapoints_per_tree; i++){
-//            if(dummyResult[i] != -1){
-//                std::cout << "dummy ID's:  " << dummyResult[i]<<std::endl;
-//            }
-//        }
-        
-        startInsideBox = std::chrono::high_resolution_clock::now();
-        insideBoxCPU(VtreesArray, VtreesArray_ID, VtreeResults_ID, Vbox, treeSize, number_of_dimensions);
-        endInsideBox = std::chrono::high_resolution_clock::now();
-        
-        number_nodes.push_back(number_of_nodes_traversed);
-        /*for(int i=0; i<number_nodes.size();i++){
-            cout  << number_nodes[i] << ",";
-        }*/
+        double NodesSum = std::accumulate(NodesTraversed.begin(), NodesTraversed.end(), 0.0);
+        double NodesMean = NodesSum / NodesTraversed.size();
+        double NodesSq_sum = std::inner_product(NodesTraversed.begin(), NodesTraversed.end(), NodesTraversed.begin(), 0.0);
+        double NodesStdev = std::sqrt(NodesSq_sum / NodesTraversed.size() - NodesMean * NodesMean);
         
         
-        
-        /*
-        Cuda_class<num_t> tree;
-    
-        startCopyToDevice = std::chrono::high_resolution_clock::now();
-        tree.cudaCopyToDevice(threads, datapoints_per_tree, treesArray, treesArray_ID, box, number_of_dimensions);
-        endCopyToDevice = std::chrono::high_resolution_clock::now();
-    
-        startInsideBox = std::chrono::high_resolution_clock::now();
-        tree.cudaInsideBox(threads, datapoints_per_tree, number_of_dimensions, treesArray, treesArray_ID, box);
-        cudaDeviceSynchronize();
-        endInsideBox = std::chrono::high_resolution_clock::now();
-    
-        tree.cudaCopyToHost(treesArray_ID);
-         */
-         
-        
-        //TESTING CORRECTNESS ------------------------------------------------------------------------------------------------------
-        //test wether the resulting ID's are correct, and the only ones inside box:
-        //vector<int> dummyResult = inBox(threads, datapoints_per_tree, box,trees);
-        bool resultsCorrect = true;
-        for( int i = 0; i<threads*datapoints_per_tree; i++){
-            if(VtreeResults_ID[i] != 0){
-                std::cout << "ID real: " << VtreeResults_ID[i]<< " ID dummy: " << dummyResult[i]<<std::endl;
-                cout << "Values: " << VtreesArray[i*number_of_dimensions+0] << " " << VtreesArray[i*number_of_dimensions+1] << " " << VtreesArray[i*number_of_dimensions+2] << endl;
-            }
-            if(VtreeResults_ID[i] != dummyResult[i]){
-                //std::cout << "ID real: " << VtreeResults_ID[i]<< " ID dummy: " << dummyResult[i]<<std::endl;
-                if(VtreeResults_ID[i] == 0 && dummyResult[i] == -1) continue;
-                    std::cout << "NOT same!!! ID real: " << VtreeResults_ID[i]<< " ID dummy: " << dummyResult[i]<< " cloudsize " << numberOfHits << std::endl;
-                resultsCorrect = false;
-            }
-        }
-        if(resultsCorrect) cout << "All inside Box are correct!" << endl;
-        sort( VtreeResults_ID.begin(), VtreeResults_ID.end() );
-        VtreeResults_ID.erase( unique( VtreeResults_ID.begin(), VtreeResults_ID.end() ), VtreeResults_ID.end() );
-        
-        for(int i = 0; i< VtreeResults_ID.size(); i++){
-            std::cout << "FINAL ID: " << VtreeResults_ID[i]<< std::endl;
-        }
-        
-        cloud.clear();
         
         myThreadFile << std::chrono::duration_cast<std::chrono::microseconds>(endMakingForestWithThreads-startMakingForestWithThreads).count() << ",";
-        myCudaFile  << std::chrono::duration_cast<std::chrono::microseconds>(endInsideBox-startInsideBox).count() << ",";
+        myCudaFile  << CudaMean << ",";
+        myCudaStdev << CudaStdev << ",";
         myTreeSizeFile << to_string(treeSize) << ",";
-        myNodesTraversed << to_string(number_of_nodes_traversed) << ",";
-        cout << "VtreeResults_ID.size() " << VtreeResults_ID.size() << endl;
+        myNodesTraversed << NodesMean << ",";
+        myNodesStdev << NodesStdev << ",";
+        
+        //cout << "VtreeResults_ID.size() " << VtreeResults_ID.size() << endl;
         myNodesInsideBox << to_string(VtreeResults_ID.size()) << ",";
     }
     myThreadFile.close();

@@ -22,16 +22,17 @@ void insideBox(T *treeArray_x, T *treeArray_y, T *treeArray_z, int *treeArray_ID
 
 template <typename T>
 __global__
-void insideBox(T *treeArray_values, int *treeArray_ID, T *box, int tree_size, int number_of_dimensions);
+void insideBox(T *treeArray_values, int *treeArray_ID, int *treeArray_results, T *box, int *queue, int tree_size, int number_of_dimensions);
 
 template <class T>
 class Cuda_class{
 public:
     
     //void cudaMain(int number_of_trees, int tree_size, T *treeArray_values, int *treeArray_ID, T box[],  int number_of_dimensions);
-    void cudaInsideBox(int number_of_trees, int tree_size, int number_of_dimensions, T *treeArray_values, int *treeArray_ID, T box[]);
-    void cudaCopyToDevice(int number_of_trees, int tree_size, T *treeArray_values, int *treeArray_ID, T box[],  int number_of_dimensions);
-    void cudaCopyToHost(int* treeArray_ID);
+    void cudaInsideBox(int number_of_trees, int tree_size, int number_of_dimensions, T *treeArray_values, int *treeArray_ID,int *treeArray_results, T box[], int *queue);
+    void cudaCopyToDevice(int number_of_trees, int tree_size, T *treeArray_values, int *treeArray_ID, int *treeArray_results, T box[], int *queue, int number_of_dimensions);
+    void cudaCopyToHost(int* treeArray_results);
+    
 private:
     int tree_size;
     int number_of_trees;
@@ -39,6 +40,8 @@ private:
     int size_of_forest;
     T *d_treeArray_values;
     int *d_treeArray_ID;
+    int *d_treeArray_results;
     T *d_box;
+    int *d_queue;
 };
 

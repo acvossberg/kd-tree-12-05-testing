@@ -422,6 +422,9 @@ int main()
     
     vector<Hit<num_t>> cloud;
     vector<Point<num_t>> cloudn;
+    
+    
+    fstream myOutputFile("./OutputRecursive.txt", std::fstream::in | std::fstream::out | std::fstream::app);
     /*
     ofstream myThreadFile ("ThreadingTimesIterative.txt");
     ofstream myCudaFile("CudaTimesIterative.txt");
@@ -607,7 +610,14 @@ int main()
         double NodesSq_sum = std::inner_product(NodesTraversed.begin(), NodesTraversed.end(), NodesTraversed.begin(), 0.0);
         double NodesStdev = std::sqrt(NodesSq_sum / NodesTraversed.size() - NodesMean * NodesMean);
         
-        
+        if(myOutputFile.is_open())
+        {
+            myOutputFile << std::chrono::duration_cast<std::chrono::microseconds>(endMakingForestWithThreads-startMakingForestWithThreads).count() << ";" << CudaMean << ";" << CudaStdev << ";" << to_string(treeSize) << ";" << NodesMean << ";" << NodesStdev << ";\n";
+        }
+        else
+        {
+            cout << "Error writing to ";
+        }
         
         myThreadFile << std::chrono::duration_cast<std::chrono::microseconds>(endMakingForestWithThreads-startMakingForestWithThreads).count() << ",";
         myCudaFile  << CudaMean << ",";

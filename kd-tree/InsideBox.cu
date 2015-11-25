@@ -107,10 +107,9 @@ void traverseTreeIterative( T *treeArray_values, int *treeArray_ID, int *treeArr
     
     int lastLevel = ceil(log2(double(endOfTree+1))-1);
     
-    
     queue[startOfTree] = pos;
-    int queueFront = 0;
-    int queueRear = 1;
+    int queueFront = startOfTree;
+    int queueRear = startOfTree+1;
     int queueSize = 1;
     int numberOfMightHits = 0;
     
@@ -228,6 +227,9 @@ void Cuda_class<T>::cudaCopyToDevice(int number_of_trees_, int tree_size_, T *tr
     cudaMalloc(&d_treeArray_results, size_of_forest);
     cudaMalloc(&d_box, number_of_dimensions*2*sizeof(T));
     cudaMalloc(&d_queue, size_of_forest);
+    cudaError_t err = cudaGetLastError();
+    if (err != cudaSuccess)
+        printf("Error in allocating memory: %s\n", cudaGetErrorString(err));
     
     //send trees to gpu
     cudaMemcpy(d_treeArray_values, treeArray_values, size_of_forest*number_of_dimensions, cudaMemcpyHostToDevice);
@@ -235,6 +237,9 @@ void Cuda_class<T>::cudaCopyToDevice(int number_of_trees_, int tree_size_, T *tr
     cudaMemcpy(d_treeArray_results, treeArray_results, size_of_forest, cudaMemcpyHostToDevice);
     cudaMemcpy(d_box, box, number_of_dimensions*2*sizeof(T), cudaMemcpyHostToDevice);
     cudaMemcpy(d_queue, queue, size_of_forest, cudaMemcpyHostToDevice);
+    err = cudaGetLastError();
+    if (err != cudaSuccess)
+        printf("Error in sending stuff: %s\n", cudaGetErrorString(err));
 }
 
 template <typename T>
@@ -259,6 +264,7 @@ void Cuda_class<T>::cudaCopyToHost(int* treeArray_results){
     cudaFree(d_treeArray_ID);
     cudaFree(d_treeArray_results);
     cudaFree(d_box);
+    cudaFree(d_queue);
 
 }
 

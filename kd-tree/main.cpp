@@ -29,12 +29,15 @@ using namespace std;
 
 
 template <typename num_t>
-void generateRandomPointCloud(int specialPoint_x, int specialPoint_y, int specialPoint_z, vector<Point<num_t>> &pointn, vector<Hit<num_t>> &point, const size_t N, const int max_range = 10)
+void generateRandomPointCloud(int datapoints_per_tree, int specialPoint_x, int specialPoint_y, int specialPoint_z, vector<Point<num_t>> &pointn, vector<Hit<num_t>> &point, const size_t N, const int max_range = 10)
 {
+    //TODO: change, s.t. each tree has hit !
+    //jetzt hat ein tree-forest genau ein hit inside box. Realistisch? nein! jeder tree sollte ein hit inside box haben!
+    //in jeder threadcloud ein hit inside box
+    //d.h. alle anzahl_hits_per_tree + 30 muss box-hit sein
     cout << "Generating "<< N << " point cloud...\n";
     point.resize(N);
     pointn.resize(N);
-    int counter = 0;
     
     for (size_t i=0;i<N;i++)
     {
@@ -59,7 +62,7 @@ void generateRandomPointCloud(int specialPoint_x, int specialPoint_y, int specia
         }
         
         
-        if(i==30){
+        if(i%datapoints_per_tree == 30){
             pointn[i].x = specialPoint_x;
             pointn[i].y = specialPoint_y;
             pointn[i].z = specialPoint_z;
@@ -422,10 +425,8 @@ int main()
     
     vector<Hit<num_t>> cloud;
     vector<Point<num_t>> cloudn;
-    
-    
-    fstream myOutputFile("./OutputRecursive.txt", std::fstream::in | std::fstream::out | std::fstream::app);
     /*
+    fstream myOutputFile("./OutputIterative.txt", std::fstream::in | std::fstream::out | std::fstream::app);
     ofstream myThreadFile ("ThreadingTimesIterative.txt");
     ofstream myCudaFile("CudaTimesIterative.txt");
     ofstream myCudaStdev("CudaStdDevIterative.txt");
@@ -434,6 +435,7 @@ int main()
     ofstream myNodesStdev("NodesStdDevIterative.txt");
     ofstream myNodesInsideBox("InsideBoxIterative.txt");
     */
+    fstream myOutputFile("./OutputRecursive.txt", std::fstream::in | std::fstream::out | std::fstream::app);
     ofstream myThreadFile ("ThreadingTimes.txt");
     ofstream myCudaFile("CudaTimes.txt");
     ofstream myCudaStdev("CudaStdDev.txt");
@@ -452,7 +454,7 @@ int main()
     int numberOfHits = 200;
     vector<int> number_nodes;
     
-    while( numberOfHits <= 30000){
+    while( numberOfHits <= 50000){
         numberOfHits+=200;
         int treeSize;
         std::vector<int> VtreeArray_results;
@@ -461,21 +463,15 @@ int main()
         std::vector<double> CudaTimes;
         std::vector<int> NodesTraversed;
         for(int p = 0; p<=10;p++){
-            // Generate points:
-            const int max_range = 10;
-            int specialPoint_x = max_range * (rand() % 1000) / num_t(500);
-            int specialPoint_y = max_range * (rand() % 1000) / num_t(500);
-            int specialPoint_z = max_range * (rand() % 1000) / num_t(500);
-
-            
-            generateRandomPointCloud(specialPoint_x, specialPoint_y, specialPoint_z, cloudn, cloud, numberOfHits);
             number_of_nodes_traversed = 0;
             
             //must be defined {1, 2, 3} = {x, y, z}
+            //set which dimensions
             vector<int> dimensions = {1,2,3};
             int number_of_dimensions = dimensions.size();
             
             //get_size_of_tree from cuda_device --> #datapoints per thread.. = datapoints per tree
+            //get GPU device properties
             int device;
             cudaGetDevice(&device);
             std::cout<< "devices are: " << device << endl;
@@ -502,6 +498,15 @@ int main()
             int threads = (numberOfHits+datapoints_per_tree-1)/datapoints_per_tree;
             //threads = warp_size-1;
             
+            // Generate points:
+            const int max_range = 10;
+            int specialPoint_x = max_range * (rand() % 1000) / num_t(500);
+            int specialPoint_y = max_range * (rand() % 1000) / num_t(500);
+            int specialPoint_z = max_range * (rand() % 1000) / num_t(500);
+            generateRandomPointCloud(datapoints_per_tree, specialPoint_x, specialPoint_y, specialPoint_z, cloudn, cloud, numberOfHits);
+            
+            
+            
             //for cpu:
             //threads = 1;
             cout << "number of warps " << warp_size << endl;
@@ -527,6 +532,11 @@ int main()
         
             //make box, in which should be searched for hits
             //set all other dimensions to zero, if not used:
+            //make each box, s.t. it has one hit inside tree NOT inside forest!
+            //int box[warp_size*2*number_of_dimensions];
+            
+            
+            
             int box[6] = {specialPoint_x, specialPoint_x, specialPoint_y, specialPoint_y, specialPoint_z, specialPoint_z};
             
             //testing on CPU
@@ -598,6 +608,11 @@ int main()
             CudaTimes.push_back(std::chrono::duration_cast<std::chrono::microseconds>(endInsideBox-startInsideBox).count());
             NodesTraversed.push_back(number_of_nodes_traversed);
             
+            delete[] treeArray_results;
+            delete[] queue;
+            delete[] treesArray_ID;
+            delete[] treesArray;
+            
         }
         //getting mean and standard deviation
         double CudaSum = std::accumulate(CudaTimes.begin(), CudaTimes.end(), 0.0);
@@ -610,9 +625,10 @@ int main()
         double NodesSq_sum = std::inner_product(NodesTraversed.begin(), NodesTraversed.end(), NodesTraversed.begin(), 0.0);
         double NodesStdev = std::sqrt(NodesSq_sum / NodesTraversed.size() - NodesMean * NodesMean);
         
+        
         if(myOutputFile.is_open())
         {
-            myOutputFile << std::chrono::duration_cast<std::chrono::microseconds>(endMakingForestWithThreads-startMakingForestWithThreads).count() << ";" << CudaMean << ";" << CudaStdev << ";" << to_string(treeSize) << ";" << NodesMean << ";" << NodesStdev << ";\n";
+            myOutputFile << CudaMean << ";" << CudaStdev << ";" << treeSize << ";" << numberOfHits << ";\n";
         }
         else
         {

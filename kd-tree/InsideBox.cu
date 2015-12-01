@@ -189,8 +189,8 @@ void insideBox(T *treeArray_values, int *treeArray_ID, int *treeArray_results, T
     int startOfTree = threadIdx.x * tree_size;
     int endOfTree = startOfTree + (tree_size - 1);
     
-    //traverseTreeRecursiveIF(treeArray_values, treeArray_ID, treeArray_results, box, 1, startOfTree, endOfTree, number_of_dimensions);
-    traverseTreeIterative(treeArray_values, treeArray_ID, treeArray_results, box, queue, 1, startOfTree, endOfTree, number_of_dimensions);
+    traverseTreeRecursiveIF(treeArray_values, treeArray_ID, treeArray_results, box, 1, startOfTree, endOfTree, number_of_dimensions);
+    //traverseTreeIterative(treeArray_values, treeArray_ID, treeArray_results, box, queue, 1, startOfTree, endOfTree, number_of_dimensions);
 }
 
 template <typename T>
@@ -198,11 +198,10 @@ void Cuda_class<T>::cudaInsideBox(int number_of_trees, int tree_size, int number
     
     //insideBox<T><<<Anzahl benutzte Blöcke, Anzahl Threads>>> = <<<Anzahl benutzte Blöcke, Anzahl Baeume >>>
     //weil ein Thread == ein Baum
-    int max_threads_per_block = 1024;
-    int number_of_blocks = (number_of_trees + max_threads_per_block -1) / max_threads_per_block ;
-    if(number_of_trees > 1024){number_of_trees = 1024;}
+    int warp_size = 32;
+    int number_of_blocks = 1;
     
-    insideBox<T><<<number_of_blocks,number_of_trees>>>(d_treeArray_values, d_treeArray_ID, d_treeArray_results, d_box, d_queue, tree_size, number_of_dimensions);
+    insideBox<T><<<number_of_blocks,warp_size>>>(d_treeArray_values, d_treeArray_ID, d_treeArray_results, d_box, d_queue, tree_size, number_of_dimensions);
     //YourKernel<<<dimGrid, dimBlock>>>(d_A,d_B); //Kernel invocation
 }
 
@@ -221,7 +220,6 @@ void Cuda_class<T>::cudaCopyToDevice(int number_of_trees_, int tree_size_, T *tr
     size_of_forest =  number_of_trees*tree_size*sizeof(int);
     
     //allocate memory
-    //TODO: do outside of cudaMain
     cudaMalloc(&d_treeArray_values, size_of_forest*number_of_dimensions);
     cudaMalloc(&d_treeArray_ID, size_of_forest);
     cudaMalloc(&d_treeArray_results, size_of_forest);

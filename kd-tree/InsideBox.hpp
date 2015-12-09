@@ -29,9 +29,9 @@ class Cuda_class{
 public:
     
     //void cudaMain(int number_of_trees, int tree_size, T *treeArray_values, int *treeArray_ID, T box[],  int number_of_dimensions);
-    void cudaInsideBox(int number_of_trees, int tree_size, int number_of_dimensions, T *treeArray_values, int *treeArray_ID,int *treeArray_results, T box[], int *queue);
-    void cudaCopyToDevice(int number_of_trees, int tree_size, T *treeArray_values, int *treeArray_ID, int *treeArray_results, T box[], int *queue, int number_of_dimensions);
-    void cudaCopyToHost(int* treeArray_results);
+    void cudaInsideBox(int number_of_trees, int tree_size, int number_of_dimensions, T *treeArray_values, int *treeArray_ID,int *treeArray_results, T box[], int *queue, int numberOfHits);
+    void cudaCopyToDevice(int number_of_trees, int tree_size, T *treeArray_values, int *treeArray_ID, int *treeArray_results, T box[], int *queue, int number_of_dimensions, int numberOfHits);
+    void cudaCopyToHost(int* treeArray_results, int numberOfHits);
     
 private:
     int tree_size;

@@ -1,6 +1,6 @@
 //
 //  InsideBox.cu
-//  
+//
 //
 //  Created by Ann-Christine Vossberg on 6/3/15.
 //
@@ -224,7 +224,7 @@ void Cuda_class<T>::cudaCopyToDevice(int number_of_trees_, int tree_size_, T *tr
     number_of_dimensions = number_of_dimensions_;
     tree_size = tree_size_;
     size_of_forest =  number_of_trees*tree_size;
-
+    
     cudaSetDevice(MYDEVICE);
     std::cout << "number of trees: " << number_of_trees << std::endl;
     std::cout << "tree size: " << tree_size << std::endl;
@@ -283,10 +283,10 @@ void Cuda_class<T>::cudaCopyToHost(int* treeArray_results, int numberOfHits){
     
     std::cout << "\n Size of forest: " << size_of_forest << std::endl;
     
-//    //print out ID's which are in box:
-//        for(int i = 0; i< number_of_trees*tree_size; i++){
-//            std::cout << "ID: " << treeArray_ID[i]<< std::endl;
-//        }
+    //    //print out ID's which are in box:
+    //        for(int i = 0; i< number_of_trees*tree_size; i++){
+    //            std::cout << "ID: " << treeArray_ID[i]<< std::endl;
+    //        }
     
     
     //free space
@@ -296,7 +296,7 @@ void Cuda_class<T>::cudaCopyToHost(int* treeArray_results, int numberOfHits){
     cudaFree(d_box);
     cudaFree(d_queue);
     std::cout <<"Freed cuda stuff " << std::endl;
-
+    
 }
 
 template class Cuda_class<int>;

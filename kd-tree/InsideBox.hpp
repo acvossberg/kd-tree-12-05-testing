@@ -44,4 +44,3 @@ private:
     T *d_box;
     int *d_queue;
 };
-

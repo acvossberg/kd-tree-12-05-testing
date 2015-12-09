@@ -542,10 +542,11 @@ int main()
         //all not-used elements in treesArray are by default set to zero by compiler
         int *treesArray_ID = new int[threads*datapoints_per_tree]();
         //initializing results with 0
-        int *treeArray_results = new int[threads*datapoints_per_tree]();
-        int *queue = new int[threads*datapoints_per_tree]();
+        int *treeArray_results = new int[numberOfHits*threads*datapoints_per_tree]();
+        int *queue = new int[numberOfHits*threads*datapoints_per_tree]();
         num_t *treesArray;
         treesArray = new num_t [threads*datapoints_per_tree*number_of_dimensions]();//[number_of_dimensions+1][threads*datapoints_per_tree];
+        
         startMakingForestWithThreads = std::chrono::high_resolution_clock::now();
         make_forest<num_t>(InnerCloud_simple, InnerCloud, dimensions, datapoints_per_tree, threads, treesArray, treesArray_ID);
         endMakingForestWithThreads = std::chrono::high_resolution_clock::now();

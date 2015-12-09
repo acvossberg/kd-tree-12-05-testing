@@ -226,43 +226,42 @@ void Cuda_class<T>::cudaCopyToDevice(int number_of_trees_, int tree_size_, T *tr
     size_of_forest =  number_of_trees*tree_size;
     
     cudaSetDevice(MYDEVICE);
+    std::cout << "sizeof(int): " << sizeof(int) << " sizeof(T) " <<  sizeof(T) << std::endl;
     std::cout << "number of trees: " << number_of_trees << std::endl;
     std::cout << "tree size: " << tree_size << std::endl;
     std::cout << "number of dimensions: " << number_of_dimensions << std::endl;
-    std::cout << "size of treeArray_values " << size_of_forest*number_of_dimensions << std::endl;
-    std::cout << "size of treeArray_ID " << size_of_forest << std::endl;
-    std::cout << "size of treeArray_results " << size_of_forest*numberOfHits << std::endl;
-    std::cout << "size of box " << number_of_dimensions*2*numberOfHits << std::endl;
-    std::cout << "size of queue " << size_of_forest << std::endl;
+    std::cout << "size of treeArray_values " << size_of_forest*number_of_dimensions*sizeof(T) << std::endl;
+    std::cout << "size of treeArray_ID " << size_of_forest*sizeof(int) << std::endl;
+    std::cout << "size of treeArray_results " << size_of_forest*numberOfHits*sizeof(int) << std::endl;
+    std::cout << "size of box " << number_of_dimensions*2*numberOfHits*sizeof(T) << std::endl;
+    std::cout << "size of queue " << size_of_forest*numberOfHits*sizeof(int) << std::endl;
     
     //std::cout << "box: " << box[0] << " " << box[1] << " " << box[2] << " " << box[3] << " " << box[4] << " " << box[5] << std::endl;
     //TODO: int ----> num_t
     
     //allocate memory
-    cudaError_t errortreeArray = cudaMalloc(&d_treeArray_values, size_of_forest*number_of_dimensions*sizeof(T));
-    cudaError_t errortreeID = cudaMalloc(&d_treeArray_ID, size_of_forest*sizeof(int));
-    cudaError_t errorResults = cudaMalloc(&d_treeArray_results, size_of_forest*numberOfHits*sizeof(int));
-    cudaError_t errorBox = cudaMalloc(&d_box, number_of_dimensions*2*numberOfHits*sizeof(T));
-    cudaError_t errorQueue = cudaMalloc(&d_queue, size_of_forest*numberOfHits*sizeof(T));
-    if (errorResults != cudaErrorMemoryAllocation)
-        printf("Error in allocating memory cudaResult: %s\n", cudaGetErrorString(errorResults));
-    if (errortreeArray != cudaErrorMemoryAllocation)
-        printf("Error in allocating memory cudatreeArray: %s\n", cudaGetErrorString(errortreeArray));
-    if (errortreeID != cudaErrorMemoryAllocation)
-        printf("Error in allocating memory treeID: %s\n", cudaGetErrorString(errortreeID));
-    if (errorBox != cudaErrorMemoryAllocation)
-        printf("Error in allocating memory box: %s\n", cudaGetErrorString(errorBox));
-    if (errorQueue != cudaErrorMemoryAllocation)
-        printf("Error in allocating memory queue: %s\n", cudaGetErrorString(errorQueue));
+    cudaMalloc(&d_treeArray_values, size_of_forest*number_of_dimensions*sizeof(T));
+    cudaMalloc(&d_treeArray_ID, size_of_forest*sizeof(int));
+    cudaMalloc(&d_treeArray_results, size_of_forest*numberOfHits*sizeof(int));
+    cudaMalloc(&d_box, number_of_dimensions*2*numberOfHits*sizeof(T));
+    cudaMalloc(&d_queue, size_of_forest*numberOfHits*sizeof(int));
     
+    cudaError_t err = cudaGetLastError();
+    if (err != cudaSuccess)
+        printf("Error in allocating stuff: %s\n", cudaGetErrorString(err));
     
+    std::cout << "before copying to device " << std::endl;
     //send trees to gpu
     cudaMemcpy(d_treeArray_values, treeArray_values, size_of_forest*number_of_dimensions*sizeof(T), cudaMemcpyHostToDevice);
     cudaMemcpy(d_treeArray_ID, treeArray_ID, size_of_forest*sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(d_treeArray_results, treeArray_results, size_of_forest*numberOfHits*sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(d_box, box, number_of_dimensions*2*numberOfHits*sizeof(T), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_queue, queue, size_of_forest*numberOfHits*sizeof(T), cudaMemcpyHostToDevice);
-    cudaError_t err = cudaGetLastError();
+    cudaMemcpy(d_queue, queue, size_of_forest*numberOfHits*sizeof(int), cudaMemcpyHostToDevice);
+    
+    std::cout << "finished copying to device " << std::endl;
+    
+    
+    err = cudaGetLastError();
     if (err != cudaSuccess)
         printf("Error in sending stuff: %s\n", cudaGetErrorString(err));
 }
@@ -276,7 +275,7 @@ void Cuda_class<T>::cudaCopyToHost(int* treeArray_results, int numberOfHits){
         printf("Error before copying back to host: %s\n", cudaGetErrorString(err));
     
     cudaMemcpy(treeArray_results, d_treeArray_results, size_of_forest*numberOfHits*sizeof(int), cudaMemcpyDeviceToHost);
-    
+    std::cout << "done copying back to host " << std::endl;
     err = cudaGetLastError();
     if (err != cudaSuccess)
         printf("Error after copying back to host: %s\n", cudaGetErrorString(err));
@@ -295,7 +294,7 @@ void Cuda_class<T>::cudaCopyToHost(int* treeArray_results, int numberOfHits){
     cudaFree(d_treeArray_results);
     cudaFree(d_box);
     cudaFree(d_queue);
-    std::cout <<"Freed cuda stuff " << std::endl;
+    std::cout <<"Freed memory " << std::endl;
     
 }
 

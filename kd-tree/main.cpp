@@ -543,6 +543,7 @@ int main()
         int *treesArray_ID = new int[threads*datapoints_per_tree]();
         //initializing results with 0
         int *treeArray_results = new int[numberOfHits*threads*datapoints_per_tree]();
+        std::cout << " size of treeArray_results "<< numberOfHits*threads*datapoints_per_tree << std::endl; 
         int *queue = new int[numberOfHits*threads*datapoints_per_tree]();
         num_t *treesArray;
         treesArray = new num_t [threads*datapoints_per_tree*number_of_dimensions]();//[number_of_dimensions+1][threads*datapoints_per_tree];

@@ -478,7 +478,7 @@ int main()
     int numberOfHits = 0;
     vector<int> number_nodes;
     
-    while( numberOfHits <= 600){
+    while( numberOfHits <= 27200){
         numberOfHits+=200;
         int treeSize;
         std::vector<int> VtreeArray_results;

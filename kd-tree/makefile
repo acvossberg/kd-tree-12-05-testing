@@ -40,4 +40,5 @@ run: clean build
 
 clean:
 	rm -rf *.o
+	rm *.txt
 

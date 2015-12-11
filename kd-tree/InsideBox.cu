@@ -103,10 +103,10 @@ void traverseTreeRecursiveIF( T *treeArray_values, int *treeArray_ID, int *treeA
 
 template <typename T>
 __device__
-void traverseTreeIterative( T *treeArray_values, int *treeArray_ID, int *treeArray_results, T *box, int *queue, int pos, int startOfTree, int endOfTree, int number_of_dimensions, int startOfBox, int startOfResults){
+void traverseTreeIterative( T *treeArray_values, int *treeArray_ID, int *treeArray_results, T *box, int pos, int startOfTree, int endOfTree, int number_of_dimensions, int startOfBox, int startOfResults){
     
     int lastLevel = ceil(log2(double(endOfTree+1))-1);
-    
+    int queue[sizeof(treeArray_results)/sizeof(int)];
     queue[startOfResults] = pos;
     int queueFront = startOfResults;
     int queueRear = startOfResults+1;
@@ -182,7 +182,7 @@ void traverseTreeIterative( T *treeArray_values, int *treeArray_ID, int *treeArr
 
 template <typename T>
 __global__
-void insideBox(T *treeArray_values, int *treeArray_ID, int *treeArray_results, T *box, int *queue, int tree_size, int number_of_dimensions){
+void insideBox(T *treeArray_values, int *treeArray_ID, int *treeArray_results, T *box, int tree_size, int number_of_dimensions){
     
     //__shared__ int s[]
     //for each thread has it's own tree starting here
@@ -194,17 +194,21 @@ void insideBox(T *treeArray_values, int *treeArray_ID, int *treeArray_results, T
     
     //if(startOfResults != startOfTree){printf("\n not same! Global Index: %d, startOfTree: %d, startOfResults %d ", blockIdx.x*blockDim.x + threadIdx.x, startOfTree, startOfResults);}
     //if(blockIdx.x*blockDim.x + threadIdx.x < 63){ printf("\n box nr: %d for gloabl index: %d",(blockIdx.x*blockDim.x + threadIdx.x)/32, blockIdx.x*blockDim.x + threadIdx.x );}
-    if(blockIdx.x >= 6 && threadIdx.x > 900){printf("\n Global Index: %d, blockDim: %d, startOfTree: %d, startOfResults %d ", blockIdx.x*blockDim.x + threadIdx.x, blockDim.x, startOfTree, startOfResults);}
-    if(blockIdx.x*blockDim.x + threadIdx.x == 0) {printf("\t \t \t INDEX IS ZERO!!!! ");}
+    //if(blockIdx.x >= 6 && threadIdx.x > 900){printf("\n Global Index: %d, blockDim: %d, startOfTree: %d, startOfResults %d ", blockIdx.x*blockDim.x + threadIdx.x, blockDim.x, startOfTree, startOfResults);}
+    //if(blockIdx.x*blockDim.x + threadIdx.x == 0) {printf("\t \t \t INDEX IS ZERO!!!! ");}
     
-    traverseTreeRecursiveIF(treeArray_values, treeArray_ID, treeArray_results, box, 1, startOfTree, endOfTree, number_of_dimensions, startOfBox, startOfResults);
+    
+    
     /*if(startOfResults <= sizeof(treeArray_results)/sizeof(int)){
-        traverseTreeIterative(treeArray_values, treeArray_ID, treeArray_results, box, queue, 1, startOfTree, endOfTree, number_of_dimensions, startOfBox, startOfResults);
+        traverseTreeRecursiveIF(treeArray_values, treeArray_ID, treeArray_results, box, 1, startOfTree, endOfTree, number_of_dimensions, startOfBox, startOfResults);
     }*/
+    if(startOfResults <= sizeof(treeArray_results)/sizeof(int)){
+        traverseTreeIterative(treeArray_values, treeArray_ID, treeArray_results, box, 1, startOfTree, endOfTree, number_of_dimensions, startOfBox, startOfResults);
+    }
 }
 
 template <typename T>
-void Cuda_class<T>::cudaInsideBox(int number_of_trees, int tree_size, int number_of_dimensions, T *treeArray_values, int *treeArray_ID, int *treeArray_results, T box[], int* queue, int numberOfHits){
+void Cuda_class<T>::cudaInsideBox(int number_of_trees, int tree_size, int number_of_dimensions, T *treeArray_values, int *treeArray_ID, int *treeArray_results, T box[], int numberOfHits){
     //number_of_warps = numberOfHits
     //numberOfBlocks = numberOfHits/32, because 32 = 1 warp
     
@@ -214,9 +218,9 @@ void Cuda_class<T>::cudaInsideBox(int number_of_trees, int tree_size, int number
     int warp_size = 32;
     int number_of_blocks = (numberOfHits+32-1)/32;
     
-    std::cout << "Number of Blocks: " << number_of_blocks << "\t number of Threads: " << numberOfHits*warp_size << std::endl;
+    //std::cout << "Number of Blocks: " << number_of_blocks << "\t number of Threads: " << numberOfHits*warp_size << std::endl;
     
-    insideBox<T><<<number_of_blocks,1024>>>(d_treeArray_values, d_treeArray_ID, d_treeArray_results, d_box, d_queue, tree_size, number_of_dimensions );
+    insideBox<T><<<number_of_blocks,1024>>>(d_treeArray_values, d_treeArray_ID, d_treeArray_results, d_box, tree_size, number_of_dimensions );
     //YourKernel<<<dimGrid, dimBlock>>>(d_A,d_B); //Kernel invocation
     
     cudaError_t err = cudaGetLastError();
@@ -225,7 +229,7 @@ void Cuda_class<T>::cudaInsideBox(int number_of_trees, int tree_size, int number
 }
 
 template <typename T>
-void Cuda_class<T>::cudaCopyToDevice(int number_of_trees_, int tree_size_, T *treeArray_values, int *treeArray_ID, int* treeArray_results, T box[], int *queue, int number_of_dimensions_, int numberOfHits){
+void Cuda_class<T>::cudaCopyToDevice(int number_of_trees_, int tree_size_, T *treeArray_values, int *treeArray_ID, int* treeArray_results, T box[], int number_of_dimensions_, int numberOfHits){
     number_of_trees = number_of_trees_;
     number_of_dimensions = number_of_dimensions_;
     tree_size = tree_size_;
@@ -250,7 +254,7 @@ void Cuda_class<T>::cudaCopyToDevice(int number_of_trees_, int tree_size_, T *tr
     cudaMalloc(&d_treeArray_ID, size_of_forest*sizeof(int));
     cudaMalloc(&d_treeArray_results, size_of_forest*numberOfHits*sizeof(int));
     cudaMalloc(&d_box, number_of_dimensions*2*numberOfHits*sizeof(T));
-    cudaMalloc(&d_queue, size_of_forest*numberOfHits*sizeof(int));
+    //cudaMalloc(&d_queue, size_of_forest*numberOfHits*sizeof(int));
     
     cudaError_t err = cudaGetLastError();
     if (err != cudaSuccess)
@@ -262,7 +266,8 @@ void Cuda_class<T>::cudaCopyToDevice(int number_of_trees_, int tree_size_, T *tr
     cudaMemcpy(d_treeArray_ID, treeArray_ID, size_of_forest*sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(d_treeArray_results, treeArray_results, size_of_forest*numberOfHits*sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(d_box, box, number_of_dimensions*2*numberOfHits*sizeof(T), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_queue, queue, size_of_forest*numberOfHits*sizeof(int), cudaMemcpyHostToDevice);
+    //don't have to copy queue... only allocate!
+    //cudaMemcpy(d_queue, queue, size_of_forest*numberOfHits*sizeof(int), cudaMemcpyHostToDevice);
     
     std::cout << "finished copying to device " << std::endl;
     
@@ -299,7 +304,7 @@ void Cuda_class<T>::cudaCopyToHost(int* treeArray_results, int numberOfHits){
     cudaFree(d_treeArray_ID);
     cudaFree(d_treeArray_results);
     cudaFree(d_box);
-    cudaFree(d_queue);
+    //cudaFree(d_queue);
     
     err = cudaGetLastError();
     if (err != cudaSuccess)

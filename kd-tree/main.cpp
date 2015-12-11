@@ -478,7 +478,7 @@ int main()
     int numberOfHits = 0;
     vector<int> number_nodes;
     
-    while( numberOfHits <= 27200){
+    while( numberOfHits <= 600){
         numberOfHits+=200;
         int treeSize;
         std::vector<int> VtreeArray_results;
@@ -603,11 +603,11 @@ int main()
             Cuda_class<num_t> tree;
             
             startCopyToDevice = std::chrono::high_resolution_clock::now();
-            tree.cudaCopyToDevice(threads, datapoints_per_tree, treesArray, treesArray_ID, treeArray_results, box, queue, number_of_dimensions, numberOfHits);
+            tree.cudaCopyToDevice(threads, datapoints_per_tree, treesArray, treesArray_ID, treeArray_results, box, number_of_dimensions, numberOfHits);
             endCopyToDevice = std::chrono::high_resolution_clock::now();
             
             startInsideBox = std::chrono::high_resolution_clock::now();
-            tree.cudaInsideBox(threads, datapoints_per_tree, number_of_dimensions, treesArray, treesArray_ID, treeArray_results, box, queue, numberOfHits);
+            tree.cudaInsideBox(threads, datapoints_per_tree, number_of_dimensions, treesArray, treesArray_ID, treeArray_results, box, numberOfHits);
             cudaDeviceSynchronize();
             endInsideBox = std::chrono::high_resolution_clock::now();
             

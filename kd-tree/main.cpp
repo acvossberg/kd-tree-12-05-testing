@@ -423,8 +423,8 @@ void insideBoxCPU(vector<int> &treeArray_values, vector<int> &treeArray_ID, vect
     int startOfTree = threadIdx* tree_size;
     int endOfTree = startOfTree + (tree_size - 1);
     
-    CPUtraverseTreeRecursiveIF(treeArray_values, treeArray_ID,results, box, 1, startOfTree, endOfTree, number_of_dimensions);
-    //CPUtraverseTreeIterative(treeArray_values, treeArray_ID,results, box, queue, 1, startOfTree, endOfTree, number_of_dimensions);
+    //CPUtraverseTreeRecursiveIF(treeArray_values, treeArray_ID,results, box, 1, startOfTree, endOfTree, number_of_dimensions);
+    CPUtraverseTreeIterative(treeArray_values, treeArray_ID,results, box, queue, 1, startOfTree, endOfTree, number_of_dimensions);
     //CPUtraverseTreeBFSQueue(treeArray_values, treeArray_ID,results, box, 1, startOfTree, endOfTree, number_of_dimensions);
 }
 
@@ -603,13 +603,13 @@ int main()
             Cuda_class<num_t> tree;
             
             startCopyToDevice = std::chrono::high_resolution_clock::now();
-            //tree.cudaCopyToDevice(threads, datapoints_per_tree, treesArray, treesArray_ID, treeArray_results, box, number_of_dimensions, numberOfHits);
-            tree.cudaCopyToDevice(threads, datapoints_per_tree, treesArray, treesArray_ID, treeArray_results, box, queue, number_of_dimensions, numberOfHits);
+            tree.cudaCopyToDevice(threads, datapoints_per_tree, treesArray, treesArray_ID, treeArray_results, box, number_of_dimensions, numberOfHits);
+            //tree.cudaCopyToDevice(threads, datapoints_per_tree, treesArray, treesArray_ID, treeArray_results, box, queue, number_of_dimensions, numberOfHits);
             endCopyToDevice = std::chrono::high_resolution_clock::now();
             
             startInsideBox = std::chrono::high_resolution_clock::now();
-            //tree.cudaInsideBox(threads, datapoints_per_tree, number_of_dimensions, treesArray, treesArray_ID, treeArray_results, box, numberOfHits);
-            tree.cudaInsideBox(threads, datapoints_per_tree, number_of_dimensions, treesArray, treesArray_ID, treeArray_results, box, queue, numberOfHits);
+            tree.cudaInsideBox(threads, datapoints_per_tree, number_of_dimensions, treesArray, treesArray_ID, treeArray_results, box, numberOfHits);
+            //tree.cudaInsideBox(threads, datapoints_per_tree, number_of_dimensions, treesArray, treesArray_ID, treeArray_results, box, queue, numberOfHits);
             cudaDeviceSynchronize();
             endInsideBox = std::chrono::high_resolution_clock::now();
             
